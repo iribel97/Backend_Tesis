@@ -1,5 +1,6 @@
 package com.tesis.BackV2.services;
 
+import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.entities.Usuario;
@@ -10,6 +11,7 @@ import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.UsuarioRepo;
 
+import com.tesis.BackV2.request.UsuarioRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioServ {
@@ -29,76 +32,88 @@ public class UsuarioServ {
     private EstudianteRepo repoE;
 
     /* ----- CRUD DE LA ENTIDAD USUARIO ----- */
-    //Crear un usuario de tipo Docente
+
+    //Actualizar usuario
     @Transactional
-    public void crearUsuarioDocente(Usuario usuario, Docente datosD) throws MiExcepcion {
-        // Verificar que el usuario no exista
-        validarUsuarioNoExistente(usuario.getCedula());
+    public String actualizarUser(UsuarioRequest request) throws MiExcepcion {
+        Usuario usuario = repoU.findByCedula(request.getCedula());
 
-        // Asignar valores al objeto Docente
-        datosD.setUsuario(usuario);
-        // Encriptar la contraseña
-        usuario.setPassword(new BCryptPasswordEncoder().encode(usuario.getPassword()));
+        //Validar que el usuario exista
+        if (usuario != null && usuario.getRol().equals(request.getRol())) {
+            //Actualizar los datos del usuario generales del usuario
+            Usuario usu = Usuario.builder()
+                    .cedula(request.getCedula())
+                    .nombres(request.getNombres())
+                    .apellidos(request.getApellidos())
+                    .email(request.getCorreo())
+                    .telefono(request.getTelefono())
+                    .nacimiento(request.getNacimiento())
+                    .genero(request.getGenero())
+                    .rol(request.getRol())
+                    .estado(request.getEstado())
+                    .direccion(request.getDireccion())
+                    .build();
+            repoU.save(usu);
 
-        // Guardar el objeto Usuario
-        repoU.save(usuario);
-        // Guardar el objeto Docente
-        repoD.save(datosD);
-    }
+            //Actualizar los datos del docente
+            if (request.getRol().equals(Rol.DOCENTE)) {
 
-    //Crear un usuario de tipo Estudiante
-    @Transactional
-    public void crearUsuarioEstudiante(Usuario usuario, LocalDate fechaIngreso, String tipoSangre, Usuario representante) throws MiExcepcion {
-        // Verificar que el usuario no exista
-        validarUsuarioNoExistente(usuario.getCedula());
+                Docente docente = repoD.findById(request.getId()).orElseThrow(() -> new MiExcepcion("El docente con cédula " + request.getCedula() + " no existe."));
+                docente.setTitulo(request.getTitulo());
+                docente.setEspecialidad(request.getEspecialidad());
+                docente.setExperiencia(request.getExperiencia());
 
-        // Instancian objeto de tipo Estudiante
-        Estudiante estudiante = new Estudiante();
+                repoD.save(docente);
+            }
 
-        // Asignar valores al objeto Estudiante
-        estudiante.setUsuario(usuario);
-        estudiante.setIngreso(fechaIngreso);
-        estudiante.setSangre(tipoSangre);
-        estudiante.setRepresentante(representante);
-        // Encriptar la contraseña
-        usuario.setPassword(new BCryptPasswordEncoder().encode(usuario.getPassword()));
+            //Actualizar los datos del estudiante
+            if (request.getRol().equals(Rol.ESTUDIANTE)) {
 
-        // Guardar el objeto Usuario
-        repoU.save(usuario);
+                Estudiante estudiante = repoE.findById(request.getId()).orElseThrow(() -> new MiExcepcion("El estudiante con cédula " + request.getCedula() + " no existe."));
+                estudiante.setIngreso(request.getIngreso());
+                estudiante.setRepresentante(repoU.findByCedula(request.getCedulaRepresentante()));
 
-        // Guardar el objeto Estudiante
-        repoE.save(estudiante);
-    }
+                repoE.save(estudiante);
+            }
 
-    //Retornar todos los usuarios
-    public List<Usuario> listarUsuarios() {
-        return repoU.findAll();
-    }
-
-    //Retornar un usuario por su cédula
-    public Usuario listUsuId(String cedula) throws MiExcepcion {
-        if (!repoU.existsById(cedula)) {
-            throw new MiExcepcion("El usuario con cédula " + cedula + " no existe.");
+        } else {
+            return "El usuario con cédula " + request.getCedula() + " no existe.";
         }
-        return repoU.findByCedula(cedula);
+
+        return "Usuario actualizado";
     }
 
-    public Docente listDocId(String cedula) throws MiExcepcion {
-        if (!repoU.findByCedula(cedula).getRol().equals(Rol.DOCENTE)) {
-            throw new MiExcepcion("El docente con cédula " + cedula + " no existe.");
-        }
+    public UsuarioDTO buscarUsuario(String cedula) throws MiExcepcion {
+        Usuario usuario = repoU.findById(cedula).orElseThrow(() -> new MiExcepcion("El usuario con cédula " + cedula + " no existe."));
+
+        return UsuarioDTO.builder()
+                .cedula(usuario.getCedula())
+                .nombres(usuario.getNombres())
+                .apellidos(usuario.getApellidos())
+                .correo(usuario.getEmail())
+                .telefono(usuario.getTelefono())
+                .direccion(usuario.getDireccion())
+                .nacimiento(usuario.getNacimiento())
+                .genero(usuario.getGenero())
+                .rol(usuario.getRol())
+                .estado(usuario.getEstado())
+                .docente(repoD.findByUsuarioCedula(cedula))
+                .estudiante(repoE.findByUsuarioCedula(cedula))
+                .build();
+
+    }
+
+    //Retornar un estudiante
+    public Estudiante buscarEstudiante(String cedula){
+        return repoE.findByUsuarioCedula(cedula);
+    }
+
+    //Retornar un docente
+    public Docente buscarDocente(String cedula){
         return repoD.findByUsuarioCedula(cedula);
     }
 
-    // Retornar los usuarios de tipo Docente
-    public List<Docente> listarDocentes() {
-        return repoD.findAll();
-    }
 
-    // Retornar los usuarios de tipo Estudiante
-    public List<Estudiante> listarEstudiantes() {
-        return repoE.findAll();
-    }
 
     /* ---------- VALIDACIONES ----------- */
     private void validarUsuarioNoExistente(String cedula) throws MiExcepcion {
