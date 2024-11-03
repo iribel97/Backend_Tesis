@@ -1,7 +1,5 @@
 package com.tesis.BackV2.dto;
 
-import com.tesis.BackV2.entities.Docente;
-import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Genero;
 import com.tesis.BackV2.enums.Rol;
@@ -29,7 +27,7 @@ public class UsuarioDTO {
     private Rol rol;
     private EstadoUsu estado;
 
-    private Docente docente;
-    private Estudiante estudiante;
+    private DocenteDTO docente;
+    private EstudianteDTO estudiante;
 
 }
