@@ -1,5 +1,7 @@
 package com.tesis.BackV2.services;
 
+import com.tesis.BackV2.dto.DocenteDTO;
+import com.tesis.BackV2.dto.EstudianteDTO;
 import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
@@ -86,6 +88,22 @@ public class UsuarioServ {
     public UsuarioDTO buscarUsuario(String cedula) throws MiExcepcion {
         Usuario usuario = repoU.findById(cedula).orElseThrow(() -> new MiExcepcion("El usuario con cédula " + cedula + " no existe."));
 
+        Docente docente = repoD.findByUsuarioCedula(cedula);
+        Estudiante estudiante = repoE.findByUsuarioCedula(cedula);
+
+        DocenteDTO docenteDTO = docente != null ? DocenteDTO.builder()
+                .id(docente.getId())
+                .titulo(docente.getTitulo())
+                .especialidad(docente.getEspecialidad())
+                .experiencia(docente.getExperiencia())
+                .build() : null;
+
+        EstudianteDTO estudianteDTO = estudiante != null ? EstudianteDTO.builder()
+                .id(estudiante.getId())
+                .ingreso(estudiante.getIngreso())
+                .representante(buscarUsuario(estudiante.getRepresentante().getCedula())) 
+                .build() : null;
+
         return UsuarioDTO.builder()
                 .cedula(usuario.getCedula())
                 .nombres(usuario.getNombres())
@@ -97,8 +115,8 @@ public class UsuarioServ {
                 .genero(usuario.getGenero())
                 .rol(usuario.getRol())
                 .estado(usuario.getEstado())
-                .docente(repoD.findByUsuarioCedula(cedula))
-                .estudiante(repoE.findByUsuarioCedula(cedula))
+                .docente(docenteDTO)
+                .estudiante(estudianteDTO)
                 .build();
 
     }
