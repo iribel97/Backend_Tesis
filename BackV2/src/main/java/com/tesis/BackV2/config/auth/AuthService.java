@@ -3,10 +3,12 @@ package com.tesis.BackV2.config.auth;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
+import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.Usuario;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.repositories.EstudianteRepo;
+import com.tesis.BackV2.repositories.RepresentanteRepo;
 import com.tesis.BackV2.repositories.UsuarioRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +16,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +31,52 @@ public class AuthService {
     private final UsuarioRepo usuRep;
     private final DocenteRepo docRep;
     private final EstudianteRepo estRep;
+    private final RepresentanteRepo repRep;
 
-    //Metodo para el registro de un usuario
-    public AuthResponse register(RegisterRequest request){
-        // Creación de un nuevo usuario base
-        Usuario usuario = Usuario.builder()
+    public AuthResponse register(RegisterRequest request) {
+        // Comprobar que el usuario ya existe
+        if (usuRep.existsByCedula(request.getCedula())) {
+            throw new RuntimeException("El usuario ya existe");
+        }
+
+        Usuario usuario = buildUsuario(request);
+        usuRep.save(usuario);
+
+        switch (request.getRol()) {
+            case DOCENTE:
+                crearYGuardarDocente(request, usuario);
+                break;
+            case ESTUDIANTE:
+                crearYGuardarEstudiante(request, usuario);
+                break;
+            case REPRESENTANTE:
+                crearYGuardarRepresentante(request, usuario);
+                break;
+            case ADMIN:
+                break;
+            default:
+                throw new RuntimeException("Rol no reconocido");
+        }
+
+        return AuthResponse.builder()
+                .token(jwtService.generateToken(usuario))
+                .build();
+    }
+
+    // -------------------------------------------------------------------------------------
+    private Usuario buildUsuario(RegisterRequest request) {
+        byte[] foto = null;
+
+        if (request.getFoto() != null && !request.getFoto().isEmpty()){
+            try {
+                foto = request.getFoto().getBytes();
+            } catch (IOException e) {
+                throw new RuntimeException("Error al procesar la foto de perfil", e);
+            }
+        }
+
+
+        return Usuario.builder()
                 .cedula(request.getCedula())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nombres(request.getNombre())
@@ -42,36 +88,47 @@ public class AuthService {
                 .rol(request.getRol())
                 .estado(request.getEstado())
                 .direccion(request.getDireccion())
-                .build();
-        usuRep.save(usuario); // Guardar el usuario en la base de datos tipo admin o tipo representante
-
-        // Si el usuario es un docente
-        if(request.getRol().equals(Rol.DOCENTE)){
-            // Creación de un nuevo docente
-            Docente docente = Docente.builder()
-                    .usuario(usuario)
-                    .titulo(request.getTitulo())
-                    .especialidad(request.getEspecialidad())
-                    .experiencia(request.getExperiencia())
-                    .build();
-            docRep.save(docente); // Guardar el docente en la base de datos
-        }
-
-        // Si el usuario es un estudiante
-        if(request.getRol().equals(Rol.ESTUDIANTE)){
-            // Creación de un nuevo estudiante
-            Estudiante estudiante = Estudiante.builder()
-                    .usuario(usuario)
-                    .ingreso(request.getIngreso())
-                    .representante(usuRep.findByCedula(request.getCedulaRepresentante()))
-                    .build();
-            estRep.save(estudiante); // Guardar el estudiante en la base de datos
-        }
-
-        return AuthResponse.builder()
-                .token(jwtService.generateToken(usuario))
+                .creacion(LocalDate.now())
+                .foto(foto)
+                .tipo(request.getFoto() != null ? request.getFoto().getContentType() : null)
                 .build();
     }
+
+    private void crearYGuardarDocente(RegisterRequest request, Usuario usuario) {
+        Docente docente = Docente.builder()
+                .usuario(usuario)
+                .titulo(request.getTitulo())
+                .especialidad(request.getEspecialidad())
+                .experiencia(request.getExperiencia())
+                .build();
+        docRep.save(docente);
+    }
+
+    private void crearYGuardarEstudiante(RegisterRequest request, Usuario usuario) {
+        Representante representante = repRep.findByUsuarioCedula(request.getCedulaRepresentante());
+        if (representante == null) {
+            throw new RuntimeException("Representante no encontrado");
+        }
+        Estudiante estudiante = Estudiante.builder()
+                .usuario(usuario)
+                .ingreso(request.getIngreso())
+                .representante(representante)
+                .build();
+        estRep.save(estudiante);
+    }
+
+    private void crearYGuardarRepresentante(RegisterRequest request, Usuario usuario) {
+        Representante representante = Representante.builder()
+                .usuario(usuario)
+                .autorizado(request.isAutorizado())
+                .ocupacion(request.getOcupacion())
+                .empresa(request.getEmpresa())
+                .direccion(request.getDireccionEmpresa())
+                .telefono(request.getTelefonoEmpresa())
+                .build();
+        repRep.save(representante);
+    }
+    // -------------------------------------------------------------------------------------
 
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getCedula(), request.getPassword()));

@@ -17,5 +17,5 @@ public class EstudianteDTO {
     private LocalDate ingreso;
     private String sangre;
 
-    private UsuarioDTO representante;
+    private RepresentanteDTO representante;
 }

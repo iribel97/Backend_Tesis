@@ -41,10 +41,14 @@ public class Usuario implements UserDetails {
     private Rol rol;
     private String direccion;
     private String telefono;
+    private String tipo; // Tipo de foto (image/png, image/jpeg, image/jpg)
+    @Lob
+    private byte[] foto;
 
     /*----- ATRIBUTOS DE AUTENTICACION Y SEGURIDAD -----*/
     @Enumerated(EnumType.STRING)
     private EstadoUsu estado;      //Estado del usuario (Activo, Inactivo, Bloqueado)
+    private LocalDate creacion;     //Fecha de creacion del usuario
 
 
     @Override

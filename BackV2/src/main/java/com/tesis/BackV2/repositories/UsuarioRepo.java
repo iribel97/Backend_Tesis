@@ -9,4 +9,7 @@ public interface UsuarioRepo extends JpaRepository<Usuario, String> {
 
     // Regrese un usuario por cedula
     Usuario findByCedula(String cedula);
+
+    //Comprobar si el usuario existe
+    boolean existsByCedula(String cedula);
 }

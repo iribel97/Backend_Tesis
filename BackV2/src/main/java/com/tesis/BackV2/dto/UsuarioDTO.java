@@ -29,5 +29,6 @@ public class UsuarioDTO {
 
     private DocenteDTO docente;
     private EstudianteDTO estudiante;
+    private RepresentanteDTO representante;
 
 }

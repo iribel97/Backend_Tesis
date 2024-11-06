@@ -36,5 +36,12 @@ public class UsuarioRequest {
     /*------ ATRIBUTOS DEL ESTUDIANTE -------*/
     private LocalDate ingreso;
     private String cedulaRepresentante;
+
+    /*------ ATRIBUTOS DEL REPRESENTANTE -------*/
+    private boolean autorizado;
+    private String ocupacion;
+    private String empresa;
+    private String direccionEmpresa;
+    private String telefonoEmpresa;
 }
 

@@ -2,15 +2,18 @@ package com.tesis.BackV2.services;
 
 import com.tesis.BackV2.dto.DocenteDTO;
 import com.tesis.BackV2.dto.EstudianteDTO;
+import com.tesis.BackV2.dto.RepresentanteDTO;
 import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
+import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.Usuario;
 import com.tesis.BackV2.enums.Genero;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.repositories.EstudianteRepo;
+import com.tesis.BackV2.repositories.RepresentanteRepo;
 import com.tesis.BackV2.repositories.UsuarioRepo;
 
 import com.tesis.BackV2.request.UsuarioRequest;
@@ -32,6 +35,7 @@ public class UsuarioServ {
     private DocenteRepo repoD;
     @Autowired
     private EstudianteRepo repoE;
+    private RepresentanteRepo repoR;
 
     /* ----- CRUD DE LA ENTIDAD USUARIO ----- */
 
@@ -73,9 +77,23 @@ public class UsuarioServ {
 
                 Estudiante estudiante = repoE.findById(request.getId()).orElseThrow(() -> new MiExcepcion("El estudiante con cédula " + request.getCedula() + " no existe."));
                 estudiante.setIngreso(request.getIngreso());
-                estudiante.setRepresentante(repoU.findByCedula(request.getCedulaRepresentante()));
+                estudiante.setRepresentante(repoR.findByUsuarioCedula(request.getCedulaRepresentante()));
 
                 repoE.save(estudiante);
+            }
+
+            //Actualizar los datos del representante
+            if(request.getRol().equals(Rol.REPRESENTANTE)){
+
+                Representante representante = repoR.findById(request.getId()).orElseThrow(() -> new MiExcepcion(("El representante con cédula " + request.getCedula() + " no existe.")));
+                representante.setAutorizado(request.isAutorizado());
+                representante.setOcupacion(request.getOcupacion());
+                representante.setEmpresa(request.getEmpresa());
+                representante.setDireccion(request.getDireccionEmpresa());
+                representante.setTelefono(request.getTelefonoEmpresa());
+
+                repoR.save(representante);
+
             }
 
         } else {
@@ -90,6 +108,7 @@ public class UsuarioServ {
 
         Docente docente = repoD.findByUsuarioCedula(cedula);
         Estudiante estudiante = repoE.findByUsuarioCedula(cedula);
+        Representante representante = repoR.findByUsuarioCedula(cedula);
 
         DocenteDTO docenteDTO = docente != null ? DocenteDTO.builder()
                 .id(docente.getId())
@@ -101,7 +120,23 @@ public class UsuarioServ {
         EstudianteDTO estudianteDTO = estudiante != null ? EstudianteDTO.builder()
                 .id(estudiante.getId())
                 .ingreso(estudiante.getIngreso())
-                .representante(buscarUsuario(estudiante.getRepresentante().getCedula())) 
+                .representante(RepresentanteDTO.builder()
+                        .autorizado(estudiante.getRepresentante().isAutorizado())
+                        .ocupacion(estudiante.getRepresentante().getOcupacion())
+                        .empresa(estudiante.getRepresentante().getEmpresa())
+                        .direccion(estudiante.getRepresentante().getDireccion())
+                        .telefono(estudiante.getRepresentante().getTelefono())
+                        .build()
+                )
+                .build() : null;
+
+        RepresentanteDTO representanteDTO = representante != null ? RepresentanteDTO.builder()
+                .id(representante.getId())
+                .autorizado(representante.isAutorizado())
+                .ocupacion(representante.getOcupacion())
+                .empresa(representante.getEmpresa())
+                .direccion(representante.getDireccion())
+                .telefono(representante.getTelefono())
                 .build() : null;
 
         return UsuarioDTO.builder()
@@ -117,6 +152,7 @@ public class UsuarioServ {
                 .estado(usuario.getEstado())
                 .docente(docenteDTO)
                 .estudiante(estudianteDTO)
+                .representante(representanteDTO)
                 .build();
 
     }

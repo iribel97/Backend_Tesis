@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -29,6 +30,8 @@ public class RegisterRequest {
     private Genero genero;
     private EstadoUsu estado;
 
+    private MultipartFile foto; // Foto de perfil del usuario
+
     /*------ ATRIBUTOS DEL DOCENTE -------*/
     private String titulo;
     private String especialidad;
@@ -36,6 +39,14 @@ public class RegisterRequest {
 
     /*------ ATRIBUTOS DEL ESTUDIANTE -------*/
     private LocalDate ingreso;
+    private String sangre;
     private String cedulaRepresentante;
+
+    /*------ ATRIBUTOS DEL REPRESENTANTE -------*/
+    private boolean autorizado;
+    private String ocupacion;
+    private String empresa;
+    private String direccionEmpresa;
+    private String telefonoEmpresa;
 
 }

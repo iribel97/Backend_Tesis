@@ -27,5 +27,5 @@ public class Estudiante {
     private Usuario usuario;
 
     @ManyToOne
-    private Usuario representante;
+    private Representante representante;
 }
