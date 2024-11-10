@@ -24,11 +24,8 @@ public class UsuarioRequest {
     private String direccion;
     private LocalDate nacimiento;
     private Genero genero;
-    private Rol rol;
-    private EstadoUsu estado;
 
-    private Long id;
-    /*------ ATRIBUTOS DEL DOCENTE -------*/
+    /*------ ATRIBUTOS DEL OCENTE -------*/
     private String titulo;
     private String especialidad;
     private int experiencia;

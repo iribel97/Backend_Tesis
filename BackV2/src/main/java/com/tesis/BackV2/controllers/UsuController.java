@@ -23,8 +23,7 @@ public class UsuController {
 
     @GetMapping("{cedula}")
     public ResponseEntity<UsuarioDTO> buscarUsuario(@PathVariable String cedula) throws MiExcepcion {
-        UsuarioDTO usuario = usuarioService.buscarUsuario(cedula);
-        return ResponseEntity.ok(usuario);
+        return ResponseEntity.ok(usuarioService.buscarUsuario(cedula));
     }
 
     @PutMapping()
