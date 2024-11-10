@@ -26,6 +26,9 @@ public class Estudiante {
     @OneToOne
     private Usuario usuario;
 
+    @OneToOne
+    private Promoción promocion;
+
     @ManyToOne
-    private Usuario representante;
+    private Representante representante;
 }

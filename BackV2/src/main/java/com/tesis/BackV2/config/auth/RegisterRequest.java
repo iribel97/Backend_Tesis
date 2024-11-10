@@ -1,8 +1,6 @@
 package com.tesis.BackV2.config.auth;
 
-import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Genero;
-import com.tesis.BackV2.enums.Rol;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,10 +22,8 @@ public class RegisterRequest {
     private String password;
     private String telefono;
     private String direccion;
-    private Rol rol;
     private LocalDate nacimiento;
     private Genero genero;
-    private EstadoUsu estado;
 
     /*------ ATRIBUTOS DEL DOCENTE -------*/
     private String titulo;
@@ -36,6 +32,13 @@ public class RegisterRequest {
 
     /*------ ATRIBUTOS DEL ESTUDIANTE -------*/
     private LocalDate ingreso;
+    private String sangre;
     private String cedulaRepresentante;
+
+    /*------ ATRIBUTOS DEL REPRESENTANTE -------*/
+    private String ocupacion;
+    private String empresa;
+    private String direccionEmpresa;
+    private String telefonoEmpresa;
 
 }
