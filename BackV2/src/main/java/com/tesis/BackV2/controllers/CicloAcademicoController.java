@@ -1,0 +1,22 @@
+package com.tesis.BackV2.controllers;
+
+import com.tesis.BackV2.request.CicloARequest;
+import com.tesis.BackV2.services.CicloAcademicoServ;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/admin/")
+@RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:4200"})
+public class CicloAcademicoController {
+
+    private final CicloAcademicoServ service;
+
+    // Crear un ciclo académico
+    @PostMapping("ciclo")
+    public ResponseEntity<String> crearCicloAcademico(@RequestBody CicloARequest request) {
+        return ResponseEntity.ok(service.crearCicloAcademico(request));
+    }
+}

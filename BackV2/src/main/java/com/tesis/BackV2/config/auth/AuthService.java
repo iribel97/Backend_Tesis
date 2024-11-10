@@ -5,6 +5,7 @@ import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.Usuario;
+import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.repositories.EstudianteRepo;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -33,26 +35,43 @@ public class AuthService {
     private final EstudianteRepo estRep;
     private final RepresentanteRepo repRep;
 
-    public AuthResponse register(RegisterRequest request) {
-        // Comprobar que el usuario ya existe
+    public AuthResponse register(RegisterRequest request, Rol rol, EstadoUsu estado) {
+
+        // comprobar si el usuario ya existe
         if (usuRep.existsByCedula(request.getCedula())) {
-            throw new RuntimeException("El usuario ya existe");
+            throw new RuntimeException("Usuario ya existe");
         }
 
-        Usuario usuario = buildUsuario(request);
+        // Crear instancia de usuario
+        Usuario usuario = Usuario.builder()
+                .cedula(request.getCedula())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .nombres(request.getNombre())
+                .apellidos(request.getApellido())
+                .email(request.getCorreo())
+                .telefono(request.getTelefono())
+                .nacimiento(request.getNacimiento())
+                .genero(request.getGenero())
+                .rol(rol)
+                .estado(estado)
+                .direccion(request.getDireccion())
+                .creacion(LocalDate.now())
+                .build();
+
+        // Guardar usuario
         usuRep.save(usuario);
 
-        switch (request.getRol()) {
-            case DOCENTE:
-                crearYGuardarDocente(request, usuario);
+        switch (rol) {
+            case REPRESENTANTE:
+                crearYGuardarRepresentante(request, usuario);
                 break;
             case ESTUDIANTE:
                 crearYGuardarEstudiante(request, usuario);
                 break;
-            case REPRESENTANTE:
-                crearYGuardarRepresentante(request, usuario);
+            case DOCENTE:
+                crearYGuardarDocente(request, usuario);
                 break;
-            case ADMIN:
+            case ADMIN, AOPERACIONAL:
                 break;
             default:
                 throw new RuntimeException("Rol no reconocido");
@@ -63,36 +82,6 @@ public class AuthService {
                 .build();
     }
 
-    // -------------------------------------------------------------------------------------
-    private Usuario buildUsuario(RegisterRequest request) {
-        byte[] foto = null;
-
-        if (request.getFoto() != null && !request.getFoto().isEmpty()){
-            try {
-                foto = request.getFoto().getBytes();
-            } catch (IOException e) {
-                throw new RuntimeException("Error al procesar la foto de perfil", e);
-            }
-        }
-
-
-        return Usuario.builder()
-                .cedula(request.getCedula())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .nombres(request.getNombre())
-                .apellidos(request.getApellido())
-                .email(request.getCorreo())
-                .telefono(request.getTelefono())
-                .nacimiento(request.getNacimiento())
-                .genero(request.getGenero())
-                .rol(request.getRol())
-                .estado(request.getEstado())
-                .direccion(request.getDireccion())
-                .creacion(LocalDate.now())
-                .foto(foto)
-                .tipo(request.getFoto() != null ? request.getFoto().getContentType() : null)
-                .build();
-    }
 
     private void crearYGuardarDocente(RegisterRequest request, Usuario usuario) {
         Docente docente = Docente.builder()
@@ -120,7 +109,6 @@ public class AuthService {
     private void crearYGuardarRepresentante(RegisterRequest request, Usuario usuario) {
         Representante representante = Representante.builder()
                 .usuario(usuario)
-                .autorizado(request.isAutorizado())
                 .ocupacion(request.getOcupacion())
                 .empresa(request.getEmpresa())
                 .direccion(request.getDireccionEmpresa())
@@ -138,4 +126,5 @@ public class AuthService {
                 .token(token)
                 .build();
     }
+
 }

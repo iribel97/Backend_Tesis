@@ -4,6 +4,8 @@ import com.tesis.BackV2.config.auth.AuthResponse;
 import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.config.auth.LoginRequest;
 import com.tesis.BackV2.config.auth.RegisterRequest;
+import com.tesis.BackV2.enums.EstadoUsu;
+import com.tesis.BackV2.enums.Rol;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +24,26 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
-    //Registro de usuario
+    //Registro de usuario administrados
+    @PostMapping("/register/admin")
+    public ResponseEntity<AuthResponse> registerAdmin(@RequestBody RegisterRequest registerRequest) {
+        return ResponseEntity.ok(authService.register(registerRequest, Rol.ADMIN, EstadoUsu.Activo));
+    }
+
+    @PostMapping("/register/adminOp")
+    public ResponseEntity<AuthResponse> registerAdminOp(@RequestBody RegisterRequest registerRequest) {
+        return ResponseEntity.ok(authService.register(registerRequest, Rol.AOPERACIONAL, EstadoUsu.Inactivo));
+    }
+
+    // Registro de usuario docente
+    @PostMapping("/register/docente")
+    public ResponseEntity<AuthResponse> registerDocente(@RequestBody RegisterRequest registerRequest) {
+        return ResponseEntity.ok(authService.register(registerRequest, Rol.DOCENTE, EstadoUsu.Inactivo));
+    }
+
+    //Registro de usuario representante
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authService.register(registerRequest));
+        return ResponseEntity.ok(authService.register(registerRequest, Rol.REPRESENTANTE, EstadoUsu.Activo));
     }
 }

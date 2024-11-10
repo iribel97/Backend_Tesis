@@ -1,13 +1,10 @@
 package com.tesis.BackV2.config.auth;
 
-import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Genero;
-import com.tesis.BackV2.enums.Rol;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -25,12 +22,8 @@ public class RegisterRequest {
     private String password;
     private String telefono;
     private String direccion;
-    private Rol rol;
     private LocalDate nacimiento;
     private Genero genero;
-    private EstadoUsu estado;
-
-    private MultipartFile foto; // Foto de perfil del usuario
 
     /*------ ATRIBUTOS DEL DOCENTE -------*/
     private String titulo;
@@ -43,7 +36,6 @@ public class RegisterRequest {
     private String cedulaRepresentante;
 
     /*------ ATRIBUTOS DEL REPRESENTANTE -------*/
-    private boolean autorizado;
     private String ocupacion;
     private String empresa;
     private String direccionEmpresa;
