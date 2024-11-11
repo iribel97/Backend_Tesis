@@ -3,10 +3,12 @@ package com.tesis.BackV2.services;
 import com.tesis.BackV2.entities.Aula;
 import com.tesis.BackV2.entities.CicloAcademico;
 import com.tesis.BackV2.entities.Grado;
+import com.tesis.BackV2.entities.Materia;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.request.AulaRequest;
 import com.tesis.BackV2.request.CicloARequest;
+import com.tesis.BackV2.request.MateriaRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,8 @@ public class CicloAcademicoServ {
     private DocenteRepo docenteRepo;
     @Autowired
     private UsuarioRepo usuarioRepo;
+    @Autowired
+    private MateriaRepo materiaRepo;
 
     // Creación de un ciclo académico
     public String crearCicloAcademico(CicloARequest request) {
@@ -89,6 +93,30 @@ public class CicloAcademicoServ {
 
         aulaRepo.save(aula);
         return "Creación de aula exitosa";
+    }
+
+
+    // Crear materia
+    public String crearMateria(MateriaRequest request) {
+        // Verificar si el grado existe
+        if (Objects.isNull(gradoRepo.findByNombre(request.getGrado()))) {
+            throw new RuntimeException("El grado no existe");
+        }
+
+        // Verificar si la materia ya existe
+        if (materiaRepo.existsByNombre(request.getNombre()) && materiaRepo.existsByGradoNombre(request.getGrado())) {
+            throw new RuntimeException("La materia ya existe en el grado");
+        }
+
+        Materia materia = Materia.builder()
+                .nombre(request.getNombre())
+                .horas(request.getHoras())
+                .area(request.getArea())
+                .grado(gradoRepo.findByNombre(request.getGrado()))
+                .build();
+
+        materiaRepo.save(materia);
+        return "Creación de materia exitosa";
     }
 
 }
