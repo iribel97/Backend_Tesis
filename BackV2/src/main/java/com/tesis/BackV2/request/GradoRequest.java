@@ -5,16 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CicloARequest {
+public class GradoRequest {
 
     private String nombre;
-    private int cantPeriodos;
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
 }

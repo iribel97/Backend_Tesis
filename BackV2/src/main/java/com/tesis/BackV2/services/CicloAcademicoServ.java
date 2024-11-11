@@ -1,7 +1,9 @@
 package com.tesis.BackV2.services;
 
 import com.tesis.BackV2.entities.CicloAcademico;
+import com.tesis.BackV2.entities.Grado;
 import com.tesis.BackV2.repositories.CicloAcademicoRepo;
+import com.tesis.BackV2.repositories.GradoRepo;
 import com.tesis.BackV2.request.CicloARequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,16 +15,13 @@ public class CicloAcademicoServ {
 
     @Autowired
     private CicloAcademicoRepo repo;
+    @Autowired
+    private GradoRepo gradoRepo;
 
     // Creación de un ciclo académico
     public String crearCicloAcademico(CicloARequest request) {
-        // Verificar que el usuario sea de tipo administrador
-
-
-
-
         List<CicloAcademico> ciclos = repo.findAll();
-        if (ciclos.size() > 0) {
+        if (!ciclos.isEmpty()) {
             //Verificar que el ciclo academico no choque con otro ciclo academico
             for (CicloAcademico ciclo : ciclos) {
                 if (request.getFechaInicio().isBefore(ciclo.getFechaFin()) && request.getFechaFin().isAfter(ciclo.getFechaInicio())) {
@@ -43,6 +42,29 @@ public class CicloAcademicoServ {
         repo.save(ciclo);
 
         return "Ciclo académico creado";
+    }
+
+    // Creación de grados académicos octavo, noveno, decimo
+    public String crearGrado(Grado request){
+        List<Grado> grados = gradoRepo.findAll();
+        if (!grados.isEmpty()){
+            // Verificar que no exista el mismo nombre de grado
+            for (Grado grado : grados){
+                if (grado.getNombre().equalsIgnoreCase(request.getNombre()) ){
+                    throw new RuntimeException("Ya existen los grados académicos");
+                }
+            }
+        }
+
+        // Crear un nuevo grado académico
+        var grado = Grado.builder()
+                .nombre(request.getNombre())
+                .build();
+
+        // Guardar el grado académico en la base de datos
+        gradoRepo.save(grado);
+
+        return "Grado creado correctamente";
     }
 
 

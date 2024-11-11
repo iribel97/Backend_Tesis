@@ -1,5 +1,6 @@
 package com.tesis.BackV2.controllers;
 
+import com.tesis.BackV2.entities.Grado;
 import com.tesis.BackV2.request.CicloARequest;
 import com.tesis.BackV2.services.CicloAcademicoServ;
 import lombok.RequiredArgsConstructor;
@@ -18,5 +19,11 @@ public class CicloAcademicoController {
     @PostMapping("ciclo")
     public ResponseEntity<String> crearCicloAcademico(@RequestBody CicloARequest request) {
         return ResponseEntity.ok(service.crearCicloAcademico(request));
+    }
+
+    // Crear un grado
+    @PostMapping("grado")
+    public ResponseEntity<String> crearGrado(@RequestBody Grado request) {
+        return ResponseEntity.ok(service.crearGrado(request));
     }
 }
