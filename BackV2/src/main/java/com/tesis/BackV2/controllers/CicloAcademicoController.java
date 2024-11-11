@@ -3,6 +3,7 @@ package com.tesis.BackV2.controllers;
 import com.tesis.BackV2.entities.Grado;
 import com.tesis.BackV2.request.AulaRequest;
 import com.tesis.BackV2.request.CicloARequest;
+import com.tesis.BackV2.request.DistributivoRequest;
 import com.tesis.BackV2.request.MateriaRequest;
 import com.tesis.BackV2.services.CicloAcademicoServ;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,11 @@ public class CicloAcademicoController {
     @PostMapping("materia")
     public ResponseEntity<String> crearMateria(@RequestBody MateriaRequest request) {
         return ResponseEntity.ok(service.crearMateria(request));
+    }
+
+    // Crear un distributivo
+    @PostMapping("distributivo")
+    public ResponseEntity<String> crearDistributivo(@RequestBody DistributivoRequest request) {
+        return ResponseEntity.ok(service.crearDistributivo(request));
     }
 }

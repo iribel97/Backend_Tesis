@@ -1,13 +1,11 @@
 package com.tesis.BackV2.services;
 
-import com.tesis.BackV2.entities.Aula;
-import com.tesis.BackV2.entities.CicloAcademico;
-import com.tesis.BackV2.entities.Grado;
-import com.tesis.BackV2.entities.Materia;
+import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.request.AulaRequest;
 import com.tesis.BackV2.request.CicloARequest;
+import com.tesis.BackV2.request.DistributivoRequest;
 import com.tesis.BackV2.request.MateriaRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +28,8 @@ public class CicloAcademicoServ {
     private UsuarioRepo usuarioRepo;
     @Autowired
     private MateriaRepo materiaRepo;
+    @Autowired
+    private DistributivoRepo distributivoRepo;
 
     // Creación de un ciclo académico
     public String crearCicloAcademico(CicloARequest request) {
@@ -117,6 +117,47 @@ public class CicloAcademicoServ {
 
         materiaRepo.save(materia);
         return "Creación de materia exitosa";
+    }
+
+    // Crear distributivo
+    public String crearDistributivo(DistributivoRequest request) {
+        // Verificar que los datos no se repitan
+        List<Distributivo> distributicvos = distributivoRepo.findAll();
+        if (distributicvos.stream().anyMatch(distributivo -> distributivo.getCiclo().getId() == request.getCicloId() &&
+                distributivo.getAula().getId() == request.getAulaId() &&
+                distributivo.getMateria().getId() == request.getMateriaId() &&
+                distributivo.getDocente().getId() == docenteRepo.findByUsuarioCedula(request.getCedulaDocente()).getId())) {
+            throw new RuntimeException("El distributivo ya existe");
+        }
+        // Verificar si el ciclo académico existe
+        if (!cicloRepo.existsById(request.getCicloId())) {
+            throw new RuntimeException("El ciclo académico no existe");
+        }
+
+        // Verificar si el aula existe
+        if (!aulaRepo.existsById(request.getAulaId())) {
+            throw new RuntimeException("El aula no existe");
+        }
+
+        // Verificar si la materia existe
+        if (!materiaRepo.existsById(request.getMateriaId())) {
+            throw new RuntimeException("La materia no existe");
+        }
+
+        // Verificar si el docente existe
+        if (!usuarioRepo.existsByCedula(request.getCedulaDocente()) && !usuarioRepo.findByCedula(request.getCedulaDocente()).getRol().equals(Rol.DOCENTE)) {
+            throw new RuntimeException("El docente no existe");
+        }
+
+        var distributivo = Distributivo.builder()
+                .ciclo(cicloRepo.findById(request.getCicloId()).get())
+                .aula(aulaRepo.findById(request.getAulaId()).get())
+                .materia(materiaRepo.findById(request.getMateriaId()).get())
+                .docente(docenteRepo.findByUsuarioCedula(request.getCedulaDocente()))
+                .build();
+
+        distributivoRepo.save(distributivo);
+        return "Distributivo creado";
     }
 
 }
