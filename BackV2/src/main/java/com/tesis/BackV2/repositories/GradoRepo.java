@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GradoRepo extends JpaRepository<Grado, Long> {
+
+    // Buscar por nombre
+    Grado findByNombre(String nombre);
 }
