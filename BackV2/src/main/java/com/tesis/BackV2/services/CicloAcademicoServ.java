@@ -1,5 +1,8 @@
 package com.tesis.BackV2.services;
 
+import com.tesis.BackV2.dto.AulaDTO;
+import com.tesis.BackV2.dto.DistributivoDTO;
+import com.tesis.BackV2.dto.MateriaDTO;
 import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.repositories.*;
@@ -31,6 +34,7 @@ public class CicloAcademicoServ {
     @Autowired
     private DistributivoRepo distributivoRepo;
 
+    /* -------------------- CICLO ACADEMICO -------------------- */
     // Creación de un ciclo académico
     public String crearCicloAcademico(CicloARequest request) {
         if (cicloRepo.findAll().stream().anyMatch(
@@ -50,6 +54,12 @@ public class CicloAcademicoServ {
         return "Ciclo académico creado";
     }
 
+    // Traer todos los ciclos académicos
+    public List<CicloAcademico> getCiclos() {
+        return cicloRepo.findAll();
+    }
+
+    /* -------------------- GRADOS ACADEMICOS -------------------- */
     // Creación de grados académicos ejem: octavo, noveno, decimo
     public String crearGrado(Grado request) {
         boolean gradoExiste = gradoRepo.findAll().stream()
@@ -66,6 +76,12 @@ public class CicloAcademicoServ {
         return "Grado creado correctamente";
     }
 
+    // Traer todos los grados académicos
+    public List<Grado> getGrados() {
+        return gradoRepo.findAll();
+    }
+
+    /* -------------------- CURSOS/AULAS ACADEMICAS -------------------- */
     // Creación de aulas
     public String crearAula(AulaRequest request) {
         // Verificar si el paralelo  y el grado ya existe
@@ -95,7 +111,21 @@ public class CicloAcademicoServ {
         return "Creación de aula exitosa";
     }
 
+    // Traer todas las aulas
+    public List<AulaDTO> getAulas() {
+        List<Aula> aulas = aulaRepo.findAll();
+        return aulas.stream().map(aula -> AulaDTO.builder()
+                .id(aula.getId())
+                .paralelo(aula.getParalelo())
+                .maxEstudiantes(aula.getMaxEstudiantes())
+                .nombreGrado(aula.getGrado().getNombre())
+                .tutor(aula.getTutor().getUsuario().getNombres() + " " + aula.getTutor().getUsuario().getApellidos())
+                .telefonoTutor(aula.getTutor().getUsuario().getTelefono())
+                .emailTutor(aula.getTutor().getUsuario().getEmail())
+                .build()).toList();
+    }
 
+    /* -------------------- MATERIAS ACADEMICAS -------------------- */
     // Crear materia
     public String crearMateria(MateriaRequest request) {
         // Verificar si el grado existe
@@ -119,6 +149,19 @@ public class CicloAcademicoServ {
         return "Creación de materia exitosa";
     }
 
+    // Traer todas las materias
+    public List<MateriaDTO> getMaterias() {
+        List<Materia> materias = materiaRepo.findAll();
+        return materias.stream().map(materia -> MateriaDTO.builder()
+                .id(materia.getId())
+                .nombre(materia.getNombre())
+                .area(materia.getArea())
+                .horasSemanales(materia.getHoras())
+                .nombreGrado(materia.getGrado().getNombre())
+                .build()).toList();
+    }
+
+    /* -------------------- DISTRIBUTIVO -------------------- */
     // Crear distributivo
     public String crearDistributivo(DistributivoRequest request) {
         // Verificar que los datos no se repitan
@@ -158,6 +201,20 @@ public class CicloAcademicoServ {
 
         distributivoRepo.save(distributivo);
         return "Distributivo creado";
+    }
+
+    // Traer todos los distributivos
+    public List<DistributivoDTO> getDistributivos() {
+        List<Distributivo> distributivos = distributivoRepo.findAll();
+        return distributivos.stream().map(distributivo -> DistributivoDTO.builder()
+                .id(distributivo.getId())
+                .cicloAcademico(distributivo.getCiclo().getNombre())
+                .aula(distributivo.getAula().getParalelo())
+                .grado(distributivo.getAula().getGrado().getNombre())
+                .materia(distributivo.getMateria().getNombre())
+                .horasSemanales(distributivo.getMateria().getHoras())
+                .docente(distributivo.getDocente().getUsuario().getNombres() + " " + distributivo.getDocente().getUsuario().getApellidos())
+                .build()).toList();
     }
 
 }
