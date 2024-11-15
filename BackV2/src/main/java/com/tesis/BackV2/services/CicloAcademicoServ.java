@@ -59,6 +59,11 @@ public class CicloAcademicoServ {
         return cicloRepo.findAll();
     }
 
+    // Traer un solo ciclo academico
+    public CicloAcademico getCiclo(Long id) {
+        return cicloRepo.findById(id).orElseThrow(() -> new RuntimeException("Ciclo académico no encontrado"));
+    }
+
     /* -------------------- GRADOS ACADEMICOS -------------------- */
     // Creación de grados académicos ejem: octavo, noveno, decimo
     public String crearGrado(Grado request) {
@@ -79,6 +84,15 @@ public class CicloAcademicoServ {
     // Traer todos los grados académicos
     public List<Grado> getGrados() {
         return gradoRepo.findAll();
+    }
+
+    // Traer un solo grado academico
+    public Grado getGrado(String nombre) {
+        Grado grado = gradoRepo.findByNombre(nombre);
+        if(grado == null) {
+            throw new RuntimeException("Grado académico no encontrado");
+        }
+        return gradoRepo.findByNombre(nombre);
     }
 
     /* -------------------- CURSOS/AULAS ACADEMICAS -------------------- */
@@ -125,6 +139,25 @@ public class CicloAcademicoServ {
                 .build()).toList();
     }
 
+    // Traer solo un aula
+    public AulaDTO getAula(String paralelo, String grado) {
+        Aula aula = aulaRepo.findByParaleloAndGradoNombre(paralelo, grado);
+
+        if(aula == null){
+            throw new RuntimeException("Aula no encontrada");
+        }
+
+        return AulaDTO.builder()
+                .id(aula.getId())
+                .paralelo(aula.getParalelo())
+                .maxEstudiantes(aula.getMaxEstudiantes())
+                .nombreGrado(aula.getGrado().getNombre())
+                .tutor(aula.getTutor().getUsuario().getNombres() + " " + aula.getTutor().getUsuario().getApellidos())
+                .telefonoTutor(aula.getTutor().getUsuario().getTelefono())
+                .emailTutor(aula.getTutor().getUsuario().getEmail())
+                .build();
+    }
+
     /* -------------------- MATERIAS ACADEMICAS -------------------- */
     // Crear materia
     public String crearMateria(MateriaRequest request) {
@@ -161,6 +194,17 @@ public class CicloAcademicoServ {
                 .build()).toList();
     }
 
+    // Traer solo una materia
+    public MateriaDTO getMateria(long id){
+        Materia materia = materiaRepo.findById(id).orElseThrow(() -> new RuntimeException("Materia no encontrada"));
+        return MateriaDTO.builder()
+                .id(materia.getId())
+                .nombre(materia.getNombre())
+                .area(materia.getArea())
+                .horasSemanales(materia.getHoras())
+                .nombreGrado(materia.getGrado().getNombre())
+                .build();
+    }
     /* -------------------- DISTRIBUTIVO -------------------- */
     // Crear distributivo
     public String crearDistributivo(DistributivoRequest request) {
@@ -192,6 +236,11 @@ public class CicloAcademicoServ {
             throw new RuntimeException("El docente no existe");
         }
 
+        // Verificar si el grado de la materia es el mismo que el grado del aula
+        if (materiaRepo.findById(request.getMateriaId()).get().getGrado().getId() != aulaRepo.findById(request.getAulaId()).get().getGrado().getId()) {
+            throw new RuntimeException("El grado de la materia no coincide con el grado del curso");
+        }
+
         var distributivo = Distributivo.builder()
                 .ciclo(cicloRepo.findById(request.getCicloId()).get())
                 .aula(aulaRepo.findById(request.getAulaId()).get())
@@ -206,6 +255,34 @@ public class CicloAcademicoServ {
     // Traer todos los distributivos
     public List<DistributivoDTO> getDistributivos() {
         List<Distributivo> distributivos = distributivoRepo.findAll();
+        return distributivos.stream().map(distributivo -> DistributivoDTO.builder()
+                .id(distributivo.getId())
+                .cicloAcademico(distributivo.getCiclo().getNombre())
+                .aula(distributivo.getAula().getParalelo())
+                .grado(distributivo.getAula().getGrado().getNombre())
+                .materia(distributivo.getMateria().getNombre())
+                .horasSemanales(distributivo.getMateria().getHoras())
+                .docente(distributivo.getDocente().getUsuario().getNombres() + " " + distributivo.getDocente().getUsuario().getApellidos())
+                .build()).toList();
+    }
+
+    // Traer distributivo por id
+    public DistributivoDTO getDistributivo(Long id) {
+        Distributivo distributivo = distributivoRepo.findById(id).orElseThrow(() -> new RuntimeException("Distributivo no encontrado"));
+        return DistributivoDTO.builder()
+                .id(distributivo.getId())
+                .cicloAcademico(distributivo.getCiclo().getNombre())
+                .aula(distributivo.getAula().getParalelo())
+                .grado(distributivo.getAula().getGrado().getNombre())
+                .materia(distributivo.getMateria().getNombre())
+                .horasSemanales(distributivo.getMateria().getHoras())
+                .docente(distributivo.getDocente().getUsuario().getNombres() + " " + distributivo.getDocente().getUsuario().getApellidos())
+                .build();
+    }
+
+    // Traer distributivo por ciclo academico
+    public List<DistributivoDTO> getDistributivoByCiclo(Long id) {
+        List<Distributivo> distributivos = distributivoRepo.findByCicloId(id);
         return distributivos.stream().map(distributivo -> DistributivoDTO.builder()
                 .id(distributivo.getId())
                 .cicloAcademico(distributivo.getCiclo().getNombre())

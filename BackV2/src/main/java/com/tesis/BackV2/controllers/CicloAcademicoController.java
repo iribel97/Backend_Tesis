@@ -31,6 +31,12 @@ public class CicloAcademicoController {
         return ResponseEntity.ok(service.getCiclos());
     }
 
+    // Traer un solo ciclo académico por id
+    @GetMapping("ciclo/{id}")
+    public ResponseEntity<?> getCicloAcademico(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getCiclo(id));
+    }
+
     /* -------------------- GRADO ACADEMICO -------------------- */
     // Crear un grado
     @PostMapping("grado")
@@ -42,6 +48,12 @@ public class CicloAcademicoController {
     @GetMapping("grado")
     public ResponseEntity<?> getGrados() {
         return ResponseEntity.ok(service.getGrados());
+    }
+
+    // Traer grado por nombre
+    @GetMapping("grado/{nombre}")
+    public ResponseEntity<?> getGrado(@PathVariable String nombre) {
+        return ResponseEntity.ok(service.getGrado(nombre));
     }
 
     /* -------------------- CURSOS/AULAS ACADEMICAS -------------------- */
@@ -57,6 +69,12 @@ public class CicloAcademicoController {
         return ResponseEntity.ok(service.getAulas());
     }
 
+    // Traer aula por paralelo y nombre del grado
+    @GetMapping("curso/{nombre}/{paralelo}")
+    public ResponseEntity<?> getAula(@PathVariable String nombre, @PathVariable String paralelo) {
+        return ResponseEntity.ok(service.getAula(paralelo, nombre));
+    }
+
     /* -------------------- MATERIAS ACADEMICO -------------------- */
     // Crear una materia
     @PostMapping("materia")
@@ -65,9 +83,15 @@ public class CicloAcademicoController {
     }
 
     // Traer todas las materias
-    @GetMapping("materia")
+    @GetMapping("materias")
     public ResponseEntity<?> getMaterias() {
         return ResponseEntity.ok(service.getMaterias());
+    }
+
+    // Traer materia por id
+    @GetMapping("materia/{id}")
+    public ResponseEntity<?> getMateria(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getMateria(id));
     }
 
     /* -------------------- DISTRIBUTIVO -------------------- */
@@ -81,5 +105,17 @@ public class CicloAcademicoController {
     @GetMapping("distributivo")
     public ResponseEntity<?> getDistributivos() {
         return ResponseEntity.ok(service.getDistributivos());
+    }
+
+    // Traer distributivo por id
+    @GetMapping("distributivo/{id}")
+    public ResponseEntity<?> getDistributivo(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getDistributivo(id));
+    }
+
+    // Traer distributivo por id del ciclo académico
+    @GetMapping("distributivo/ciclo/{id}")
+    public ResponseEntity<?> getDistributivoByCiclo(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getDistributivoByCiclo(id));
     }
 }
