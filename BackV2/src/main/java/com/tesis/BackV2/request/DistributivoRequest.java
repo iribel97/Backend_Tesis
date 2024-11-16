@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DistributivoRequest {
 
+    private long id;
     private long cicloId;
     private long aulaId;
     private long materiaId;

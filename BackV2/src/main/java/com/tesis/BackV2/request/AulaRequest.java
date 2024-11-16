@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AulaRequest {
 
+    private long id;
     private String paralelo;
     private int cantEstudiantes;
     private String grado;

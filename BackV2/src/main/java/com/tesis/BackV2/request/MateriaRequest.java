@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MateriaRequest {
 
+    private long id;
     private String nombre;
     private String area;
     private int horas;

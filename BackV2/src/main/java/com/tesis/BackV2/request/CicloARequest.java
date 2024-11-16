@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CicloARequest {
 
+    private long id;
     private String nombre;
     private int cantPeriodos;
     private LocalDate fechaInicio;

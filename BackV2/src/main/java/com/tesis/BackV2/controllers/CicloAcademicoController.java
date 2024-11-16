@@ -37,6 +37,12 @@ public class CicloAcademicoController {
         return ResponseEntity.ok(service.getCiclo(id));
     }
 
+    //Actualizar un ciclo académico
+    @PutMapping("ciclo")
+    public ResponseEntity<String> actualizarCicloAcademico(@RequestBody CicloARequest request) {
+        return ResponseEntity.ok(service.editarCiclo(request));
+    }
+
     /* -------------------- GRADO ACADEMICO -------------------- */
     // Crear un grado
     @PostMapping("grado")
@@ -54,6 +60,12 @@ public class CicloAcademicoController {
     @GetMapping("grado/{nombre}")
     public ResponseEntity<?> getGrado(@PathVariable String nombre) {
         return ResponseEntity.ok(service.getGrado(nombre));
+    }
+
+    // Actualizar un grado
+    @PutMapping("grado")
+    public ResponseEntity<String> actualizarGrado(@RequestBody Grado request) {
+        return ResponseEntity.ok(service.editarGrado(request));
     }
 
     /* -------------------- CURSOS/AULAS ACADEMICAS -------------------- */
@@ -75,6 +87,12 @@ public class CicloAcademicoController {
         return ResponseEntity.ok(service.getAula(paralelo, nombre));
     }
 
+    // Actualizar curso/aula
+    @PutMapping("curso")
+    public ResponseEntity<String> actualizarAula(@RequestBody AulaRequest request) {
+        return ResponseEntity.ok(service.editarAula(request));
+    }
+
     /* -------------------- MATERIAS ACADEMICO -------------------- */
     // Crear una materia
     @PostMapping("materia")
@@ -92,6 +110,12 @@ public class CicloAcademicoController {
     @GetMapping("materia/{id}")
     public ResponseEntity<?> getMateria(@PathVariable Long id) {
         return ResponseEntity.ok(service.getMateria(id));
+    }
+
+    // Actualizar materia
+    @PutMapping("materia")
+    public ResponseEntity<String> actualizarMateria(@RequestBody MateriaRequest request) {
+        return ResponseEntity.ok(service.editarMateria(request));
     }
 
     /* -------------------- DISTRIBUTIVO -------------------- */
@@ -117,5 +141,11 @@ public class CicloAcademicoController {
     @GetMapping("distributivo/ciclo/{id}")
     public ResponseEntity<?> getDistributivoByCiclo(@PathVariable Long id) {
         return ResponseEntity.ok(service.getDistributivoByCiclo(id));
+    }
+
+    // Actualizar distributivo
+    @PutMapping("distributivo")
+    public ResponseEntity<String> actualizarDistributivo(@RequestBody DistributivoRequest request) {
+        return ResponseEntity.ok(service.editarDistributivo(request));
     }
 }
