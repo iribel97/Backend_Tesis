@@ -19,38 +19,44 @@ public class CicloAcademicoController {
     private final CicloAcademicoServ service;
 
     /* -------------------- CICLO ACADEMICO -------------------- */
-    // Crear un ciclo académico
+    // Crear
     @PostMapping("ciclo")
     public ResponseEntity<String> crearCicloAcademico(@RequestBody CicloARequest request) {
         return ResponseEntity.ok(service.crearCicloAcademico(request));
     }
 
-    // Traer todos los ciclos académicos
+    // Traer todos
     @GetMapping("ciclo")
     public ResponseEntity<?> getCiclosAcademicos() {
         return ResponseEntity.ok(service.getCiclos());
     }
 
-    // Traer un solo ciclo académico por id
+    // Traer un solo por id
     @GetMapping("ciclo/{id}")
     public ResponseEntity<?> getCicloAcademico(@PathVariable Long id) {
         return ResponseEntity.ok(service.getCiclo(id));
     }
 
-    //Actualizar un ciclo académico
+    //Actualizar
     @PutMapping("ciclo")
     public ResponseEntity<String> actualizarCicloAcademico(@RequestBody CicloARequest request) {
         return ResponseEntity.ok(service.editarCiclo(request));
     }
 
+    // Eliminar
+    @DeleteMapping("ciclo/{id}")
+    public ResponseEntity<String> eliminarCicloAcademico(@PathVariable Long id) {
+        return ResponseEntity.ok(service.eliminarCiclo(id));
+    }
+
     /* -------------------- GRADO ACADEMICO -------------------- */
-    // Crear un grado
+    // Crear
     @PostMapping("grado")
     public ResponseEntity<String> crearGrado(@RequestBody Grado request) {
         return ResponseEntity.ok(service.crearGrado(request));
     }
 
-    // Traer todos los grados
+    // Traer todos
     @GetMapping("grado")
     public ResponseEntity<?> getGrados() {
         return ResponseEntity.ok(service.getGrados());
@@ -62,90 +68,114 @@ public class CicloAcademicoController {
         return ResponseEntity.ok(service.getGrado(nombre));
     }
 
-    // Actualizar un grado
+    // Actualizar
     @PutMapping("grado")
     public ResponseEntity<String> actualizarGrado(@RequestBody Grado request) {
         return ResponseEntity.ok(service.editarGrado(request));
     }
 
+    // Eliminar
+    @DeleteMapping("grado/{id}")
+    public ResponseEntity<String> eliminarGrado(@PathVariable Long id) {
+        return ResponseEntity.ok(service.eliminarGrado(id));
+    }
+
     /* -------------------- CURSOS/AULAS ACADEMICAS -------------------- */
-    // Crear un aula
+    // Crear
     @PostMapping("curso")
     public ResponseEntity<String> crearAula(@RequestBody AulaRequest request) {
         return ResponseEntity.ok(service.crearAula(request));
     }
 
-    // Traer todos los cursos/aulas
+    // Traer todos
     @GetMapping("curso")
     public ResponseEntity<?> getAulas() {
         return ResponseEntity.ok(service.getAulas());
     }
 
-    // Traer aula por paralelo y nombre del grado
+    // Traer por paralelo y nombre del grado
     @GetMapping("curso/{nombre}/{paralelo}")
     public ResponseEntity<?> getAula(@PathVariable String nombre, @PathVariable String paralelo) {
         return ResponseEntity.ok(service.getAula(paralelo, nombre));
     }
 
-    // Actualizar curso/aula
+    // Actualizar
     @PutMapping("curso")
     public ResponseEntity<String> actualizarAula(@RequestBody AulaRequest request) {
         return ResponseEntity.ok(service.editarAula(request));
     }
 
+    // Eliminar
+    @DeleteMapping("curso/{id}")
+    public ResponseEntity<String> eliminarAula(@PathVariable Long id) {
+        return ResponseEntity.ok(service.eliminarAula(id));
+    }
+
     /* -------------------- MATERIAS ACADEMICO -------------------- */
-    // Crear una materia
+    // Crear
     @PostMapping("materia")
     public ResponseEntity<String> crearMateria(@RequestBody MateriaRequest request) {
         return ResponseEntity.ok(service.crearMateria(request));
     }
 
-    // Traer todas las materias
+    // Traer todas
     @GetMapping("materias")
     public ResponseEntity<?> getMaterias() {
         return ResponseEntity.ok(service.getMaterias());
     }
 
-    // Traer materia por id
+    // Traer por id
     @GetMapping("materia/{id}")
     public ResponseEntity<?> getMateria(@PathVariable Long id) {
         return ResponseEntity.ok(service.getMateria(id));
     }
 
-    // Actualizar materia
+    // Actualizar
     @PutMapping("materia")
     public ResponseEntity<String> actualizarMateria(@RequestBody MateriaRequest request) {
         return ResponseEntity.ok(service.editarMateria(request));
     }
 
+    // Eliminar
+    @DeleteMapping("materia/{id}")
+    public ResponseEntity<String> eliminarMateria(@PathVariable Long id) {
+        return ResponseEntity.ok(service.eliminarMateria(id));
+    }
+
     /* -------------------- DISTRIBUTIVO -------------------- */
-    // Crear un distributivo
+    // Crear
     @PostMapping("distributivo")
     public ResponseEntity<String> crearDistributivo(@RequestBody DistributivoRequest request) {
         return ResponseEntity.ok(service.crearDistributivo(request));
     }
 
-    // Traer todos los distributivos
+    // Traer todos
     @GetMapping("distributivo")
     public ResponseEntity<?> getDistributivos() {
         return ResponseEntity.ok(service.getDistributivos());
     }
 
-    // Traer distributivo por id
+    // Traer por id
     @GetMapping("distributivo/{id}")
     public ResponseEntity<?> getDistributivo(@PathVariable Long id) {
         return ResponseEntity.ok(service.getDistributivo(id));
     }
 
-    // Traer distributivo por id del ciclo académico
+    // Traer por id del ciclo académico
     @GetMapping("distributivo/ciclo/{id}")
     public ResponseEntity<?> getDistributivoByCiclo(@PathVariable Long id) {
         return ResponseEntity.ok(service.getDistributivoByCiclo(id));
     }
 
-    // Actualizar distributivo
+    // Actualizar
     @PutMapping("distributivo")
     public ResponseEntity<String> actualizarDistributivo(@RequestBody DistributivoRequest request) {
         return ResponseEntity.ok(service.editarDistributivo(request));
+    }
+
+    // Eliminar
+    @DeleteMapping("distributivo/{id}")
+    public ResponseEntity<String> eliminarDistributivo(@PathVariable Long id) {
+        return ResponseEntity.ok(service.eliminarDistributivo(id));
     }
 }

@@ -26,4 +26,7 @@ public interface MateriaRepo extends JpaRepository<Materia, Long> {
 
     // Traer por nombre de la materia y grado y area
     Materia findByNombreAndGradoNombreAndArea(String nombre, String grado, String area);
+
+    // Existe por id del grado
+    boolean existsByGradoId(Long id);
 }

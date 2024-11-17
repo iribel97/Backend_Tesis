@@ -36,7 +36,7 @@ public class CicloAcademicoServ {
     private DistributivoRepo distributivoRepo;
 
     /* -------------------- CICLO ACADEMICO -------------------- */
-    // Creación de un ciclo académico
+    // Creación
     @Transactional
     public String crearCicloAcademico(CicloARequest request) {
         if (cicloRepo.findAll().stream().anyMatch(
@@ -56,17 +56,17 @@ public class CicloAcademicoServ {
         return "Ciclo académico creado";
     }
 
-    // Traer todos los ciclos académicos
+    // Traer todos
     public List<CicloAcademico> getCiclos() {
         return cicloRepo.findAll();
     }
 
-    // Traer un solo ciclo academico
+    // Traer un solo por id
     public CicloAcademico getCiclo(Long id) {
         return cicloRepo.findById(id).orElseThrow(() -> new RuntimeException("Ciclo académico no encontrado"));
     }
 
-    // Editar el ciclo academico
+    // Editar
     @Transactional
     public String editarCiclo(CicloARequest request){
 
@@ -84,8 +84,22 @@ public class CicloAcademicoServ {
 
     }
 
+    // Eliminar
+    @Transactional
+    public String eliminarCiclo(Long id) {
+        CicloAcademico ciclo = cicloRepo.findById(id).orElseThrow(() -> new RuntimeException("Ciclo académico no encontrado"));
+
+        // comprobar si hay distributivos asociados
+        if (distributivoRepo.existsByCicloId(id)) {
+            throw new RuntimeException("No se puede eliminar el ciclo académico porque tiene distributivos asociados");
+        }
+
+        cicloRepo.delete(ciclo);
+        return "Ciclo académico eliminado";
+    }
+
     /* -------------------- GRADOS ACADEMICOS -------------------- */
-    // Creación de grados académicos ejem: octavo, noveno, decimo
+    // Creación ejem: octavo, noveno, decimo
     @Transactional
     public String crearGrado(Grado request) {
         boolean gradoExiste = gradoRepo.findAll().stream()
@@ -102,10 +116,10 @@ public class CicloAcademicoServ {
         return "Grado creado correctamente";
     }
 
-    // Traer todos los grados académicos
+    // Traer todos
     public List<Grado> getGrados() { return gradoRepo.findAll(); }
 
-    // Traer un solo grado academico
+    // Traer por nombre
     public Grado getGrado(String nombre) {
         Grado grado = gradoRepo.findByNombre(nombre);
         if(grado == null) {
@@ -114,7 +128,7 @@ public class CicloAcademicoServ {
         return gradoRepo.findByNombre(nombre);
     }
 
-    // Acualizar un grado academico
+    // Acualizar
     @Transactional
     public String editarGrado(Grado request){
         // Traer el grado academico a editar
@@ -137,8 +151,23 @@ public class CicloAcademicoServ {
         return("Actualización completa");
     }
 
+    // Eliminar
+    @Transactional
+    public String eliminarGrado(Long id){
+        Grado grado = gradoRepo.findById(id).orElseThrow(() -> new RuntimeException("Grado académico no encontrado"));
+
+        // comprobar si hay aulas o materias asociadas
+        if (aulaRepo.existsByGradoId(id) || materiaRepo.existsByGradoId(id)) {
+            throw new RuntimeException("No se puede eliminar el grado académico porque tiene aulas o materias asociadas");
+        }
+
+        gradoRepo.delete(grado);
+
+        return("Grado académico eliminado");
+    }
+
     /* -------------------- CURSOS/AULAS ACADEMICAS -------------------- */
-    // Creación de aulas
+    // Creación
     @Transactional
     public String crearAula(AulaRequest request) {
         // Verificar si el paralelo  y el grado ya existe
@@ -173,7 +202,7 @@ public class CicloAcademicoServ {
         return "Creación de aula exitosa";
     }
 
-    // Traer todas las aulas
+    // Traer todas
     public List<AulaDTO> getAulas() {
         List<Aula> aulas = aulaRepo.findAll();
         return aulas.stream().map(aula -> AulaDTO.builder()
@@ -187,7 +216,7 @@ public class CicloAcademicoServ {
                 .build()).toList();
     }
 
-    // Traer solo un aula
+    // Traer solo uno
     public AulaDTO getAula(String paralelo, String grado) {
         Aula aula = aulaRepo.findByParaleloAndGradoNombre(paralelo, grado);
 
@@ -206,7 +235,7 @@ public class CicloAcademicoServ {
                 .build();
     }
 
-    // Actualizar un aula
+    // Actualizar
     @Transactional
     public String editarAula(AulaRequest request) {
         Aula aulaE = aulaRepo.findById(request.getId()).orElseThrow(() -> new RuntimeException("Aula no encontrada"));
@@ -238,8 +267,23 @@ public class CicloAcademicoServ {
         return "Actualización completa";
     }
 
+    // Eliminar
+    @Transactional
+    public String eliminarAula(Long id){
+        Aula aula = aulaRepo.findById(id).orElseThrow(() -> new RuntimeException("Aula no encontrada"));
+
+        // comprobar si hay distributivos asociados
+        if (distributivoRepo.existsByAulaId(id)) {
+            throw new RuntimeException("No se puede eliminar el aula porque tiene distributivos asociados");
+        }
+
+        aulaRepo.delete(aula);
+
+        return("Aula eliminada");
+    }
+
     /* -------------------- MATERIAS ACADEMICAS -------------------- */
-    // Crear materia
+    // Crear
     @Transactional
     public String crearMateria(MateriaRequest request) {
         // Verificar si el grado existe
@@ -263,7 +307,7 @@ public class CicloAcademicoServ {
         return "Creación de materia exitosa";
     }
 
-    // Traer todas las materias
+    // Traer todas
     public List<MateriaDTO> getMaterias() {
         List<Materia> materias = materiaRepo.findAll();
         return materias.stream().map(materia -> MateriaDTO.builder()
@@ -275,7 +319,7 @@ public class CicloAcademicoServ {
                 .build()).toList();
     }
 
-    // Traer solo una materia
+    // Traer solo una
     public MateriaDTO getMateria(long id){
         Materia materia = materiaRepo.findById(id).orElseThrow(() -> new RuntimeException("Materia no encontrada"));
         return MateriaDTO.builder()
@@ -287,7 +331,7 @@ public class CicloAcademicoServ {
                 .build();
     }
 
-    // Actualizar una materia
+    // Actualizar
     @Transactional
     public String editarMateria(MateriaRequest request) {
         Materia materia = materiaRepo.findById(request.getId()).orElseThrow(() -> new RuntimeException("Materia no encontrada"));
@@ -315,8 +359,23 @@ public class CicloAcademicoServ {
         return "Actualización completa";
     }
 
+    // Eliminar
+    @Transactional
+    public String eliminarMateria(Long id){
+        Materia materia = materiaRepo.findById(id).orElseThrow(() -> new RuntimeException("Materia no encontrada"));
+
+        // comprobar si hay distributivos asociados
+        if (distributivoRepo.existsByMateriaId(id)) {
+            throw new RuntimeException("No se puede eliminar la materia porque tiene distributivos asociados");
+        }
+
+        materiaRepo.delete(materia);
+
+        return("Materia eliminada");
+    }
+
     /* -------------------- DISTRIBUTIVO -------------------- */
-    // Crear distributivo
+    // Crear
     public String crearDistributivo(DistributivoRequest request) {
         // Verificar que los datos no se repitan
         List<Distributivo> distributicvos = distributivoRepo.findAll();
@@ -362,7 +421,7 @@ public class CicloAcademicoServ {
         return "Distributivo creado";
     }
 
-    // Traer todos los distributivos
+    // Traer todos
     public List<DistributivoDTO> getDistributivos() {
         List<Distributivo> distributivos = distributivoRepo.findAll();
         return distributivos.stream().map(distributivo -> DistributivoDTO.builder()
@@ -376,7 +435,7 @@ public class CicloAcademicoServ {
                 .build()).toList();
     }
 
-    // Traer distributivo por id
+    // Traer por id
     public DistributivoDTO getDistributivo(Long id) {
         Distributivo distributivo = distributivoRepo.findById(id).orElseThrow(() -> new RuntimeException("Distributivo no encontrado"));
         return DistributivoDTO.builder()
@@ -390,7 +449,7 @@ public class CicloAcademicoServ {
                 .build();
     }
 
-    // Traer distributivo por ciclo academico
+    // Traer por ciclo academico
     public List<DistributivoDTO> getDistributivoByCiclo(Long id) {
         List<Distributivo> distributivos = distributivoRepo.findByCicloId(id);
         return distributivos.stream().map(distributivo -> DistributivoDTO.builder()
@@ -404,7 +463,7 @@ public class CicloAcademicoServ {
                 .build()).toList();
     }
 
-    // Actualizar distributivo
+    // Actualizar
     @Transactional
     public String editarDistributivo(DistributivoRequest request) {
         Distributivo distributivo = distributivoRepo.findById(request.getId()).orElseThrow(() -> new RuntimeException("Distributivo no encontrado"));
@@ -440,6 +499,16 @@ public class CicloAcademicoServ {
         distributivoRepo.save(distributivo);
         return "Distributivo actualizado";
 
+    }
+
+    // Eliminar
+    @Transactional
+    public String eliminarDistributivo(Long id){
+        Distributivo distributivo = distributivoRepo.findById(id).orElseThrow(() -> new RuntimeException("Distributivo no encontrado"));
+
+        distributivoRepo.delete(distributivo);
+
+        return("Distributivo eliminado");
     }
 
 }
