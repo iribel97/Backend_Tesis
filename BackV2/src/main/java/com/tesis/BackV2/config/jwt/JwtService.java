@@ -1,5 +1,6 @@
 package com.tesis.BackV2.config.jwt;
 
+import com.tesis.BackV2.entities.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -28,8 +29,13 @@ public class JwtService {
 
     // Generar un token
     public String generateToken(UserDetails userDetails) {
-        // Genera un token con los detalles del usuario
-        return generateToken(new HashMap<>(),userDetails);
+        // Extrae los datos adicionales (rol y estado) del usuario
+        Usuario usuario = (Usuario) userDetails;
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("rol", usuario.getRol().name());
+
+        // Genera el token con los claims adicionales
+        return generateToken(extraClaims, userDetails);
     }
 
     // Generar un token con claims adicionales, como el rol del usuario, etc.
@@ -47,6 +53,11 @@ public class JwtService {
     public <T> T extractClaim(String token, Function<Claims,T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims); // Devuelve el claim específico
+    }
+
+    // Extraer el rol del token
+    public String extractRol(String token) {
+        return extractClaim(token, claims -> claims.get("rol", String.class));
     }
 
     // Verificar si el token es válido
