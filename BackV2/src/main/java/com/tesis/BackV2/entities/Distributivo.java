@@ -15,6 +15,8 @@ public class Distributivo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    private int horasAsignadas;
+
     /*---- ATRIBUTOS RELACIONADOS ----*/
     @ManyToOne
     private CicloAcademico ciclo;

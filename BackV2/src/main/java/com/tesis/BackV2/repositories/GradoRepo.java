@@ -9,4 +9,8 @@ public interface GradoRepo extends JpaRepository<Grado, Long> {
 
     // Buscar por nombre
     Grado findByNombre(String nombre);
+
+    boolean existsByNombreIgnoreCase(String nombre);
+
+    boolean existsByNombreIgnoreCaseAndIdNot(String nombre, long id);
 }

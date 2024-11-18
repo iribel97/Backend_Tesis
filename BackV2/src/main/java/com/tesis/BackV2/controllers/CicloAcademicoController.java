@@ -1,11 +1,8 @@
 package com.tesis.BackV2.controllers;
 
 import com.tesis.BackV2.entities.Grado;
-import com.tesis.BackV2.request.AulaRequest;
-import com.tesis.BackV2.request.CicloARequest;
-import com.tesis.BackV2.request.DistributivoRequest;
-import com.tesis.BackV2.request.MateriaRequest;
-import com.tesis.BackV2.services.CicloAcademicoServ;
+import com.tesis.BackV2.request.*;
+import com.tesis.BackV2.services.cicloacademico.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = {"http://localhost:4200"})
 public class CicloAcademicoController {
 
-    private final CicloAcademicoServ service;
+    private final CicloServ service;
+    private final GradoServ gradoServ;
+    private final AulaServ aulaServ;
+    private final MateriaServ materiaServ;
+    private final DistributivoServ distributivoServ;
+    private final HorarioServ horarioServ;
 
     /* -------------------- CICLO ACADEMICO -------------------- */
     // Crear
@@ -53,129 +55,136 @@ public class CicloAcademicoController {
     // Crear
     @PostMapping("grado")
     public ResponseEntity<String> crearGrado(@RequestBody Grado request) {
-        return ResponseEntity.ok(service.crearGrado(request));
+        return ResponseEntity.ok(gradoServ.crearGrado(request));
     }
 
     // Traer todos
     @GetMapping("grado")
     public ResponseEntity<?> getGrados() {
-        return ResponseEntity.ok(service.getGrados());
+        return ResponseEntity.ok(gradoServ.getGrados());
     }
 
     // Traer grado por nombre
     @GetMapping("grado/{nombre}")
     public ResponseEntity<?> getGrado(@PathVariable String nombre) {
-        return ResponseEntity.ok(service.getGrado(nombre));
+        return ResponseEntity.ok(gradoServ.getGrado(nombre));
     }
 
     // Actualizar
     @PutMapping("grado")
     public ResponseEntity<String> actualizarGrado(@RequestBody Grado request) {
-        return ResponseEntity.ok(service.editarGrado(request));
+        return ResponseEntity.ok(gradoServ.editarGrado(request));
     }
 
     // Eliminar
     @DeleteMapping("grado/{id}")
     public ResponseEntity<String> eliminarGrado(@PathVariable Long id) {
-        return ResponseEntity.ok(service.eliminarGrado(id));
+        return ResponseEntity.ok(gradoServ.eliminarGrado(id));
     }
 
     /* -------------------- CURSOS/AULAS ACADEMICAS -------------------- */
     // Crear
     @PostMapping("curso")
     public ResponseEntity<String> crearAula(@RequestBody AulaRequest request) {
-        return ResponseEntity.ok(service.crearAula(request));
+        return ResponseEntity.ok(aulaServ.crearAula(request));
     }
 
     // Traer todos
     @GetMapping("curso")
-    public ResponseEntity<?> getAulas() {
-        return ResponseEntity.ok(service.getAulas());
+    public ResponseEntity<?> obtenerAulas() {
+        return ResponseEntity.ok(aulaServ.obtenerAulas());
     }
 
     // Traer por paralelo y nombre del grado
     @GetMapping("curso/{nombre}/{paralelo}")
-    public ResponseEntity<?> getAula(@PathVariable String nombre, @PathVariable String paralelo) {
-        return ResponseEntity.ok(service.getAula(paralelo, nombre));
+    public ResponseEntity<?> obtenerAula(@PathVariable String nombre, @PathVariable String paralelo) {
+        return ResponseEntity.ok(aulaServ.obtenerAula(paralelo, nombre));
     }
 
     // Actualizar
     @PutMapping("curso")
     public ResponseEntity<String> actualizarAula(@RequestBody AulaRequest request) {
-        return ResponseEntity.ok(service.editarAula(request));
+        return ResponseEntity.ok(aulaServ.editarAula(request));
     }
 
     // Eliminar
     @DeleteMapping("curso/{id}")
     public ResponseEntity<String> eliminarAula(@PathVariable Long id) {
-        return ResponseEntity.ok(service.eliminarAula(id));
+        return ResponseEntity.ok(aulaServ.eliminarAula(id));
     }
 
     /* -------------------- MATERIAS ACADEMICO -------------------- */
     // Crear
     @PostMapping("materia")
     public ResponseEntity<String> crearMateria(@RequestBody MateriaRequest request) {
-        return ResponseEntity.ok(service.crearMateria(request));
+        return ResponseEntity.ok(materiaServ.crearMateria(request));
     }
 
     // Traer todas
     @GetMapping("materias")
     public ResponseEntity<?> getMaterias() {
-        return ResponseEntity.ok(service.getMaterias());
+        return ResponseEntity.ok(materiaServ.getMaterias());
     }
 
     // Traer por id
     @GetMapping("materia/{id}")
     public ResponseEntity<?> getMateria(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getMateria(id));
+        return ResponseEntity.ok(materiaServ.getMateria(id));
     }
 
     // Actualizar
     @PutMapping("materia")
     public ResponseEntity<String> actualizarMateria(@RequestBody MateriaRequest request) {
-        return ResponseEntity.ok(service.editarMateria(request));
+        return ResponseEntity.ok(materiaServ.editarMateria(request));
     }
 
     // Eliminar
     @DeleteMapping("materia/{id}")
     public ResponseEntity<String> eliminarMateria(@PathVariable Long id) {
-        return ResponseEntity.ok(service.eliminarMateria(id));
+        return ResponseEntity.ok(materiaServ.eliminarMateria(id));
     }
 
     /* -------------------- DISTRIBUTIVO -------------------- */
     // Crear
     @PostMapping("distributivo")
     public ResponseEntity<String> crearDistributivo(@RequestBody DistributivoRequest request) {
-        return ResponseEntity.ok(service.crearDistributivo(request));
+        return ResponseEntity.ok(distributivoServ.crearDistributivo(request));
     }
 
     // Traer todos
     @GetMapping("distributivo")
     public ResponseEntity<?> getDistributivos() {
-        return ResponseEntity.ok(service.getDistributivos());
+        return ResponseEntity.ok(distributivoServ.obtenerDistributivos());
     }
 
     // Traer por id
     @GetMapping("distributivo/{id}")
     public ResponseEntity<?> getDistributivo(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getDistributivo(id));
+        return ResponseEntity.ok(distributivoServ.obtenerDistributivo(id));
     }
 
     // Traer por id del ciclo académico
     @GetMapping("distributivo/ciclo/{id}")
     public ResponseEntity<?> getDistributivoByCiclo(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getDistributivoByCiclo(id));
+        return ResponseEntity.ok(distributivoServ.getDistributivoByCiclo(id));
     }
 
     // Actualizar
     @PutMapping("distributivo")
     public ResponseEntity<String> actualizarDistributivo(@RequestBody DistributivoRequest request) {
-        return ResponseEntity.ok(service.editarDistributivo(request));
+        return ResponseEntity.ok(distributivoServ.editarDistributivo(request));
     }
 
     // Eliminar
     @DeleteMapping("distributivo/{id}")
     public ResponseEntity<String> eliminarDistributivo(@PathVariable Long id) {
-        return ResponseEntity.ok(service.eliminarDistributivo(id));
+        return ResponseEntity.ok(distributivoServ.eliminarDistributivo(id));
+    }
+
+    /* -------------------- HORARIO -------------------- */
+    // Crear
+    @PostMapping("horario")
+    public ResponseEntity<String> crearHorario(@RequestBody HorarioRequest request) {
+        return ResponseEntity.ok(horarioServ.crearHorario(request));
     }
 }

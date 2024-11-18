@@ -24,10 +24,15 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
+    @PostMapping("/register/adminA")
+    public ResponseEntity<AuthResponse> registerAdminA(@RequestBody RegisterRequest registerRequest) {
+        return ResponseEntity.ok(authService.register(registerRequest, Rol.ADMIN, EstadoUsu.Activo));
+    }
+
     //Registro de usuario administrados
     @PostMapping("/register/admin")
     public ResponseEntity<AuthResponse> registerAdmin(@RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authService.register(registerRequest, Rol.ADMIN, EstadoUsu.Activo));
+        return ResponseEntity.ok(authService.register(registerRequest, Rol.ADMIN, EstadoUsu.Inactivo));
     }
 
     @PostMapping("/register/adminOp")

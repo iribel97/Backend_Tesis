@@ -29,4 +29,6 @@ public interface MateriaRepo extends JpaRepository<Materia, Long> {
 
     // Existe por id del grado
     boolean existsByGradoId(Long id);
+
+    boolean existsByNombreAndGradoNombre(String nombre, String grado);
 }

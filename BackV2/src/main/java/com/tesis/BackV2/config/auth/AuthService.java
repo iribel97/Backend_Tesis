@@ -45,9 +45,9 @@ public class AuthService {
         // Crear instancia de usuario
         Usuario usuario = Usuario.builder()
                 .cedula(request.getCedula())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .nombres(request.getNombre())
-                .apellidos(request.getApellido())
+                .password(passwordEncoder.encode(request.getPassword() == null ? request.getCedula() : request.getPassword()))
+                .nombres(request.getNombres())
+                .apellidos(request.getApellidos())
                 .email(request.getCorreo())
                 .telefono(request.getTelefono())
                 .nacimiento(request.getNacimiento())

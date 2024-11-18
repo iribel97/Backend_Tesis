@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
                         .requestMatchers("/auth/register").permitAll()
                         .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/register/adminA").permitAll()
                         .requestMatchers("/auth/register/**").authenticated()
                         .anyRequest().authenticated()
                 )

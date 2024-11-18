@@ -16,8 +16,8 @@ public class RegisterRequest {
 
     /*------ ATRIBUTOS DEL USUARIO GENERAL -------*/
     private String cedula;
-    private String nombre;
-    private String apellido;
+    private String nombres;
+    private String apellidos;
     private String correo;
     private String password;
     private String telefono;

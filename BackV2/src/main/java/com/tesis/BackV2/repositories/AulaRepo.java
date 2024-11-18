@@ -18,4 +18,6 @@ public interface AulaRepo extends JpaRepository<Aula, Long> {
 
     // Traer por paralelo y nombre del grado
     Aula findByParaleloAndGradoNombre(String paralelo, String nombre);
+
+    boolean existsByParaleloAndGradoNombre(String paralelo, String grado);
 }

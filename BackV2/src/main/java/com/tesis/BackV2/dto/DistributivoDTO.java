@@ -17,5 +17,6 @@ public class DistributivoDTO {
     private String grado;
     private String materia;
     private int horasSemanales;
+    private int horasAsignadas;
     private String docente;
 }
