@@ -1,7 +1,7 @@
 package com.tesis.BackV2.services.cicloacademico;
 
+import com.tesis.BackV2.entities.CicloAcademico;
 import com.tesis.BackV2.repositories.*;
-import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.request.CicloARequest;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

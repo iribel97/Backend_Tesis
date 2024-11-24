@@ -1,8 +1,6 @@
 package com.tesis.BackV2.controllers;
 
 import com.tesis.BackV2.dto.UsuarioDTO;
-import com.tesis.BackV2.entities.Docente;
-import com.tesis.BackV2.entities.Usuario;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.request.UsuarioRequest;
 import com.tesis.BackV2.services.UsuarioServ;

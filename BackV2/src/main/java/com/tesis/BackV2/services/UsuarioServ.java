@@ -8,8 +8,6 @@ import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.Usuario;
-import com.tesis.BackV2.enums.Genero;
-import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.repositories.EstudianteRepo;
@@ -18,13 +16,8 @@ import com.tesis.BackV2.repositories.UsuarioRepo;
 
 import com.tesis.BackV2.request.UsuarioRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioServ {

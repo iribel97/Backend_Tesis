@@ -2,11 +2,8 @@ package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Horario;
-import com.tesis.BackV2.entities.Materia;
-import com.tesis.BackV2.enums.DiaSemana;
 import com.tesis.BackV2.repositories.DistributivoRepo;
 import com.tesis.BackV2.repositories.HorarioRepo;
-import com.tesis.BackV2.repositories.MateriaRepo;
 import com.tesis.BackV2.request.HorarioRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

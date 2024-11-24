@@ -2,7 +2,6 @@ package com.tesis.BackV2.repositories;
 
 import com.tesis.BackV2.entities.Horario;
 import com.tesis.BackV2.enums.DiaSemana;
-import org.springframework.beans.PropertyValues;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

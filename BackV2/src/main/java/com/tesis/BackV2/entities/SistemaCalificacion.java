@@ -2,10 +2,7 @@ package com.tesis.BackV2.entities;
 
 import com.tesis.BackV2.entities.embedded.Calificacion;
 import com.tesis.BackV2.enums.TipoSistCalif;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -21,7 +18,11 @@ public class SistemaCalificacion {
     private Calificacion id;
 
     private String descripcion;
-    private int peso;
+    private String peso;
     @Enumerated(EnumType.STRING)
     private TipoSistCalif tipo;
+
+    /* ------ ATRIBUTOS RELACIONADOS ----- */
+    @ManyToOne
+    private CicloAcademico ciclo;
 }
