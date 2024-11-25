@@ -16,4 +16,5 @@ public class MateriaRequest {
     private String area;
     private int horas;
     private String grado;
+    private int registroCalificacion;
 }

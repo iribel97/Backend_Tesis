@@ -2,33 +2,30 @@ package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.dto.MateriaDTO;
 import com.tesis.BackV2.entities.Materia;
+import com.tesis.BackV2.entities.SistemaCalificacion;
+import com.tesis.BackV2.enums.TipoNivel;
 import com.tesis.BackV2.repositories.*;
+import com.tesis.BackV2.request.CalfRequest;
 import com.tesis.BackV2.request.MateriaRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MateriaServ {
 
     @Autowired
-    private CicloAcademicoRepo cicloRepo;
-    @Autowired
     private GradoRepo gradoRepo;
-    @Autowired
-    private AulaRepo aulaRepo;
-    @Autowired
-    private DocenteRepo docenteRepo;
-    @Autowired
-    private UsuarioRepo usuarioRepo;
     @Autowired
     private MateriaRepo materiaRepo;
     @Autowired
     private DistributivoRepo distributivoRepo;
     @Autowired
-    private HorarioRepo horarioRepo;
+    private SistCalifRepo sistCalifRepo;
 
     // Crear
     @Transactional
@@ -48,6 +45,7 @@ public class MateriaServ {
                 .horas(request.getHoras())
                 .area(request.getArea())
                 .grado(grado)
+                .registroCalificacion(request.getRegistroCalificacion())
                 .build();
 
         materiaRepo.save(materia);
@@ -56,9 +54,10 @@ public class MateriaServ {
 
     // Obtener todas
     public List<MateriaDTO> getMaterias() {
-        return materiaRepo.findAll().stream()
-                .map(this::convertirADTO)
-                .toList();
+        List<Materia> materias = materiaRepo.findAll();
+        List<MateriaDTO> materiasDTO = new ArrayList<>();
+        materias.forEach(materia -> materiasDTO.add(convertirADTO(materia)));
+        return materiasDTO;
     }
 
     // Obtener una
@@ -110,13 +109,37 @@ public class MateriaServ {
 
     // Convertir a DTO
     private MateriaDTO convertirADTO(Materia materia) {
+        List<SistemaCalificacion> sistemaCalificacion = sistCalifRepo.porRegistro(materia.getRegistroCalificacion());
+
         return MateriaDTO.builder()
                 .id(materia.getId())
                 .nombre(materia.getNombre())
                 .area(materia.getArea())
                 .horasSemanales(materia.getHoras())
                 .nombreGrado(materia.getGrado().getNombre())
+                .sistemaCalificacion(sistemaCalificacion.stream()
+                        .map(sistema -> CalfRequest.builder()
+                                .nivel(niveles(sistema))
+                                .tipo(sistema.getTipo())
+                                .descripcion(sistema.getDescripcion())
+                                .peso(sistema.getPeso())
+                                .build())
+                        .collect(Collectors.toList()))
                 .build();
+    }
+
+    // pasar niveles de calificaciones
+
+    private TipoNivel niveles (SistemaCalificacion sistema){
+         if (sistema.getId().getLvl2() == 0 && sistema.getId().getLvl3() == 0 && sistema.getId().getLvl4() == 0){
+             return TipoNivel.Primero;
+         } else if (sistema.getId().getLvl3() == 0 && sistema.getId().getLvl4() == 0){
+             return TipoNivel.Segundo;
+         } else if (sistema.getId().getLvl4() == 0){
+             return TipoNivel.Tercero;
+         } else {
+             return TipoNivel.Cuarto;
+         }
     }
 
 

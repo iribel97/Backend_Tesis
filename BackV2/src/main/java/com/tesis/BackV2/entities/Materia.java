@@ -19,6 +19,7 @@ public class Materia {
     private String nombre;
     private String area;
     private int horas;
+    private int registroCalificacion;
 
     /*---- ATRIBUTOS RELACIONADOS ----*/
     @ManyToOne
