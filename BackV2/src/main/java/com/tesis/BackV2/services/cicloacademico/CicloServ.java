@@ -1,6 +1,8 @@
 package com.tesis.BackV2.services.cicloacademico;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.entities.CicloAcademico;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.request.CicloARequest;
 import java.util.List;
@@ -17,7 +19,7 @@ public class CicloServ {
 
     // Creación
     @Transactional
-    public String crearCicloAcademico(CicloARequest request) {
+    public ApiResponse<String> crearCicloAcademico(CicloARequest request) {
         boolean existeConflicto = cicloRepo.findAll().stream()
                 .anyMatch(ciclo ->
                         request.getFechaInicio().isBefore(ciclo.getFechaFin()) &&
@@ -25,7 +27,13 @@ public class CicloServ {
                 );
 
         if (existeConflicto) {
-            throw new RuntimeException("El ciclo académico choca con otro ciclo académico.");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Conflicto de fechas")
+                    .codigo(400)
+                    .detalles("El ciclo académico tiene conflicto de fechas con otro ciclo académico.")
+                    .build()
+            );
         }
 
         CicloAcademico ciclo = CicloAcademico.builder()
@@ -36,7 +44,12 @@ public class CicloServ {
                 .build();
 
         cicloRepo.save(ciclo);
-        return "Ciclo académico creado exitosamente.";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Ciclo académico creado")
+                .codigo(200)
+                .detalles("El ciclo académico ha sido creado correctamente.")
+                .build();
     }
 
     // Traer todos
@@ -51,9 +64,15 @@ public class CicloServ {
 
     // Editar
     @Transactional
-    public String editarCiclo(CicloARequest request) {
+    public ApiResponse<String> editarCiclo(CicloARequest request) {
         CicloAcademico ciclo = cicloRepo.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("Ciclo académico no encontrado."));
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud incorrecta")
+                        .codigo(400)
+                        .detalles("El ciclo académico no existe.")
+                        .build()
+                ));
 
         ciclo.setNombre(request.getNombre());
         ciclo.setCantPeriodos(request.getCantPeriodos());
@@ -61,19 +80,35 @@ public class CicloServ {
         ciclo.setFechaFin(request.getFechaFin());
 
         cicloRepo.save(ciclo);
-        return "Ciclo académico actualizado exitosamente.";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Ciclo académico actualizado")
+                .codigo(200)
+                .detalles("El ciclo académico ha sido actualizado correctamente.")
+                .build();
     }
 
     // Eliminar
     @Transactional
-    public String eliminarCiclo(Long id) {
+    public ApiResponse<String> eliminarCiclo(Long id) {
         CicloAcademico ciclo = cicloRepo.findById(id).orElseThrow(() -> new RuntimeException("Ciclo académico no encontrado."));
 
         if (distributivoRepo.existsByCicloId(id)) {
-            throw new RuntimeException("No se puede eliminar el ciclo académico porque tiene distributivos asociados.");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("No es posible eliminar el ciclo académico, tiene distributivos asociados.")
+                    .build()
+            );
         }
 
         cicloRepo.delete(ciclo);
-        return "Ciclo académico eliminado exitosamente.";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Ciclo académico eliminado")
+                .codigo(200)
+                .detalles("El ciclo académico ha sido eliminado correctamente.")
+                .build();
     }
 }

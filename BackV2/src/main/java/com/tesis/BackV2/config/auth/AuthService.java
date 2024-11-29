@@ -1,5 +1,6 @@
 package com.tesis.BackV2.config.auth;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
@@ -7,6 +8,7 @@ import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.Usuario;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.RepresentanteRepo;
@@ -37,7 +39,13 @@ public class AuthService {
 
         // comprobar si el usuario ya existe
         if (usuRep.existsByCedula(request.getCedula())) {
-            throw new RuntimeException("Usuario ya existe");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El usuario ya existe.")
+                    .build()
+            );
         }
 
         // Crear instancia de usuario
@@ -72,7 +80,13 @@ public class AuthService {
             case ADMIN, AOPERACIONAL:
                 break;
             default:
-                throw new RuntimeException("Rol no reconocido");
+                throw new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(400)
+                        .detalles("Rol no válido.")
+                        .build()
+                );
         }
 
         return AuthResponse.builder()
@@ -94,7 +108,13 @@ public class AuthService {
     private void crearYGuardarEstudiante(RegisterRequest request, Usuario usuario) {
         Representante representante = repRep.findByUsuarioCedula(request.getCedulaRepresentante());
         if (representante == null) {
-            throw new RuntimeException("Representante no encontrado");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El representante no existe.")
+                    .build()
+            );
         }
         Estudiante estudiante = Estudiante.builder()
                 .usuario(usuario)

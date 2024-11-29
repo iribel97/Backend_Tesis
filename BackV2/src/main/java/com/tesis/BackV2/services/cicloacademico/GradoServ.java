@@ -1,6 +1,8 @@
 package com.tesis.BackV2.services.cicloacademico;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.entities.Grado;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,10 +22,16 @@ public class GradoServ {
 
     // Creación ejem: octavo, noveno, decimo
     @Transactional
-    public String crearGrado(Grado request) {
+    public ApiResponse<String> crearGrado(Grado request) {
         boolean gradoExiste = gradoRepo.existsByNombreIgnoreCase(request.getNombre());
         if (gradoExiste) {
-            throw new RuntimeException("Ya existe un grado académico con el mismo nombre.");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El grado académico ya existe.")
+                    .build()
+            );
         }
 
         Grado grado = Grado.builder()
@@ -31,7 +39,12 @@ public class GradoServ {
                 .build();
 
         gradoRepo.save(grado);
-        return "Grado académico creado correctamente.";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Grado académico creado")
+                .codigo(200)
+                .detalles("El grado académico ha sido creado correctamente.")
+                .build();
     }
 
     // Traer todos
@@ -40,38 +53,79 @@ public class GradoServ {
     // Traer por nombre
     public Grado getGrado(String nombre) {
         Grado grado = gradoRepo.findByNombre(nombre);
-        if(grado == null) {
-            throw new RuntimeException("Grado académico no encontrado");
+        if (grado == null) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El grado académico no existe.")
+                    .build()
+            );
         }
         return gradoRepo.findByNombre(nombre);
     }
 
     // Acualizar
     @Transactional
-    public String editarGrado(Grado request) {
-        Grado grado = gradoRepo.findById(request.getId()).orElseThrow(() -> new RuntimeException("Grado académico no encontrado."));
+    public ApiResponse<String> editarGrado(Grado request) {
+        Grado grado = gradoRepo.findById(request.getId())
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(400)
+                        .detalles("El grado académico no existe.")
+                        .build()
+                ));
 
         boolean nombreEnUso = gradoRepo.existsByNombreIgnoreCaseAndIdNot(request.getNombre(), request.getId());
         if (nombreEnUso) {
-            throw new RuntimeException("El nombre del grado académico ya está en uso.");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El nombre del grado académico ya está en uso.")
+                    .build()
+            );
         }
 
         grado.setNombre(request.getNombre());
         gradoRepo.save(grado);
 
-        return "Grado académico actualizado correctamente.";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Grado académico actualizado")
+                .codigo(200)
+                .detalles("El grado académico ha sido actualizado correctamente.")
+                .build();
     }
 
     // Eliminar
     @Transactional
-    public String eliminarGrado(Long id) {
-        Grado grado = gradoRepo.findById(id).orElseThrow(() -> new RuntimeException("Grado académico no encontrado."));
+    public ApiResponse<String> eliminarGrado(Long id) {
+        Grado grado = gradoRepo.findById(id).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud inválida")
+                .codigo(400)
+                .detalles("El grado académico no existe.")
+                .build()
+        ));
 
         if (aulaRepo.existsByGradoId(id) || materiaRepo.existsByGradoId(id)) {
-            throw new RuntimeException("No se puede eliminar el grado académico porque tiene aulas o materias asociadas.");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El grado académico está asociado a un aula o materia.")
+                    .build()
+            );
         }
 
         gradoRepo.delete(grado);
-        return "Grado académico eliminado correctamente.";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Grado académico eliminado")
+                .codigo(200)
+                .detalles("El grado académico ha sido eliminado correctamente.")
+                .build();
     }
 }
