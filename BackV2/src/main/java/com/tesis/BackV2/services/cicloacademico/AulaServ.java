@@ -1,9 +1,11 @@
 package com.tesis.BackV2.services.cicloacademico;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.AulaDTO;
 import com.tesis.BackV2.entities.Aula;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.enums.Rol;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.request.AulaRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ public class AulaServ {
 
     // Creación
     @Transactional
-    public String crearAula(AulaRequest request) {
+    public ApiResponse<String> crearAula(AulaRequest request) {
         validarParaleloYGrado(request.getParalelo(), request.getGrado());
         validarTutor(request.getCedulaTutor());
 
@@ -41,7 +43,13 @@ public class AulaServ {
                 .build();
 
         aulaRepo.save(aula);
-        return "Creación de aula exitosa";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Aula creada")
+                .codigo(200)
+                .detalles("El aula ha sido creada correctamente")
+                .build()
+        ;
     }
 
     // Traer todas
@@ -55,16 +63,28 @@ public class AulaServ {
     public AulaDTO obtenerAula(String paralelo, String grado) {
         Aula aula = aulaRepo.findByParaleloAndGradoNombre(paralelo, grado);
         if (aula == null) {
-            throw new RuntimeException("Aula no encontrada");
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("El curso no existe")
+                    .build()
+            );
         }
         return convertirAulaADTO(aula);
     }
 
     // Actualizar
     @Transactional
-    public String editarAula(AulaRequest request) {
+    public ApiResponse<String> editarAula(AulaRequest request) {
         Aula aula = aulaRepo.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("Aula no encontrada"));
+                .orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                        .error(true)
+                        .mensaje("Solcitud incorrecta")
+                        .codigo(400)
+                        .detalles("No es posible actualizar el curso, no existe")
+                        .build()
+                ));
 
         validarParaleloYGradoUnico(request.getParalelo(), request.getGrado(), request.getId());
         validarTutorParaEdicion(request.getCedulaTutor(), aula);
@@ -75,28 +95,56 @@ public class AulaServ {
         aula.setTutor(docenteRepo.findByUsuarioCedula(request.getCedulaTutor()));
 
         aulaRepo.save(aula);
-        return "Actualización completa";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Aula actualizada")
+                .codigo(200)
+                .detalles("El aula ha sido actualizada correctamente")
+                .build();
     }
 
     // Eliminar
     @Transactional
-    public String eliminarAula(Long id) {
+    public ApiResponse<String> eliminarAula(Long id) {
         Aula aula = aulaRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Aula no encontrada"));
+                .orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                        .error(true)
+                        .mensaje("Solicitud incorrecta")
+                        .codigo(400)
+                        .detalles("El curso que intenta eliminar no existe")
+                        .build()
+                ));
 
         if (distributivoRepo.existsByAulaId(id)) {
-            throw new RuntimeException("No se puede eliminar el aula porque tiene distributivos asociados");
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Distributivo asociado")
+                    .codigo(400)
+                    .detalles("El curso tiene distributivos asociados, no se puede eliminar")
+                    .build()
+            );
         }
 
         aulaRepo.delete(aula);
-        return "Aula eliminada";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Aula eliminada")
+                .codigo(200)
+                .detalles("El aula ha sido eliminada correctamente")
+                .build();
     }
 
     /* --------- METODOS AUXILIARES ---------- */
 
     private void validarParaleloYGrado(String paralelo, String grado) {
         if (aulaRepo.existsByParaleloAndGradoNombre(paralelo, grado)) {
-            throw new RuntimeException("El paralelo ya existe");
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("El curso ya se encuentran registrados, no se puede crear")
+                    .build()
+            );
         }
     }
 
@@ -107,27 +155,57 @@ public class AulaServ {
                         aula.getGrado().getNombre().equalsIgnoreCase(grado))
                 .findFirst()
                 .ifPresent(aula -> {
-                    throw new RuntimeException("El paralelo ya existe");
+                    throw new ApiException(ApiResponse.<String>builder()
+                            .error(true)
+                            .mensaje("Solcitud incorrecta")
+                            .codigo(400)
+                            .detalles("El curso ya existe, no se puede actualizar")
+                            .build()
+                    );
                 });
     }
 
     private void validarTutor(String cedulaTutor) {
         var usuario = usuarioRepo.findByCedula(cedulaTutor);
         if (usuario == null || !usuario.getRol().equals(Rol.DOCENTE)) {
-            throw new RuntimeException("El tutor no existe o no es un docente");
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Docente no encontrado")
+                    .codigo(400)
+                    .detalles("La cédula ingresada no corresponde a un docente o no existe")
+                    .build()
+            );
         }
         if (aulaRepo.existsByTutorId(docenteRepo.findByUsuarioCedula(cedulaTutor).getId())) {
-            throw new RuntimeException("El tutor ya tiene un aula asignada");
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("El docente ya esta asignado como tutor, no se puede asignar a otro")
+                    .build()
+            );
         }
     }
 
     private void validarTutorParaEdicion(String cedulaTutor, Aula aulaActual) {
         Docente tutor = docenteRepo.findByUsuarioCedula(cedulaTutor);
         if (tutor == null) {
-            throw new RuntimeException("El tutor no existe");
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Solcitud incorrecta")
+                    .codigo(400)
+                    .detalles("El docente no existe")
+                    .build()
+            );
         }
         if (aulaRepo.existsByTutorId(tutor.getId()) && aulaActual.getTutor().getId() != tutor.getId()) {
-            throw new RuntimeException("El tutor ya tiene un aula asignada");
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Solcitud incorrecta")
+                    .codigo(400)
+                    .detalles("Docente ya esta asignado como tutor, no se puede asignar a otro")
+                    .build()
+            );
         }
     }
 

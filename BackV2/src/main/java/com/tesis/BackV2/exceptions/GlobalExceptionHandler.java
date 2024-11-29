@@ -1,5 +1,6 @@
 package com.tesis.BackV2.exceptions;
 
+import com.tesis.BackV2.config.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,5 +18,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handlerRuntimeException(RuntimeException ex)
     {
         return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_GATEWAY);
+    }
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiResponse<?>> handleApiException(ApiException ex) {
+        return ResponseEntity
+                .status(ex.getApiResponse().getCodigo())
+                .body(ex.getApiResponse());
     }
 }

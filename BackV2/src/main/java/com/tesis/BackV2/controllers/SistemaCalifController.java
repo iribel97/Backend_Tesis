@@ -1,5 +1,6 @@
 package com.tesis.BackV2.controllers;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.request.CicloARequest;
 import com.tesis.BackV2.request.SisCalfRequest;
 import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
@@ -17,7 +18,7 @@ public class SistemaCalifController {
 
     // crear el sistema de evaluación
     @PostMapping("calificacion")
-    public ResponseEntity<String> crearSistemaCalificacion(@RequestBody SisCalfRequest request) {
+    public ResponseEntity<ApiResponse<?>> crearSistemaCalificacion(@RequestBody SisCalfRequest request) {
         return ResponseEntity.ok(serv.crearSisCalif(request));
     }
 

@@ -1,7 +1,9 @@
 package com.tesis.BackV2.services.cicloacademico;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Horario;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.DistributivoRepo;
 import com.tesis.BackV2.repositories.HorarioRepo;
 import com.tesis.BackV2.request.HorarioRequest;
@@ -22,10 +24,16 @@ public class HorarioServ {
 
     // Crear
     @Transactional
-    public String crearHorario(HorarioRequest request) {
+    public ApiResponse<String> crearHorario(HorarioRequest request) {
         // Traer el distributivo
         Distributivo distributivo = distributivoRepo.findById(request.getIdDistributivo())
-                .orElseThrow(() -> new RuntimeException("Distributivo no encontrado"));
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(404)
+                        .detalles("El distributivo no ha sido encontrado")
+                        .build()
+                ));
 
         // Verificar si el horario ya existe o se cruza con otro horario
         boolean horarioCruzado = horarioRepo.findByDiaSemanaAndDistributivoAulaId(request.getDiaSemana(), distributivo.getAula().getId())
@@ -35,11 +43,23 @@ public class HorarioServ {
                              request.getHoraFin().isAfter(horarioExistente.getHoraInicio())));
 
         if (horarioCruzado) {
-            throw new RuntimeException("El horario se cruza con otro existente");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("Existe un choque de horarios")
+                    .build()
+            );
         }
 
         if(validarDistributivoHoras(request)) {
-            throw new RuntimeException("El docente ya tiene un horario asignado en ese día y hora");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El docente ya tiene un horario asignado en ese día y hora")
+                    .build()
+            );
         }
 
 
@@ -51,13 +71,31 @@ public class HorarioServ {
 
         // Validar la cantidad de horas asignadas
         if (cantHoras <= 0) {
-            throw new RuntimeException("La cantidad de horas debe ser mayor a 0");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("La cantidad de horas no puede ser menor o igual a 0")
+                    .build()
+            );
         }
         if (distributivo.getHorasAsignadas() >= horasMateria) {
-            throw new RuntimeException("Ya se asignaron todas las horas de la materia");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("La cantidad de horas asignadas supera las horas de la materia")
+                    .build()
+            );
         }
         if (distributivo.getHorasAsignadas() + cantHoras > horasMateria) {
-            throw new RuntimeException("La cantidad de horas asignadas supera las horas de la materia");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("La cantidad de horas asignadas supera las horas de la materia")
+                    .build()
+            );
         }
 
         // Actualizar las horas asignadas
@@ -74,13 +112,24 @@ public class HorarioServ {
                 .build();
 
         horarioRepo.save(horario);
-        return "Horario creado";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Horario creado")
+                .codigo(200)
+                .detalles("El horario ha sido creado correctamente")
+                .build();
     }
 
 
-    public int calcularHoras(LocalTime horaInicio, LocalTime horaFin) {
+    private int calcularHoras(LocalTime horaInicio, LocalTime horaFin) {
         if (horaFin.isBefore(horaInicio)) {
-            throw new RuntimeException("La hora de fin no puede ser antes de la hora de inicio");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("La hora de fin no puede ser antes de la hora de inicio")
+                    .build()
+            );
         }
         Duration duracion = Duration.between(horaInicio, horaFin);
         return (int) duracion.toHours(); // Convertir la duración a horas enteras
@@ -90,7 +139,13 @@ public class HorarioServ {
         // traer distributivos
         List<Horario> horarios = horarioRepo.findAll();
         // traer distributivo del request
-        Distributivo distributivo = distributivoRepo.findById(request.getIdDistributivo()).orElseThrow(() -> new RuntimeException("Distributivo no encontrado"));
+        Distributivo distributivo = distributivoRepo.findById(request.getIdDistributivo()).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud inválida")
+                .codigo(404)
+                .detalles("El distributivo no ha sido encontrado")
+                .build()
+        ));
 
         for (Horario horario : horarios) {
             if(horario.getDistributivo().getDocente() == distributivo.getDocente()

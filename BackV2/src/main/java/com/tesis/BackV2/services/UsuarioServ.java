@@ -1,5 +1,6 @@
 package com.tesis.BackV2.services;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.DocenteDTO;
 import com.tesis.BackV2.dto.EstudianteDTO;
 import com.tesis.BackV2.dto.RepresentanteDTO;
@@ -8,6 +9,7 @@ import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.Usuario;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.repositories.EstudianteRepo;
@@ -35,7 +37,7 @@ public class UsuarioServ {
 
     //Actualizar datos de un usuario (sin contar password, estado)
     @Transactional
-    public String actualizarUser(UsuarioRequest request) throws MiExcepcion {
+    public ApiResponse<String> actualizarUser(UsuarioRequest request) throws MiExcepcion {
         Usuario usuario = repoU.findByCedula(request.getCedula());
 
         //Validar que el usuario exista
@@ -78,14 +80,31 @@ public class UsuarioServ {
 
 
         } else {
-            return "El usuario con cédula " + request.getCedula() + " no existe.";
+            return ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(404)
+                    .detalles("El usuario con cédula " + request.getCedula() + " no existe.")
+                    .build();
         }
 
-        return "Usuario actualizado";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Usuario actualizado")
+                .codigo(200)
+                .detalles("El usuario ha sido actualizado correctamente.")
+                .build();
     }
 
     public UsuarioDTO buscarUsuario(String cedula) throws MiExcepcion {
-        Usuario usuario = repoU.findById(cedula).orElseThrow(() -> new MiExcepcion("El usuario con cédula " + cedula + " no existe."));
+        Usuario usuario = repoU.findById(cedula).orElseThrow(() -> new ApiException(
+                ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(404)
+                        .detalles("El usuario con cédula " + cedula + " no existe.")
+                        .build()
+        ));
 
         Docente docente = repoD.findByUsuarioCedula(cedula);
         Estudiante estudiante = repoE.findByUsuarioCedula(cedula);

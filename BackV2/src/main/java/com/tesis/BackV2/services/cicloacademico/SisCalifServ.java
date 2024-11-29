@@ -1,9 +1,11 @@
 package com.tesis.BackV2.services.cicloacademico;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.entities.CicloAcademico;
 import com.tesis.BackV2.entities.SistemaCalificacion;
 import com.tesis.BackV2.entities.embedded.Calificacion;
 import com.tesis.BackV2.enums.TipoNivel;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.CicloAcademicoRepo;
 import com.tesis.BackV2.repositories.SistCalifRepo;
 import com.tesis.BackV2.request.CalfRequest;
@@ -26,19 +28,31 @@ public class SisCalifServ {
     private CicloAcademicoRepo ciclorepo;
 
     // Crear
-    public String crearSisCalif(SisCalfRequest request) {
+    public ApiResponse<String> crearSisCalif(SisCalfRequest request) {
         int lvl1 = 0, lvl2 = 0, lvl3 = 0, lvl4 = 0;
         Calificacion id = new Calificacion();
 
         // List<SistemaCalificacion> lista = repo.findAll();
 
         // Traer el ciclo
-        CicloAcademico ciclo = ciclorepo.findById(request.getCicloID()).orElseThrow(() -> new RuntimeException("Ciclo no encontrado"));
+        CicloAcademico ciclo = ciclorepo.findById(request.getCicloID()).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud inválida")
+                .codigo(404)
+                .detalles("El ciclo académico especificado no existe.")
+                .build()
+        ));
 
 
         // Validar la cantidad de nivel 1
         if (!validarNivel1(request, ciclo)) {
-            throw new RuntimeException("La cantidad de nivel 1 no coincide con la cantidad de periodos");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("La cantidad de niveles 1 no coincide con la cantidad de periodos del ciclo académico.")
+                    .build()
+            );
         }
 
         // Traer el numero de registros
@@ -80,7 +94,12 @@ public class SisCalifServ {
             repo.save(sistema);
         }
 
-        return "Sistema de calificacion creado";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Sistema de calificación creado")
+                .codigo(200)
+                .detalles("El sistema de calificación ha sido creado correctamente.")
+                .build();
     }
 
     // Validar la cantidad de nivel 1
