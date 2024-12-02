@@ -10,13 +10,15 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocCedulas {
+public class DocServBasicos {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Lob
+    @Basic(fetch = FetchType.LAZY)
     private byte[] contenido;
-    private String nombreArchivo;
+    private String nombre;
+    private String mime;
 }
