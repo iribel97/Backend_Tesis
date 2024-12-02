@@ -20,11 +20,6 @@ public class UsuController {
     @Autowired
     private UsuarioServ usuarioService;
 
-    @GetMapping("{cedula}")
-    public ResponseEntity<UsuarioDTO> buscarUsuario(@PathVariable String cedula) throws MiExcepcion {
-        return ResponseEntity.ok(usuarioService.buscarUsuario(cedula));
-    }
-
     @PutMapping()
     public ResponseEntity<ApiResponse<?>> actualizarUsuario(@RequestBody UsuarioRequest usuario) throws MiExcepcion {
         return ResponseEntity.ok(usuarioService.actualizarUser(usuario));

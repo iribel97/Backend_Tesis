@@ -9,6 +9,8 @@ import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.Usuario;
+import com.tesis.BackV2.enums.EstadoUsu;
+import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.repositories.DocenteRepo;
@@ -16,10 +18,14 @@ import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.RepresentanteRepo;
 import com.tesis.BackV2.repositories.UsuarioRepo;
 
+import com.tesis.BackV2.request.UsuarioEditRequest;
 import com.tesis.BackV2.request.UsuarioRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioServ {
@@ -157,22 +163,112 @@ public class UsuarioServ {
 
     }
 
-    //Retornar un estudiante
-    public Estudiante buscarEstudiante(String cedula){
-        return repoE.findByUsuarioCedula(cedula);
+    // Traer usuarios con rol AdminGeneral, AdminOp y Docente
+    public List<UsuarioDTO> getUsuarios() {
+        List<Usuario> usuarios = repoU.findByRolAndCedulaNot(Rol.ADMIN, "0000099999");
+        usuarios.addAll(repoU.findByRol(Rol.AOPERACIONAL));
+        usuarios.addAll(repoU.findByRol(Rol.DOCENTE));
+
+        return usuarios.stream().map(usuario -> {
+            Docente docente = repoD.findByUsuarioCedula(usuario.getCedula());
+            DocenteDTO docenteDTO = docente != null ? DocenteDTO.builder()
+                    .id(docente.getId())
+                    .titulo(docente.getTitulo())
+                    .especialidad(docente.getEspecialidad())
+                    .experiencia(docente.getExperiencia())
+                    .build() : null;
+
+            return UsuarioDTO.builder()
+                    .cedula(usuario.getCedula())
+                    .nombres(usuario.getNombres())
+                    .apellidos(usuario.getApellidos())
+                    .correo(usuario.getEmail())
+                    .telefono(usuario.getTelefono())
+                    .direccion(usuario.getDireccion())
+                    .nacimiento(usuario.getNacimiento())
+                    .genero(usuario.getGenero())
+                    .rol(usuario.getRol())
+                    .estado(usuario.getEstado())
+                    .docente(docenteDTO)
+                    .build();
+        }).collect(Collectors.toList());
     }
 
-    //Retornar un docente
-    public Docente buscarDocente(String cedula){
-        return repoD.findByUsuarioCedula(cedula);
+    // Editar el estado del usuario
+    @Transactional
+    public ApiResponse<String> editarEstado(UsuarioEditRequest request) {
+        Usuario usuario = repoU.findById(request.getCedula()).orElseThrow(() -> new ApiException(
+                ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(404)
+                        .detalles("El usuario con cédula " + request.getCedula() + " no existe.")
+                        .build()
+        ));
+
+        validarEstado(String.valueOf(request.getEstado()));
+
+        usuario.setEstado(EstadoUsu.valueOf(request.getEstado()));
+        repoU.save(usuario);
+
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Estado actualizado")
+                .codigo(200)
+                .detalles("El estado del usuario ha sido actualizado correctamente.")
+                .build();
     }
 
+    // Eliminar usuario
+    @Transactional
+    public ApiResponse<String> eliminarUsuario(String cedula) {
+        Usuario usuario = repoU.findById(cedula).orElseThrow(() -> new ApiException(
+                ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(404)
+                        .detalles("El usuario con cédula " + cedula + " no existe.")
+                        .build()
+        ));
 
+        validarEstado(String.valueOf(usuario.getEstado()));
+
+        repoU.delete(usuario);
+
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Usuario eliminado")
+                .codigo(200)
+                .detalles("El usuario ha sido eliminado correctamente.")
+                .build();
+    }
 
     /* ---------- VALIDACIONES ----------- */
-    private void validarUsuarioNoExistente(String cedula) throws MiExcepcion {
-        if (repoU.existsById(cedula)) {
-            throw new MiExcepcion("El usuario con cédula " + cedula + " ya existe.");
+    private void validarEstado(String estado){
+        // Corroborar que el estado sea uno de los tres posibles
+        if (!estado.equals("Activo") && !estado.equals("Inactivo") && !estado.equals("Suspendido")) {
+            throw new ApiException(
+                    ApiResponse.builder()
+                            .error(true)
+                            .mensaje("El estado ingresado es erroneo")
+                            .codigo(400)
+                            .detalles("")
+                            .build()
+            );
+        }
+    }
+
+    private void validarRol(String rol){
+        // Corroborar que el rol sea uno de los tres posibles
+        if (!rol.equals("ADMIN") && !rol.equals("AOPERACIONAL") && !rol.equals("DOCENTE")) {
+            throw new ApiException(
+                    ApiResponse.builder()
+                            .error(true)
+                            .mensaje("El rol ingresado es erroneo")
+                            .codigo(400)
+                            .detalles("")
+                            .build()
+            );
         }
     }
 
