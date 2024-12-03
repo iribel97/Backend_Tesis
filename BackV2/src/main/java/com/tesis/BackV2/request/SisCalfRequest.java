@@ -5,16 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MateriaRequest {
+public class SisCalfRequest {
 
-    private long id;
-    private String nombre;
-    private String area;
-    private int horas;
-    private String grado;
-    private int registroCalificacion;
+    private long cicloID;
+    private long registro;
+    private List<CalfRequest> sistemaCalificacion;
+
 }

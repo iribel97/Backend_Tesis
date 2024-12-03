@@ -1,8 +1,10 @@
 package com.tesis.BackV2.services.cicloacademico;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.DistributivoDTO;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.enums.Rol;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.request.DistributivoRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ public class DistributivoServ {
     @Autowired
     private CicloAcademicoRepo cicloRepo;
     @Autowired
-    private AulaRepo aulaRepo;
+    private CursoRepo cursoRepo;
     @Autowired
     private DocenteRepo docenteRepo;
     @Autowired
@@ -28,17 +30,29 @@ public class DistributivoServ {
 
     // Crear
     @Transactional
-    public String crearDistributivo(DistributivoRequest request) {
+    public ApiResponse<String> crearDistributivo(DistributivoRequest request) {
         // Verificar si ya existe un distributivo con los mismos datos
         boolean existeDistributivo = distributivoRepo.findAll().stream().anyMatch(d ->
                 d.getCiclo().getId() == request.getCicloId() &&
-                        d.getAula().getId() == request.getAulaId() &&
+                        d.getCurso().getId() == request.getAulaId() &&
                         d.getMateria().getId() == request.getMateriaId() &&
                         d.getDocente().getId() == docenteRepo.findByUsuarioCedula(request.getCedulaDocente()).getId()
         );
-        if (existeDistributivo) throw new RuntimeException("El distributivo ya existe");
+        if (existeDistributivo) throw new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud incorrecta")
+                .codigo(400)
+                .detalles("Ya existe un distributivo con los mismos datos")
+                .build()
+        );
 
-        if (validarExistenciaAulaMateria(request)) throw new RuntimeException("Ya existe un distributivo con la misma aula y materia");
+        if (validarExistenciaAulaMateria(request)) throw new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Soliciud incorrecta")
+                .codigo(400)
+                .detalles("Ya existe un distributivo con la misma aula y materia")
+                .build()
+        );
 
         // Validaciones de existencia
         validarExistenciaCicloAulaMateriaDocente(request);
@@ -49,13 +63,18 @@ public class DistributivoServ {
         Distributivo distributivo = Distributivo.builder()
                 .horasAsignadas(0)
                 .ciclo(cicloRepo.findById(request.getCicloId()).get())
-                .aula(aulaRepo.findById(request.getAulaId()).get())
+                .curso(cursoRepo.findById(request.getAulaId()).get())
                 .materia(materiaRepo.findById(request.getMateriaId()).get())
                 .docente(docenteRepo.findByUsuarioCedula(request.getCedulaDocente()))
                 .build();
 
         distributivoRepo.save(distributivo);
-        return "Distributivo creado";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Distributivo creado")
+                .codigo(200)
+                .detalles("El distributivo ha sido creado correctamente")
+                .build();
     }
 
     // Traer todos
@@ -68,7 +87,13 @@ public class DistributivoServ {
     // Traer por ID
     public DistributivoDTO obtenerDistributivo(Long id) {
         Distributivo distributivo = distributivoRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Distributivo no encontrado"));
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud incorrecta")
+                        .codigo(400)
+                        .detalles("Distributivo no encontrado")
+                        .build()
+                ));
         return convertirADTO(distributivo);
     }
 
@@ -81,19 +106,31 @@ public class DistributivoServ {
 
     // Actualizar
     @Transactional
-    public String editarDistributivo(DistributivoRequest request) {
+    public ApiResponse<String> editarDistributivo(DistributivoRequest request) {
         Distributivo distributivo = distributivoRepo.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("Distributivo no encontrado"));
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud incorrecta")
+                        .codigo(400)
+                        .detalles("Distributivo no encontrado")
+                        .build()
+                ));
 
         // Verificar duplicados
         boolean duplicado = distributivoRepo.findAll().stream().anyMatch(d ->
                         d.getId() != request.getId() &&
                         d.getCiclo().getId() == request.getCicloId() &&
-                        d.getAula().getId() == request.getAulaId() &&
+                        d.getCurso().getId() == request.getAulaId() &&
                         d.getMateria().getId() == request.getMateriaId() &&
                         d.getDocente().getId() == docenteRepo.findByUsuarioCedula(request.getCedulaDocente()).getId()
         );
-        if (duplicado) throw new RuntimeException("El distributivo ya existe");
+        if (duplicado) throw new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solcitud incorrecta")
+                .codigo(400)
+                .detalles("Ya existe un distributivo con los mismos datos")
+                .build()
+        );
 
         // Validaciones de existencia
         validarExistenciaCicloAulaMateriaDocente(request);
@@ -102,45 +139,91 @@ public class DistributivoServ {
         validarGradoMateriaYGradoAula(request);
 
         distributivo.setCiclo(cicloRepo.findById(request.getCicloId()).get());
-        distributivo.setAula(aulaRepo.findById(request.getAulaId()).get());
+        distributivo.setCurso(cursoRepo.findById(request.getAulaId()).get());
         distributivo.setMateria(materiaRepo.findById(request.getMateriaId()).get());
         distributivo.setDocente(docenteRepo.findByUsuarioCedula(request.getCedulaDocente()));
 
         distributivoRepo.save(distributivo);
-        return "Distributivo actualizado";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Distributivo actualizado")
+                .codigo(200)
+                .detalles("El distributivo ha sido actualizado correctamente")
+                .build();
     }
 
     // Eliminar
     @Transactional
-    public String eliminarDistributivo(Long id) {
+    public ApiResponse<String> eliminarDistributivo(Long id) {
         Distributivo distributivo = distributivoRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Distributivo no encontrado"));
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud incorrecta")
+                        .codigo(400)
+                        .detalles("Distributivo no encontrado")
+                        .build()
+                ));
 
         distributivoRepo.delete(distributivo);
-        return "Distributivo eliminado";
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Distributivo eliminado")
+                .codigo(200)
+                .detalles("El distributivo ha sido eliminado correctamente")
+                .build();
     }
 
     /* --------- METODOS AUXILIARES ---------- */
 
     private void validarExistenciaCicloAulaMateriaDocente(DistributivoRequest request) {
-        if (!cicloRepo.existsById(request.getCicloId())) throw new RuntimeException("El ciclo académico no existe");
-        if (!aulaRepo.existsById(request.getAulaId())) throw new RuntimeException("El aula no existe");
-        if (!materiaRepo.existsById(request.getMateriaId())) throw new RuntimeException("La materia no existe");
+        if (!cicloRepo.existsById(request.getCicloId())) throw new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud incorrecta")
+                .codigo(400)
+                .detalles("El ciclo académico no existe")
+                .build()
+        );
+        if (!cursoRepo.existsById(request.getAulaId())) throw new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud incorrecta")
+                .codigo(400)
+                .detalles("El aula no existe")
+                .build()
+        );
+        if (!materiaRepo.existsById(request.getMateriaId())) throw new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud incorrecta")
+                .codigo(400)
+                .detalles("La materia no existe")
+                .build()
+        );
         if (!usuarioRepo.existsByCedula(request.getCedulaDocente()) ||
                 !usuarioRepo.findByCedula(request.getCedulaDocente()).getRol().equals(Rol.DOCENTE)) {
-            throw new RuntimeException("El docente no existe");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("El docente no existe")
+                    .build()
+            );
         }
     }
 
     private boolean validarExistenciaAulaMateria(DistributivoRequest request) {
-        return distributivoRepo.existsByAulaIdAndMateriaId(request.getAulaId(), request.getMateriaId());
+        return distributivoRepo.existsByCursoIdAndMateriaId(request.getAulaId(), request.getMateriaId());
     }
 
     private void validarGradoMateriaYGradoAula(DistributivoRequest request) {
         Long gradoMateriaId = materiaRepo.findById(request.getMateriaId()).get().getGrado().getId();
-        Long gradoAulaId = aulaRepo.findById(request.getAulaId()).get().getGrado().getId();
+        Long gradoAulaId = cursoRepo.findById(request.getAulaId()).get().getGrado().getId();
         if (!gradoMateriaId.equals(gradoAulaId)) {
-            throw new RuntimeException("El grado de la materia no coincide con el grado del curso");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("El curso y el aula no coinciden en grado")
+                    .build()
+            );
         }
     }
 
@@ -148,8 +231,8 @@ public class DistributivoServ {
         return DistributivoDTO.builder()
                 .id(distributivo.getId())
                 .cicloAcademico(distributivo.getCiclo().getNombre())
-                .aula(distributivo.getAula().getParalelo())
-                .grado(distributivo.getAula().getGrado().getNombre())
+                .aula(distributivo.getCurso().getParalelo())
+                .grado(distributivo.getCurso().getGrado().getNombre())
                 .materia(distributivo.getMateria().getNombre())
                 .horasSemanales(distributivo.getMateria().getHoras())
                 .horasAsignadas(distributivo.getHorasAsignadas())

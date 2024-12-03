@@ -1,5 +1,6 @@
 package com.tesis.BackV2.request;
 
+import com.tesis.BackV2.enums.EstadoUsu;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,12 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MateriaRequest {
+public class UsuarioEditRequest {
 
-    private long id;
-    private String nombre;
-    private String area;
-    private int horas;
-    private String grado;
-    private int registroCalificacion;
+    private String cedula;
+    private String estado;
 }

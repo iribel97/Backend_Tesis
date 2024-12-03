@@ -1,5 +1,6 @@
 package com.tesis.BackV2.config.auth;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.entities.Estudiante;
@@ -7,6 +8,7 @@ import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.Usuario;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.RepresentanteRepo;
@@ -18,9 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -35,11 +35,17 @@ public class AuthService {
     private final EstudianteRepo estRep;
     private final RepresentanteRepo repRep;
 
-    public AuthResponse register(RegisterRequest request, Rol rol, EstadoUsu estado) {
+    public ApiResponse<String> register(RegisterRequest request, Rol rol, EstadoUsu estado) {
 
         // comprobar si el usuario ya existe
         if (usuRep.existsByCedula(request.getCedula())) {
-            throw new RuntimeException("Usuario ya existe");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El usuario ya existe.")
+                    .build()
+            );
         }
 
         // Crear instancia de usuario
@@ -74,11 +80,19 @@ public class AuthService {
             case ADMIN, AOPERACIONAL:
                 break;
             default:
-                throw new RuntimeException("Rol no reconocido");
+                throw new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(400)
+                        .detalles("Rol no válido.")
+                        .build()
+                );
         }
 
-        return AuthResponse.builder()
-                .token(jwtService.generateToken(usuario))
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Usuario registrado con éxito.")
+                .codigo(200)
                 .build();
     }
 
@@ -96,7 +110,13 @@ public class AuthService {
     private void crearYGuardarEstudiante(RegisterRequest request, Usuario usuario) {
         Representante representante = repRep.findByUsuarioCedula(request.getCedulaRepresentante());
         if (representante == null) {
-            throw new RuntimeException("Representante no encontrado");
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El representante no existe.")
+                    .build()
+            );
         }
         Estudiante estudiante = Estudiante.builder()
                 .usuario(usuario)

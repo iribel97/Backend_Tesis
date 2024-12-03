@@ -1,4 +1,4 @@
-package com.tesis.BackV2.entities;
+package com.tesis.BackV2.entities.documentation;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,18 +10,14 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class Materia {
+public class DocCedula {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Lob @Basic(fetch = FetchType.LAZY)
+    private byte[] contenido;
     private String nombre;
-    private String area;
-    private int horas;
-    private int registroCalificacion;
-
-    /*---- ATRIBUTOS RELACIONADOS ----*/
-    @ManyToOne
-    private Grado grado;
+    private String mime;
 }

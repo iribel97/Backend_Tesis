@@ -2,7 +2,6 @@ package com.tesis.BackV2.repositories;
 
 import com.tesis.BackV2.entities.Horario;
 import com.tesis.BackV2.enums.DiaSemana;
-import org.springframework.beans.PropertyValues;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +14,9 @@ public interface HorarioRepo extends JpaRepository<Horario, Long> {
 
     boolean existsByHoraInicioAndHoraFinAndDiaSemanaAndDistributivoId(LocalTime horaInicio, LocalTime horaFin, String diaSemana, long id);
 
-    List<Horario> findByDiaSemanaAndDistributivoAulaId(DiaSemana diaSemana, long id);
+    List<Horario> findByDiaSemanaAndDistributivoCursoId(DiaSemana diaSemana, long id);
+
+    // Taer horarios por aula
+    List<Horario> findByDistributivoCursoId(long id);
 
 }

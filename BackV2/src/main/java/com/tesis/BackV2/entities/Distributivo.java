@@ -21,7 +21,7 @@ public class Distributivo {
     @ManyToOne
     private CicloAcademico ciclo;
     @ManyToOne
-    private Aula aula;
+    private Curso curso;
     @ManyToOne
     private Materia materia;
     @ManyToOne
