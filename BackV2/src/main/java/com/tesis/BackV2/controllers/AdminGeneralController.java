@@ -234,6 +234,7 @@ public class AdminGeneralController {
     // Editar
     @PutMapping("calificacion")
     public ResponseEntity<ApiResponse<?>> editarSistemaCalificacion(@RequestBody SisCalfRequest request) {
+        calendarioServ.editarCalendarioSistemaCalif(request);
         return ResponseEntity.ok(sisCalifServ.editarSisCalif(request));
     }
 

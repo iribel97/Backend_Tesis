@@ -14,4 +14,7 @@ public interface CalendarioAcademicoRepo extends JpaRepository<CalendarioAcademi
     CalendarioAcademico findByDescripcion(String descripcion);
 
     boolean existsByDescripcion(String descripcion);
+
+    // Saber si existe la misma descripcion en otro id
+    boolean existsByDescripcionAndIdNot(String descripcion, Long id);
 }

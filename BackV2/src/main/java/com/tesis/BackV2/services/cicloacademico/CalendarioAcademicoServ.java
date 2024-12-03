@@ -67,8 +67,19 @@ public class CalendarioAcademicoServ {
             );
         }
 
-        calendarioExiste(request);
         validarFechaCalendario(request);
+
+        boolean validar = calendarioAcademicoRepo.existsByDescripcionAndIdNot(request.getDescripcion(), request.getId());
+
+        if (validar) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El calendario académico ya existe.")
+                    .build()
+            );
+        }
 
         calendario.get().setDescripcion(request.getDescripcion());
         calendario.get().setFechaInicio(request.getFechaInicio());
@@ -157,7 +168,34 @@ public class CalendarioAcademicoServ {
 
     }
 
+    // Editar calendario académico para sistema de calificacion
+    @Transactional
+    public void editarCalendarioSistemaCalif (SisCalfRequest request) {
+        int x;
+        String nivelAnterior = "";
+        List<SistemaCalificacion> sistemaCalificacion = califRepo.findByCicloIdAndIdRegistro(request.getCicloID(), request.getRegistro());
+        x = sistemaCalificacion.size();
+        if (x == request.getSistemaCalificacion().size()) {
+            for (int i = 0; i < x; i++) {
+                switch (request.getSistemaCalificacion().get(i).getNivel()){
+                    case Primero -> {
+                        CalendarioAcademico calendario = calendarioAcademicoRepo.findByDescripcion(sistemaCalificacion.get(i).getDescripcion());
+                        calendario.setFechaInicio(request.getSistemaCalificacion().get(i).getFechaInicio());
+                        calendario.setFechaFin(request.getSistemaCalificacion().get(i).getFechaFin());
+                        calendarioAcademicoRepo.save(calendario);
+                        nivelAnterior = sistemaCalificacion.get(i).getDescripcion();
+                    }
+                    case Segundo -> {
+                        CalendarioAcademico calendario = calendarioAcademicoRepo.findByDescripcion(sistemaCalificacion.get(i).getDescripcion() + " " + nivelAnterior);
+                        calendario.setFechaInicio(request.getSistemaCalificacion().get(i).getFechaInicio());
+                        calendario.setFechaFin(request.getSistemaCalificacion().get(i).getFechaFin());
+                        calendarioAcademicoRepo.save(calendario);
+                    }
+                }
+            }
+        }
 
+    }
 
     /*  ---------------------------- METODOS PROPIOS DEL SERVICIO ------------------------------------*/
     private TipoNivel niveles (SistemaCalificacion sistema){
