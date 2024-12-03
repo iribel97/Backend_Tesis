@@ -1,11 +1,11 @@
 package com.tesis.BackV2.repositories;
 
-import com.tesis.BackV2.entities.Aula;
+import com.tesis.BackV2.entities.Curso;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AulaRepo extends JpaRepository<Aula, Long> {
+public interface CursoRepo extends JpaRepository<Curso, Long> {
 
     // Existe por paralelo
     boolean existsByParalelo(String paralelo);
@@ -17,7 +17,7 @@ public interface AulaRepo extends JpaRepository<Aula, Long> {
     boolean existsByTutorId(long tutorId);
 
     // Traer por paralelo y nombre del grado
-    Aula findByParaleloAndGradoNombre(String paralelo, String nombre);
+    Curso findByParaleloAndGradoNombre(String paralelo, String nombre);
 
     boolean existsByParaleloAndGradoNombre(String paralelo, String grado);
 }

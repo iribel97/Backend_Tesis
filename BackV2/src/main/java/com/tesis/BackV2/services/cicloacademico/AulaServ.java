@@ -1,13 +1,13 @@
 package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.config.ApiResponse;
-import com.tesis.BackV2.dto.AulaDTO;
-import com.tesis.BackV2.entities.Aula;
+import com.tesis.BackV2.dto.CursoDTO;
+import com.tesis.BackV2.entities.Curso;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
-import com.tesis.BackV2.request.AulaRequest;
+import com.tesis.BackV2.request.CursoRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ public class AulaServ {
     @Autowired
     private GradoRepo gradoRepo;
     @Autowired
-    private AulaRepo aulaRepo;
+    private CursoRepo cursoRepo;
     @Autowired
     private DocenteRepo docenteRepo;
     @Autowired
@@ -31,18 +31,18 @@ public class AulaServ {
 
     // Creación
     @Transactional
-    public ApiResponse<String> crearAula(AulaRequest request) {
+    public ApiResponse<String> crearAula(CursoRequest request) {
         validarParaleloYGrado(request.getParalelo(), request.getGrado());
         validarTutor(request.getCedulaTutor());
 
-        Aula aula = Aula.builder()
+        Curso curso = Curso.builder()
                 .paralelo(request.getParalelo())
                 .maxEstudiantes(request.getCantEstudiantes())
                 .grado(gradoRepo.findByNombre(request.getGrado()))
                 .tutor(docenteRepo.findByUsuarioCedula(request.getCedulaTutor()))
                 .build();
 
-        aulaRepo.save(aula);
+        cursoRepo.save(curso);
         return ApiResponse.<String>builder()
                 .error(false)
                 .mensaje("Aula creada")
@@ -53,16 +53,16 @@ public class AulaServ {
     }
 
     // Traer todas
-    public List<AulaDTO> obtenerAulas() {
-        return aulaRepo.findAll().stream()
+    public List<CursoDTO> obtenerAulas() {
+        return cursoRepo.findAll().stream()
                 .map(this::convertirAulaADTO)
                 .toList();
     }
 
     // Traer solo uno
-    public AulaDTO obtenerAula(String paralelo, String grado) {
-        Aula aula = aulaRepo.findByParaleloAndGradoNombre(paralelo, grado);
-        if (aula == null) {
+    public CursoDTO obtenerAula(String paralelo, String grado) {
+        Curso curso = cursoRepo.findByParaleloAndGradoNombre(paralelo, grado);
+        if (curso == null) {
             throw new ApiException(ApiResponse.<String>builder()
                     .error(true)
                     .mensaje("Solicitud incorrecta")
@@ -71,13 +71,13 @@ public class AulaServ {
                     .build()
             );
         }
-        return convertirAulaADTO(aula);
+        return convertirAulaADTO(curso);
     }
 
     // Actualizar
     @Transactional
-    public ApiResponse<String> editarAula(AulaRequest request) {
-        Aula aula = aulaRepo.findById(request.getId())
+    public ApiResponse<String> editarAula(CursoRequest request) {
+        Curso curso = cursoRepo.findById(request.getId())
                 .orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
                         .error(true)
                         .mensaje("Solcitud incorrecta")
@@ -87,14 +87,14 @@ public class AulaServ {
                 ));
 
         validarParaleloYGradoUnico(request.getParalelo(), request.getGrado(), request.getId());
-        validarTutorParaEdicion(request.getCedulaTutor(), aula);
+        validarTutorParaEdicion(request.getCedulaTutor(), curso);
 
-        aula.setParalelo(request.getParalelo());
-        aula.setMaxEstudiantes(request.getCantEstudiantes());
-        aula.setGrado(gradoRepo.findByNombre(request.getGrado()));
-        aula.setTutor(docenteRepo.findByUsuarioCedula(request.getCedulaTutor()));
+        curso.setParalelo(request.getParalelo());
+        curso.setMaxEstudiantes(request.getCantEstudiantes());
+        curso.setGrado(gradoRepo.findByNombre(request.getGrado()));
+        curso.setTutor(docenteRepo.findByUsuarioCedula(request.getCedulaTutor()));
 
-        aulaRepo.save(aula);
+        cursoRepo.save(curso);
         return ApiResponse.<String>builder()
                 .error(false)
                 .mensaje("Aula actualizada")
@@ -106,7 +106,7 @@ public class AulaServ {
     // Eliminar
     @Transactional
     public ApiResponse<String> eliminarAula(Long id) {
-        Aula aula = aulaRepo.findById(id)
+        Curso curso = cursoRepo.findById(id)
                 .orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
                         .error(true)
                         .mensaje("Solicitud incorrecta")
@@ -115,7 +115,7 @@ public class AulaServ {
                         .build()
                 ));
 
-        if (distributivoRepo.existsByAulaId(id)) {
+        if (distributivoRepo.existsByCursoId(id)) {
             throw new ApiException(ApiResponse.<String>builder()
                     .error(true)
                     .mensaje("Distributivo asociado")
@@ -125,7 +125,7 @@ public class AulaServ {
             );
         }
 
-        aulaRepo.delete(aula);
+        cursoRepo.delete(curso);
         return ApiResponse.<String>builder()
                 .error(false)
                 .mensaje("Aula eliminada")
@@ -137,7 +137,7 @@ public class AulaServ {
     /* --------- METODOS AUXILIARES ---------- */
 
     private void validarParaleloYGrado(String paralelo, String grado) {
-        if (aulaRepo.existsByParaleloAndGradoNombre(paralelo, grado)) {
+        if (cursoRepo.existsByParaleloAndGradoNombre(paralelo, grado)) {
             throw new ApiException(ApiResponse.<String>builder()
                     .error(true)
                     .mensaje("Solicitud incorrecta")
@@ -149,12 +149,12 @@ public class AulaServ {
     }
 
     private void validarParaleloYGradoUnico(String paralelo, String grado, Long idActual) {
-        aulaRepo.findAll().stream()
-                .filter(aula -> aula.getId() != idActual)
-                .filter(aula -> aula.getParalelo().equalsIgnoreCase(paralelo) &&
-                        aula.getGrado().getNombre().equalsIgnoreCase(grado))
+        cursoRepo.findAll().stream()
+                .filter(curso -> curso.getId() != idActual)
+                .filter(curso -> curso.getParalelo().equalsIgnoreCase(paralelo) &&
+                        curso.getGrado().getNombre().equalsIgnoreCase(grado))
                 .findFirst()
-                .ifPresent(aula -> {
+                .ifPresent(curso -> {
                     throw new ApiException(ApiResponse.<String>builder()
                             .error(true)
                             .mensaje("Solcitud incorrecta")
@@ -176,7 +176,7 @@ public class AulaServ {
                     .build()
             );
         }
-        if (aulaRepo.existsByTutorId(docenteRepo.findByUsuarioCedula(cedulaTutor).getId())) {
+        if (cursoRepo.existsByTutorId(docenteRepo.findByUsuarioCedula(cedulaTutor).getId())) {
             throw new ApiException(ApiResponse.<String>builder()
                     .error(true)
                     .mensaje("Solicitud incorrecta")
@@ -187,7 +187,7 @@ public class AulaServ {
         }
     }
 
-    private void validarTutorParaEdicion(String cedulaTutor, Aula aulaActual) {
+    private void validarTutorParaEdicion(String cedulaTutor, Curso cursoActual) {
         Docente tutor = docenteRepo.findByUsuarioCedula(cedulaTutor);
         if (tutor == null) {
             throw new ApiException(ApiResponse.<String>builder()
@@ -198,7 +198,7 @@ public class AulaServ {
                     .build()
             );
         }
-        if (aulaRepo.existsByTutorId(tutor.getId()) && aulaActual.getTutor().getId() != tutor.getId()) {
+        if (cursoRepo.existsByTutorId(tutor.getId()) && cursoActual.getTutor().getId() != tutor.getId()) {
             throw new ApiException(ApiResponse.<String>builder()
                     .error(true)
                     .mensaje("Solcitud incorrecta")
@@ -209,15 +209,15 @@ public class AulaServ {
         }
     }
 
-    private AulaDTO convertirAulaADTO(Aula aula) {
-        return AulaDTO.builder()
-                .id(aula.getId())
-                .paralelo(aula.getParalelo())
-                .maxEstudiantes(aula.getMaxEstudiantes())
-                .nombreGrado(aula.getGrado().getNombre())
-                .tutor(aula.getTutor().getUsuario().getNombres() + " " + aula.getTutor().getUsuario().getApellidos())
-                .telefonoTutor(aula.getTutor().getUsuario().getTelefono())
-                .emailTutor(aula.getTutor().getUsuario().getEmail())
+    private CursoDTO convertirAulaADTO(Curso curso) {
+        return CursoDTO.builder()
+                .id(curso.getId())
+                .paralelo(curso.getParalelo())
+                .maxEstudiantes(curso.getMaxEstudiantes())
+                .nombreGrado(curso.getGrado().getNombre())
+                .tutor(curso.getTutor().getUsuario().getNombres() + " " + curso.getTutor().getUsuario().getApellidos())
+                .telefonoTutor(curso.getTutor().getUsuario().getTelefono())
+                .emailTutor(curso.getTutor().getUsuario().getEmail())
                 .build();
     }
 }

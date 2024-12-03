@@ -15,7 +15,7 @@ public class GradoServ {
     @Autowired
     private GradoRepo gradoRepo;
     @Autowired
-    private AulaRepo aulaRepo;
+    private CursoRepo cursoRepo;
     @Autowired
     private MateriaRepo materiaRepo;
 
@@ -110,7 +110,7 @@ public class GradoServ {
                 .build()
         ));
 
-        if (aulaRepo.existsByGradoId(id) || materiaRepo.existsByGradoId(id)) {
+        if (cursoRepo.existsByGradoId(id) || materiaRepo.existsByGradoId(id)) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
                     .mensaje("Solicitud inválida")

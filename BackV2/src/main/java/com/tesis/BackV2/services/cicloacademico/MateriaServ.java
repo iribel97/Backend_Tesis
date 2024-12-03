@@ -194,7 +194,6 @@ public class MateriaServ {
     }
 
     // pasar niveles de calificaciones
-
     public TipoNivel niveles (SistemaCalificacion sistema){
          if (sistema.getId().getLvl2() == 0 && sistema.getId().getLvl3() == 0 && sistema.getId().getLvl4() == 0){
              return TipoNivel.Primero;

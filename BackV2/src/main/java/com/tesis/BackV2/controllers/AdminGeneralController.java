@@ -8,10 +8,7 @@ import com.tesis.BackV2.entities.Grado;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.MiExcepcion;
-import com.tesis.BackV2.request.CicloARequest;
-import com.tesis.BackV2.request.DistributivoRequest;
-import com.tesis.BackV2.request.MateriaRequest;
-import com.tesis.BackV2.request.UsuarioEditRequest;
+import com.tesis.BackV2.request.*;
 import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.cicloacademico.*;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +29,8 @@ public class AdminGeneralController {
     private final MateriaServ materiaServ;
     private final DistributivoServ distributivoServ;
     private final HorarioServ horarioServ;
+    private final SisCalifServ sisCalifServ;
+    private final CalendarioAcademicoServ calendarioServ;
 
     /* ---------------------------- GESTION DE USUARIOS ---------------------------- */
 
@@ -188,7 +187,7 @@ public class AdminGeneralController {
     }
 
     // Traer todos
-    @GetMapping("distributivo")
+    @GetMapping("distributivos")
     public ResponseEntity<?> getDistributivos() {
         return ResponseEntity.ok(distributivoServ.obtenerDistributivos());
     }
@@ -200,9 +199,9 @@ public class AdminGeneralController {
     }
 
     // Traer por id del ciclo académico
-    @GetMapping("distributivo/ciclo/{id}")
-    public ResponseEntity<?> getDistributivoByCiclo(@PathVariable Long id) {
-        return ResponseEntity.ok(distributivoServ.getDistributivoByCiclo(id));
+    @GetMapping("distributivo/ciclo/{idCiclo}")
+    public ResponseEntity<?> getDistributivoByCiclo(@PathVariable Long idCiclo) {
+        return ResponseEntity.ok(distributivoServ.getDistributivoByCiclo(idCiclo));
     }
 
     // Actualizar
@@ -215,5 +214,63 @@ public class AdminGeneralController {
     @DeleteMapping("distributivo/{id}")
     public ResponseEntity<ApiResponse<?>> eliminarDistributivo(@PathVariable Long id) {
         return ResponseEntity.ok(distributivoServ.eliminarDistributivo(id));
+    }
+
+    /* ---------------------------- VISUALIZACIÓN DE HORARIOS ---------------------------- */
+    // Traer horarios por curso
+    @GetMapping("horario/curso/{id}")
+    public ResponseEntity<?> getHorariosByCurso(@PathVariable Long id) {
+        return ResponseEntity.ok(horarioServ.getHorariosByCurso(id));
+    }
+
+    /* ---------------------------- GESTIÓN SISTEMA CALIFICACIONES ---------------------------- */
+    // Crear
+    @PostMapping("calificacion")
+    public ResponseEntity<ApiResponse<?>> crearSistemaCalificacion(@RequestBody SisCalfRequest request) {
+        calendarioServ.crearCalendarioSistemaCalif(request);
+        return ResponseEntity.ok(sisCalifServ.crearSisCalif(request));
+    }
+
+    // Editar
+    @PutMapping("calificacion")
+    public ResponseEntity<ApiResponse<?>> editarSistemaCalificacion(@RequestBody SisCalfRequest request) {
+        return ResponseEntity.ok(sisCalifServ.editarSisCalif(request));
+    }
+
+    // Eliminar
+    @DeleteMapping("calificacion/{cicloId}/{registro}")
+    public ResponseEntity<ApiResponse<?>> eliminarSistemaCalificacion(@PathVariable Long cicloId, @PathVariable Long registro) {
+        return ResponseEntity.ok(sisCalifServ.eliminarSisCalif(cicloId, registro));
+    }
+
+    // Traer por ciclo
+    @GetMapping("calificacion/ciclo/{cicloId}")
+    public ResponseEntity<?> getSistemaCalificacionByCiclo(@PathVariable Long cicloId) {
+        return ResponseEntity.ok(sisCalifServ.traerPorCiclo(cicloId));
+    }
+
+    /* ---------------------------- GESTIÓN CALENDARIO ACADEMICO ---------------------------- */
+    // Crear
+    @PostMapping("calendario")
+    public ResponseEntity<ApiResponse<?>> crearCalendarioAcademico(@RequestBody CalendarioAcademicoRequest request) {
+        return ResponseEntity.ok(calendarioServ.crearCalendaAcademico(request));
+    }
+
+    // Editar
+    @PutMapping("calendario")
+    public ResponseEntity<ApiResponse<?>> editarCalendarioAcademico(@RequestBody CalendarioAcademicoRequest request) {
+        return ResponseEntity.ok(calendarioServ.editarCalendarioAcademico(request));
+    }
+
+    // Eliminar
+    @DeleteMapping("calendario/{id}")
+    public ResponseEntity<ApiResponse<?>> eliminarCalendarioAcademico(@PathVariable Long id) {
+        return ResponseEntity.ok(calendarioServ.eliminarCalendarioAcademico(id));
+    }
+
+    // Traer por ciclo académico
+    @GetMapping("calendario/ciclo/{cicloId}")
+    public ResponseEntity<?> obtenerPorCicloId(@PathVariable Long cicloId) {
+        return ResponseEntity.ok(calendarioServ.obtenerPorCicloId(cicloId));
     }
 }

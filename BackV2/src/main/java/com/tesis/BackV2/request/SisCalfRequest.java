@@ -14,7 +14,7 @@ import java.util.List;
 public class SisCalfRequest {
 
     private long cicloID;
-
+    private long registro;
     private List<CalfRequest> sistemaCalificacion;
 
 }

@@ -1,7 +1,6 @@
 package com.tesis.BackV2.controllers;
 
 import com.tesis.BackV2.config.ApiResponse;
-import com.tesis.BackV2.entities.Grado;
 import com.tesis.BackV2.request.*;
 import com.tesis.BackV2.services.cicloacademico.*;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,7 @@ public class CicloAcademicoController {
     /* -------------------- CURSOS/AULAS ACADEMICAS -------------------- */
     // Crear
     @PostMapping("curso")
-    public ResponseEntity<ApiResponse<?>> crearAula(@RequestBody AulaRequest request) {
+    public ResponseEntity<ApiResponse<?>> crearAula(@RequestBody CursoRequest request) {
         return ResponseEntity.ok(aulaServ.crearAula(request));
     }
 
@@ -47,7 +46,7 @@ public class CicloAcademicoController {
 
     // Actualizar
     @PutMapping("curso")
-    public ResponseEntity<ApiResponse<?>> actualizarAula(@RequestBody AulaRequest request) {
+    public ResponseEntity<ApiResponse<?>> actualizarAula(@RequestBody CursoRequest request) {
         return ResponseEntity.ok(aulaServ.editarAula(request));
     }
 

@@ -1,4 +1,4 @@
-package com.tesis.BackV2.request;
+package com.tesis.BackV2.dto;
 
 import com.tesis.BackV2.enums.TipoNivel;
 import com.tesis.BackV2.enums.TipoSistCalif;
@@ -13,10 +13,10 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CalfRequest {
+public class SistCalfDTO {
 
+    private String ciclo;
     private TipoNivel nivel;
-    private String descripcion;
     private String peso;
     private TipoSistCalif tipo;
     private LocalDate fechaInicio;

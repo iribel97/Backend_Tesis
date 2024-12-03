@@ -15,9 +15,9 @@ public interface DistributivoRepo extends JpaRepository<Distributivo, Long> {
     // Existe por id del ciclo
     boolean existsByCicloId(long cicloId);
 
-    boolean existsByAulaId(Long id);
+    boolean existsByCursoId(Long id);
 
     boolean existsByMateriaId(Long id);
 
-    boolean existsByAulaIdAndMateriaId(Long aulaId, Long materiaId);
+    boolean existsByCursoIdAndMateriaId(Long aulaId, Long materiaId);
 }
