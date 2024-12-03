@@ -1,6 +1,7 @@
 package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.config.ApiResponse;
+import com.tesis.BackV2.dto.HorarioDTO;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Horario;
 import com.tesis.BackV2.exceptions.ApiException;
@@ -36,7 +37,7 @@ public class HorarioServ {
                 ));
 
         // Verificar si el horario ya existe o se cruza con otro horario
-        boolean horarioCruzado = horarioRepo.findByDiaSemanaAndDistributivoAulaId(request.getDiaSemana(), distributivo.getAula().getId())
+        boolean horarioCruzado = horarioRepo.findByDiaSemanaAndDistributivoCursoId(request.getDiaSemana(), distributivo.getCurso().getId())
                 .stream()
                 .anyMatch(horarioExistente ->
                             (request.getHoraInicio().isBefore(horarioExistente.getHoraFin()) &&
@@ -160,6 +161,24 @@ public class HorarioServ {
         }
 
         return false;
+    }
+
+    // Traer horarios por curso
+    public List<HorarioDTO> getHorariosByCurso(long id) {
+        return horarioRepo.findByDistributivoCursoId(id)
+                .stream()
+                .map(horario -> HorarioDTO.builder()
+                        .id(horario.getId())
+                        .diaSemana(horario.getDiaSemana().name())
+                        .horaInicio(horario.getHoraInicio().toString())
+                        .horaFin(horario.getHoraFin().toString())
+                        .ciclo(horario.getDistributivo().getCiclo().getNombre())
+                        .curso(horario.getDistributivo().getCurso().getGrado().getNombre() + " " + horario.getDistributivo().getCurso().getParalelo())
+                        .materia(horario.getDistributivo().getMateria().getNombre())
+                        .docente(horario.getDistributivo().getDocente().getUsuario().getNombres() + " " + horario.getDistributivo().getDocente().getUsuario().getApellidos())
+                        .build()
+                )
+                .toList();
     }
 
 }

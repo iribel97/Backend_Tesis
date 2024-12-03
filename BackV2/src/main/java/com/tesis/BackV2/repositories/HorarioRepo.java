@@ -14,6 +14,9 @@ public interface HorarioRepo extends JpaRepository<Horario, Long> {
 
     boolean existsByHoraInicioAndHoraFinAndDiaSemanaAndDistributivoId(LocalTime horaInicio, LocalTime horaFin, String diaSemana, long id);
 
-    List<Horario> findByDiaSemanaAndDistributivoAulaId(DiaSemana diaSemana, long id);
+    List<Horario> findByDiaSemanaAndDistributivoCursoId(DiaSemana diaSemana, long id);
+
+    // Taer horarios por aula
+    List<Horario> findByDistributivoCursoId(long id);
 
 }

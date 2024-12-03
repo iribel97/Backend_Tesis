@@ -35,7 +35,7 @@ public class AuthService {
     private final EstudianteRepo estRep;
     private final RepresentanteRepo repRep;
 
-    public AuthResponse register(RegisterRequest request, Rol rol, EstadoUsu estado) {
+    public ApiResponse<String> register(RegisterRequest request, Rol rol, EstadoUsu estado) {
 
         // comprobar si el usuario ya existe
         if (usuRep.existsByCedula(request.getCedula())) {
@@ -89,8 +89,10 @@ public class AuthService {
                 );
         }
 
-        return AuthResponse.builder()
-                .token(jwtService.generateToken(usuario))
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Usuario registrado con éxito.")
+                .codigo(200)
                 .build();
     }
 

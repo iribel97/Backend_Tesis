@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AulaDTO {
+public class CursoDTO {
 
     private long id;
     private String paralelo;

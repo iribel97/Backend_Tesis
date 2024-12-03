@@ -1,17 +1,21 @@
 package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.config.ApiResponse;
+import com.tesis.BackV2.dto.SistCalfDTO;
+import com.tesis.BackV2.entities.CalendarioAcademico;
 import com.tesis.BackV2.entities.CicloAcademico;
 import com.tesis.BackV2.entities.SistemaCalificacion;
 import com.tesis.BackV2.entities.embedded.Calificacion;
 import com.tesis.BackV2.enums.TipoNivel;
 import com.tesis.BackV2.exceptions.ApiException;
+import com.tesis.BackV2.repositories.CalendarioAcademicoRepo;
 import com.tesis.BackV2.repositories.CicloAcademicoRepo;
 import com.tesis.BackV2.repositories.SistCalifRepo;
 import com.tesis.BackV2.request.CalfRequest;
 import com.tesis.BackV2.request.SisCalfRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,34 +30,23 @@ public class SisCalifServ {
     private SistCalifRepo repo;
     @Autowired
     private CicloAcademicoRepo ciclorepo;
+    @Autowired
+    private CalendarioAcademicoRepo calendariorepo;
+    @Autowired
+    private SistCalifRepo sistCalifRepo;
 
     // Crear
+    @Transactional
     public ApiResponse<String> crearSisCalif(SisCalfRequest request) {
         int lvl1 = 0, lvl2 = 0, lvl3 = 0, lvl4 = 0;
+        String nivelaAnt = "";
         Calificacion id = new Calificacion();
 
-        // List<SistemaCalificacion> lista = repo.findAll();
-
         // Traer el ciclo
-        CicloAcademico ciclo = ciclorepo.findById(request.getCicloID()).orElseThrow(() -> new ApiException(ApiResponse.builder()
-                .error(true)
-                .mensaje("Solicitud inválida")
-                .codigo(404)
-                .detalles("El ciclo académico especificado no existe.")
-                .build()
-        ));
-
+        CicloAcademico ciclo = traerCiclo(request.getCicloID());
 
         // Validar la cantidad de nivel 1
-        if (!validarNivel1(request, ciclo)) {
-            throw new ApiException(ApiResponse.builder()
-                    .error(true)
-                    .mensaje("Solicitud inválida")
-                    .codigo(400)
-                    .detalles("La cantidad de niveles 1 no coincide con la cantidad de periodos del ciclo académico.")
-                    .build()
-            );
-        }
+        validarNivel1(request, ciclo);
 
         // Traer el numero de registros
         long registros = repo.countSistemasByCicloId(ciclo.getId()) + 1;
@@ -90,6 +83,8 @@ public class SisCalifServ {
             sistema.setTipo(calf.getTipo());
             sistema.setDescripcion(calf.getDescripcion());
             sistema.setPeso(calf.getPeso());
+            sistema.setFechaInicio(calf.getFechaInicio());
+            sistema.setFechaFin(calf.getFechaFin());
 
             repo.save(sistema);
         }
@@ -102,8 +97,146 @@ public class SisCalifServ {
                 .build();
     }
 
+    // Editar sistema de calificacion
+    @Transactional
+    public ApiResponse<String> editarSisCalif(SisCalfRequest request) {
+
+        // Traer registros por ciclo y por registro
+        List<SistemaCalificacion> sistemas = repo.findByCicloIdAndIdRegistro(request.getCicloID(), request.getRegistro());
+
+        if (sistemas.isEmpty()) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(404)
+                    .detalles("El sistema de calificación especificado no existe.")
+                    .build()
+            );
+        }
+
+
+        for (SistemaCalificacion sistema : sistemas) {
+            int lvl1 = 0, lvl2 = 0, lvl3 = 0, lvl4 = 0;
+            // Actualizar el sistema de calificacion
+            for (CalfRequest calf : request.getSistemaCalificacion()) {
+                switch (calf.getNivel()){
+                    case Primero:
+                        lvl1++;
+                        lvl2 = lvl3 = lvl4 = 0;
+                        break;
+                    case Segundo:
+                        lvl2++;
+                        lvl3 = lvl4 = 0;
+                        break;
+                    case Tercero:
+                        lvl3++;
+                        lvl4 = 0;
+                        break;
+                    case Cuarto:
+                        lvl4++;
+                        break;
+                }
+
+                if(lvl1 == sistema.getId().getLvl1() && lvl2 == sistema.getId().getLvl2() && lvl3 == sistema.getId().getLvl3() && lvl4 == sistema.getId().getLvl4()){
+
+                    sistema.setTipo(calf.getTipo());
+                    sistema.setPeso(calf.getPeso());
+                    sistema.setFechaInicio(calf.getFechaInicio());
+                    sistema.setFechaFin(calf.getFechaFin());
+                    repo.save(sistema);
+
+                }
+
+            }
+
+        }
+
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Sistema de calificación editado")
+                .codigo(200)
+                .detalles("El sistema de calificación ha sido editado correctamente.")
+                .build();
+    }
+
+    // Eliminar sistema de calificacion
+    @Transactional
+    public ApiResponse<String> eliminarSisCalif(Long cicloId, Long registro) {
+        // Traer registros por ciclo y por registro
+        List<SistemaCalificacion> sistemas = repo.findByCicloIdAndIdRegistro(cicloId, registro);
+
+        if (sistemas.isEmpty()) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(404)
+                    .detalles("El sistema de calificación especificado no existe.")
+                    .build()
+            );
+        }
+
+        repo.eliminarPorCicloIdYRegistro(cicloId, registro);
+
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Sistema de calificación eliminado")
+                .codigo(200)
+                .detalles("El sistema de calificación ha sido eliminado correctamente.")
+                .build();
+    }
+
+    // Traer por ciclo
+    public List<SistCalfDTO> traerPorCiclo(Long cicloId){
+        List<SistemaCalificacion> sistemas = sistCalifRepo.findByCicloId(cicloId);
+
+        if (sistemas.isEmpty()) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(404)
+                    .detalles("No se encontraron sistemas de calificación para el ciclo especificado.")
+                    .build()
+            );
+        }
+
+        return sistemas.stream().map(sistema -> SistCalfDTO.builder()
+                .ciclo(sistema.getCiclo().getNombre())
+                .nivel(niveles(sistema))
+                .peso(sistema.getPeso())
+                .tipo(sistema.getTipo())
+                .fechaInicio(sistema.getFechaInicio())
+                .fechaFin(sistema.getFechaFin())
+                .build()
+        ).collect(Collectors.toList());
+
+    }
+
+    /* ---------------------- METODOS PROPIOS DEL SERVICIO ---------------------------------- */
+    private CicloAcademico traerCiclo(Long id){
+        return ciclorepo.findById(id).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud inválida")
+                .codigo(404)
+                .detalles("El ciclo académico especificado no existe.")
+                .build()
+        ));
+    }
+
+    private TipoNivel niveles (SistemaCalificacion sistema){
+        if (sistema.getId().getLvl2() == 0 && sistema.getId().getLvl3() == 0 && sistema.getId().getLvl4() == 0){
+            return TipoNivel.Primero;
+        } else if (sistema.getId().getLvl3() == 0 && sistema.getId().getLvl4() == 0){
+            return TipoNivel.Segundo;
+        } else if (sistema.getId().getLvl4() == 0){
+            return TipoNivel.Tercero;
+        } else {
+            return TipoNivel.Cuarto;
+        }
+    }
+
+
     // Validar la cantidad de nivel 1
-    public boolean validarNivel1(SisCalfRequest request, CicloAcademico ciclo){
+    private void validarNivel1(SisCalfRequest request, CicloAcademico ciclo){
         int lvl1 = 0;
         int cantPeriodos = ciclo.getCantPeriodos();
 
@@ -113,7 +246,15 @@ public class SisCalifServ {
             }
         }
 
-        return lvl1 == cantPeriodos;
+        if(lvl1 != cantPeriodos){
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("La cantidad de periodos no coincide con la cantidad de niveles 1.")
+                    .build()
+            );
+        }
     }
 
     // Validar el peso por nivel

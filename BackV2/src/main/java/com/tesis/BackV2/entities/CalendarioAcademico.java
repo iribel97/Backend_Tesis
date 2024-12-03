@@ -1,32 +1,28 @@
 package com.tesis.BackV2.entities;
 
-import com.tesis.BackV2.entities.embedded.Calificacion;
-import com.tesis.BackV2.enums.TipoSistCalif;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
+@Builder
 @Getter
 @Setter
-@Builder
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class SistemaCalificacion {
+public class CalendarioAcademico {
 
-    @EmbeddedId
-    private Calificacion id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     private String descripcion;
-    private String peso;
-    @Enumerated(EnumType.STRING)
-    private TipoSistCalif tipo;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
 
     /* ------ ATRIBUTOS RELACIONADOS ----- */
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     private CicloAcademico ciclo;
 }

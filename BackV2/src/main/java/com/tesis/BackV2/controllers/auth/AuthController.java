@@ -1,5 +1,6 @@
 package com.tesis.BackV2.controllers.auth;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.auth.AuthResponse;
 import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.config.auth.LoginRequest;
@@ -24,31 +25,16 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
-    @PostMapping("/register/adminA")
-    public ResponseEntity<AuthResponse> registerAdminA(@RequestBody RegisterRequest registerRequest) {
+    @PostMapping("/registro/adminA")
+    public ResponseEntity<ApiResponse<?>> registerAdminA(@RequestBody RegisterRequest registerRequest) {
         return ResponseEntity.ok(authService.register(registerRequest, Rol.ADMIN, EstadoUsu.Activo));
     }
 
-    //Registro de usuario administrados
-    @PostMapping("/register/admin")
-    public ResponseEntity<AuthResponse> registerAdmin(@RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authService.register(registerRequest, Rol.ADMIN, EstadoUsu.Inactivo));
-    }
-
-    @PostMapping("/register/adminOp")
-    public ResponseEntity<AuthResponse> registerAdminOp(@RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authService.register(registerRequest, Rol.AOPERACIONAL, EstadoUsu.Inactivo));
-    }
-
-    // Registro de usuario docente
-    @PostMapping("/register/docente")
-    public ResponseEntity<AuthResponse> registerDocente(@RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authService.register(registerRequest, Rol.DOCENTE, EstadoUsu.Inactivo));
-    }
-
     //Registro de usuario representante
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest registerRequest) {
+    @PostMapping("/registro")
+    public ResponseEntity<ApiResponse<?>> register(@RequestBody RegisterRequest registerRequest) {
         return ResponseEntity.ok(authService.register(registerRequest, Rol.REPRESENTANTE, EstadoUsu.Activo));
     }
+
+
 }

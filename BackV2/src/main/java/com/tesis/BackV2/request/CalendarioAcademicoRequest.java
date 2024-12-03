@@ -1,7 +1,5 @@
 package com.tesis.BackV2.request;
 
-import com.tesis.BackV2.enums.TipoNivel;
-import com.tesis.BackV2.enums.TipoSistCalif;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,12 +11,12 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CalfRequest {
+public class CalendarioAcademicoRequest {
 
-    private TipoNivel nivel;
+    private Long id;
     private String descripcion;
-    private String peso;
-    private TipoSistCalif tipo;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
+    private Long cicloId;
+
 }

@@ -1,20 +1,17 @@
 package com.tesis.BackV2.request;
 
+import com.tesis.BackV2.enums.EstadoUsu;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SisCalfRequest {
+public class UsuarioEditRequest {
 
-    private long cicloID;
-    private long registro;
-    private List<CalfRequest> sistemaCalificacion;
-
+    private String cedula;
+    private String estado;
 }

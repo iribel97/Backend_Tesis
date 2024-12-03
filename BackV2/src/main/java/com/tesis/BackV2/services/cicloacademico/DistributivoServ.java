@@ -18,7 +18,7 @@ public class DistributivoServ {
     @Autowired
     private CicloAcademicoRepo cicloRepo;
     @Autowired
-    private AulaRepo aulaRepo;
+    private CursoRepo cursoRepo;
     @Autowired
     private DocenteRepo docenteRepo;
     @Autowired
@@ -34,7 +34,7 @@ public class DistributivoServ {
         // Verificar si ya existe un distributivo con los mismos datos
         boolean existeDistributivo = distributivoRepo.findAll().stream().anyMatch(d ->
                 d.getCiclo().getId() == request.getCicloId() &&
-                        d.getAula().getId() == request.getAulaId() &&
+                        d.getCurso().getId() == request.getAulaId() &&
                         d.getMateria().getId() == request.getMateriaId() &&
                         d.getDocente().getId() == docenteRepo.findByUsuarioCedula(request.getCedulaDocente()).getId()
         );
@@ -63,7 +63,7 @@ public class DistributivoServ {
         Distributivo distributivo = Distributivo.builder()
                 .horasAsignadas(0)
                 .ciclo(cicloRepo.findById(request.getCicloId()).get())
-                .aula(aulaRepo.findById(request.getAulaId()).get())
+                .curso(cursoRepo.findById(request.getAulaId()).get())
                 .materia(materiaRepo.findById(request.getMateriaId()).get())
                 .docente(docenteRepo.findByUsuarioCedula(request.getCedulaDocente()))
                 .build();
@@ -120,7 +120,7 @@ public class DistributivoServ {
         boolean duplicado = distributivoRepo.findAll().stream().anyMatch(d ->
                         d.getId() != request.getId() &&
                         d.getCiclo().getId() == request.getCicloId() &&
-                        d.getAula().getId() == request.getAulaId() &&
+                        d.getCurso().getId() == request.getAulaId() &&
                         d.getMateria().getId() == request.getMateriaId() &&
                         d.getDocente().getId() == docenteRepo.findByUsuarioCedula(request.getCedulaDocente()).getId()
         );
@@ -139,7 +139,7 @@ public class DistributivoServ {
         validarGradoMateriaYGradoAula(request);
 
         distributivo.setCiclo(cicloRepo.findById(request.getCicloId()).get());
-        distributivo.setAula(aulaRepo.findById(request.getAulaId()).get());
+        distributivo.setCurso(cursoRepo.findById(request.getAulaId()).get());
         distributivo.setMateria(materiaRepo.findById(request.getMateriaId()).get());
         distributivo.setDocente(docenteRepo.findByUsuarioCedula(request.getCedulaDocente()));
 
@@ -183,7 +183,7 @@ public class DistributivoServ {
                 .detalles("El ciclo académico no existe")
                 .build()
         );
-        if (!aulaRepo.existsById(request.getAulaId())) throw new ApiException(ApiResponse.builder()
+        if (!cursoRepo.existsById(request.getAulaId())) throw new ApiException(ApiResponse.builder()
                 .error(true)
                 .mensaje("Solicitud incorrecta")
                 .codigo(400)
@@ -210,12 +210,12 @@ public class DistributivoServ {
     }
 
     private boolean validarExistenciaAulaMateria(DistributivoRequest request) {
-        return distributivoRepo.existsByAulaIdAndMateriaId(request.getAulaId(), request.getMateriaId());
+        return distributivoRepo.existsByCursoIdAndMateriaId(request.getAulaId(), request.getMateriaId());
     }
 
     private void validarGradoMateriaYGradoAula(DistributivoRequest request) {
         Long gradoMateriaId = materiaRepo.findById(request.getMateriaId()).get().getGrado().getId();
-        Long gradoAulaId = aulaRepo.findById(request.getAulaId()).get().getGrado().getId();
+        Long gradoAulaId = cursoRepo.findById(request.getAulaId()).get().getGrado().getId();
         if (!gradoMateriaId.equals(gradoAulaId)) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
@@ -231,8 +231,8 @@ public class DistributivoServ {
         return DistributivoDTO.builder()
                 .id(distributivo.getId())
                 .cicloAcademico(distributivo.getCiclo().getNombre())
-                .aula(distributivo.getAula().getParalelo())
-                .grado(distributivo.getAula().getGrado().getNombre())
+                .aula(distributivo.getCurso().getParalelo())
+                .grado(distributivo.getCurso().getGrado().getNombre())
                 .materia(distributivo.getMateria().getNombre())
                 .horasSemanales(distributivo.getMateria().getHoras())
                 .horasAsignadas(distributivo.getHorasAsignadas())
