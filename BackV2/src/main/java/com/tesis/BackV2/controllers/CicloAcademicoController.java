@@ -33,9 +33,5 @@ public class CicloAcademicoController {
 
 
     /* -------------------- HORARIO -------------------- */
-    // Crear
-    @PostMapping("horario")
-    public ResponseEntity<ApiResponse<?>> crearHorario(@RequestBody HorarioRequest request) {
-        return ResponseEntity.ok(horarioServ.crearHorario(request));
-    }
+
 }
