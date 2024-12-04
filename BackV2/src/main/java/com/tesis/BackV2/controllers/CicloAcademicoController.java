@@ -15,7 +15,7 @@ public class CicloAcademicoController {
 
     private final CicloServ cicloServ;
     private final GradoServ gradoServ;
-    private final AulaServ aulaServ;
+
     private final MateriaServ materiaServ;
     private final DistributivoServ distributivoServ;
     private final HorarioServ horarioServ;
@@ -26,35 +26,7 @@ public class CicloAcademicoController {
 
 
     /* -------------------- CURSOS/AULAS ACADEMICAS -------------------- */
-    // Crear
-    @PostMapping("curso")
-    public ResponseEntity<ApiResponse<?>> crearAula(@RequestBody CursoRequest request) {
-        return ResponseEntity.ok(aulaServ.crearAula(request));
-    }
 
-    // Traer todos
-    @GetMapping("curso")
-    public ResponseEntity<?> obtenerAulas() {
-        return ResponseEntity.ok(aulaServ.obtenerAulas());
-    }
-
-    // Traer por paralelo y nombre del grado
-    @GetMapping("curso/{nombre}/{paralelo}")
-    public ResponseEntity<?> obtenerAula(@PathVariable String nombre, @PathVariable String paralelo) {
-        return ResponseEntity.ok(aulaServ.obtenerAula(paralelo, nombre));
-    }
-
-    // Actualizar
-    @PutMapping("curso")
-    public ResponseEntity<ApiResponse<?>> actualizarAula(@RequestBody CursoRequest request) {
-        return ResponseEntity.ok(aulaServ.editarAula(request));
-    }
-
-    // Eliminar
-    @DeleteMapping("curso/{id}")
-    public ResponseEntity<ApiResponse<?>> eliminarAula(@PathVariable Long id) {
-        return ResponseEntity.ok(aulaServ.eliminarAula(id));
-    }
 
 
 

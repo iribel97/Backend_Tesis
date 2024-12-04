@@ -3,6 +3,7 @@ package com.tesis.BackV2.services.cicloacademico;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.CursoDTO;
 import com.tesis.BackV2.entities.Curso;
+import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
@@ -15,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class AulaServ {
+public class CursoServ {
 
     @Autowired
     private GradoRepo gradoRepo;
@@ -31,7 +32,7 @@ public class AulaServ {
 
     // Creación
     @Transactional
-    public ApiResponse<String> crearAula(CursoRequest request) {
+    public ApiResponse<String> crearCurso(CursoRequest request) {
         validarParaleloYGrado(request.getParalelo(), request.getGrado());
         validarTutor(request.getCedulaTutor());
 
@@ -115,17 +116,10 @@ public class AulaServ {
                         .build()
                 ));
 
-        if (distributivoRepo.existsByCursoId(id)) {
-            throw new ApiException(ApiResponse.<String>builder()
-                    .error(true)
-                    .mensaje("Distributivo asociado")
-                    .codigo(400)
-                    .detalles("El curso tiene distributivos asociados, no se puede eliminar")
-                    .build()
-            );
-        }
+        eliminarCursoDeDistributivo(id);
 
         cursoRepo.delete(curso);
+
         return ApiResponse.<String>builder()
                 .error(false)
                 .mensaje("Aula eliminada")
@@ -163,6 +157,15 @@ public class AulaServ {
                             .build()
                     );
                 });
+    }
+
+    private void eliminarCursoDeDistributivo(Long id){
+        List<Distributivo> distributivos = distributivoRepo.findByCursoId(id);
+
+        for (Distributivo distributivo : distributivos) {
+            distributivo.setCurso(null);
+            distributivoRepo.save(distributivo);
+        }
     }
 
     private void validarTutor(String cedulaTutor) {

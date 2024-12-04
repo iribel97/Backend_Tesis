@@ -25,7 +25,7 @@ public class AdminGeneralController {
     private final AuthService authServ;
     private final CicloServ cicloServ;
     private final GradoServ gradoServ;
-    private final AulaServ aulaServ;
+    private final CursoServ cursoServ;
     private final MateriaServ materiaServ;
     private final DistributivoServ distributivoServ;
     private final HorarioServ horarioServ;

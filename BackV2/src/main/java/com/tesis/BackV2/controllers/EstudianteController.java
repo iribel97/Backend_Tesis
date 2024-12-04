@@ -10,4 +10,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:4200"})
 public class EstudianteController {
+
+    /*  ---------------------------- Visualización de Horario  ---------------------------- */
+
+    /*  ---------------------------- Materias  ---------------------------- */
+
+    /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */
+
+    /*  ---------------------------- Visualización de Compañeros  ---------------------------- */
+
+    /*  ---------------------------- Visualización de Conducta  ---------------------------- */
+
+    /*  ---------------------------- Visualización de Asistencia  ---------------------------- */
 }
