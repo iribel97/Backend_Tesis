@@ -4,6 +4,7 @@ import com.tesis.BackV2.entities.documentation.DocCedula;
 import com.tesis.BackV2.entities.documentation.DocCertifNota;
 import com.tesis.BackV2.entities.documentation.DocServBasicos;
 import com.tesis.BackV2.enums.EstadoInscripcion;
+import com.tesis.BackV2.enums.Genero;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,8 @@ public class Inscripcion {
     private String telefono;
     private String direccion;
     private LocalDate fechaNacimiento;
+    @Enumerated(EnumType.STRING)
+    private Genero genero;
 
     /* ----------------- DATOS FAMILIARES ----------------- */
     private String nombresPadre;
@@ -64,7 +67,7 @@ public class Inscripcion {
     @OneToOne(fetch = FetchType.LAZY)
     private DocServBasicos serviciosBasicos;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Representante representante;
     
 }

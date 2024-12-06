@@ -1,21 +1,53 @@
 package com.tesis.BackV2.controllers;
 
+import com.tesis.BackV2.config.ApiResponse;
+import com.tesis.BackV2.request.InscripcionRequest;
+import com.tesis.BackV2.services.inscripcion.InscripcionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/representante/")
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:4200"})
 public class RepresentanteController {
-
+    private final InscripcionService inscripServ;
     /*  ---------------------------- Visualización de Conducta  ---------------------------- */
 
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */
 
     /*  ---------------------------- Gestión de Inscripciones  ---------------------------- */
+    // Crear
+    @PostMapping("inscripcion/estudiante")
+    public ResponseEntity<ApiResponse<?>> crearInscripcion(@ModelAttribute InscripcionRequest request,
+                                                           @RequestParam("cedulaEstudiante") MultipartFile cedulaEstudiante,
+                                                           @RequestParam("cedulaPadre")MultipartFile cedulaPadre,
+                                                           @RequestParam("cedulaMadre")MultipartFile cedulaMadre,
+                                                           @RequestParam("certificadoNotas")MultipartFile certificadoNotas,
+                                                           @RequestParam("serviciosBasicos")MultipartFile serviciosBasicos) throws IOException {
+        return ResponseEntity.ok(inscripServ.inscripcion(request, cedulaEstudiante, cedulaPadre, cedulaMadre, certificadoNotas, serviciosBasicos));
+    }
+
+    // Editar
+    @PutMapping("inscripcion/estudiante")
+    public ResponseEntity<ApiResponse<?>> editarInscripcion(@ModelAttribute InscripcionRequest request,
+                                                            @RequestParam("cedulaEstudiante") MultipartFile cedulaEstudiante,
+                                                            @RequestParam("cedulaPadre")MultipartFile cedulaPadre,
+                                                            @RequestParam("cedulaMadre")MultipartFile cedulaMadre,
+                                                            @RequestParam("certificadoNotas")MultipartFile certificadoNotas,
+                                                            @RequestParam("serviciosBasicos")MultipartFile serviciosBasicos) throws IOException {
+        return ResponseEntity.ok(inscripServ.editarInscripcion(request, cedulaEstudiante, cedulaPadre, cedulaMadre, certificadoNotas, serviciosBasicos));
+    }
+
+    // Eliminar
+    @DeleteMapping("inscripcion/{cedulaEst}")
+    public ResponseEntity<ApiResponse<?>> eliminarInscripcion(@PathVariable String cedulaEst){
+        return ResponseEntity.ok(inscripServ.eliminarInscripcion(cedulaEst));
+    }
 
     /*  ---------------------------- Gestión de Matricula  ---------------------------- */
 
