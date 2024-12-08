@@ -3,6 +3,8 @@ package com.tesis.BackV2.services.inscripcion;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.config.auth.RegisterRequest;
+import com.tesis.BackV2.dto.InscripcionDTO;
+import com.tesis.BackV2.dto.doc.DocumentoDTO;
 import com.tesis.BackV2.entities.Inscripcion;
 import com.tesis.BackV2.entities.Usuario;
 import com.tesis.BackV2.entities.documentation.DocCedula;
@@ -25,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class InscripcionService {
@@ -226,13 +230,15 @@ public class InscripcionService {
                     .detalles("La inscripcion ya fue aceptada")
                     .build();
         }
+        repo.delete(inscripcion);
+
         repoCedula.delete( inscripcion.getCedulaEstudiante() );
         repoCedula.delete( inscripcion.getCedulaPadre() );
         repoCedula.delete( inscripcion.getCedulaMadre() );
         repoNotas.delete( inscripcion.getCertificadoNotas() );
         repoServBasicos.delete( inscripcion.getServiciosBasicos() );
 
-        repo.delete(inscripcion);
+
         return ApiResponse.<String>builder()
                 .error(false)
                 .codigo(200)
@@ -240,6 +246,30 @@ public class InscripcionService {
                 .detalles("La inscripcion fue eliminada con exito")
                 .build();
 
+    }
+
+    // Listar por representante
+    public List<InscripcionDTO> listarPorRepresentante(String cedula) {
+        List<Inscripcion> inscripciones = repo.findByRepresentante_Usuario_Cedula(cedula);
+        List<InscripcionDTO> dtos = new ArrayList<>();
+
+        for (Inscripcion inscripcion : inscripciones) {
+            dtos.add(convertirInscripcion(inscripcion));
+        }
+
+        return dtos;
+    }
+
+    // Listar inscripciones pendientes
+    public List<InscripcionDTO> getInscripcionesPendientes() {
+        List<Inscripcion> inscripciones = repo.findByEstadoPendiente();
+        List<InscripcionDTO> dtos = new ArrayList<>();
+
+        for (Inscripcion inscripcion : inscripciones) {
+            dtos.add(convertirInscripcion(inscripcion));
+        }
+
+        return dtos;
     }
 
     /* ---------- OTROS METODOS ---------- */
@@ -303,6 +333,69 @@ public class InscripcionService {
             servBasicos.setMime(file.getContentType());
             repoServBasicos.save(servBasicos);
         }
+    }
+
+    // Convertir a DTO
+
+    private List<DocumentoDTO> convertirDocumentos(Inscripcion inscripcion) {
+        List<DocumentoDTO> dtos = new ArrayList<>();
+        dtos.add(DocumentoDTO.builder()
+                .nombre(inscripcion.getCedulaEstudiante().getNombre())
+                .id(inscripcion.getCedulaEstudiante().getId())
+                .mime(inscripcion.getCedulaEstudiante().getMime())
+                .build()
+        );
+        dtos.add(DocumentoDTO.builder()
+                .nombre(inscripcion.getCedulaPadre().getNombre())
+                .id(inscripcion.getCedulaPadre().getId())
+                .mime(inscripcion.getCedulaPadre().getMime())
+                .build()
+        );
+        dtos.add(DocumentoDTO.builder()
+                .nombre(inscripcion.getCedulaMadre().getNombre())
+                .id(inscripcion.getCedulaMadre().getId())
+                .mime(inscripcion.getCedulaMadre().getMime())
+                .build()
+        );
+        dtos.add(DocumentoDTO.builder()
+                .nombre(inscripcion.getCertificadoNotas().getNombre())
+                .id(inscripcion.getCertificadoNotas().getId())
+                .mime(inscripcion.getCertificadoNotas().getMime())
+                .build()
+        );
+        dtos.add(DocumentoDTO.builder()
+                .nombre(inscripcion.getServiciosBasicos().getNombre())
+                .id(inscripcion.getServiciosBasicos().getId())
+                .mime(inscripcion.getServiciosBasicos().getMime())
+                .build()
+        );
+        return dtos;
+    }
+
+    private InscripcionDTO convertirInscripcion(Inscripcion inscripcion) {
+        return InscripcionDTO.builder()
+                .cedula(inscripcion.getCedula())
+                .nombres(inscripcion.getNombres())
+                .apellidos(inscripcion.getApellidos())
+                .email(inscripcion.getEmail())
+                .telefono(inscripcion.getTelefono())
+                .direccion(inscripcion.getDireccion())
+                .fechaNacimiento(String.valueOf(inscripcion.getFechaNacimiento()))
+                .genero(String.valueOf(inscripcion.getGenero()))
+                .nombresPadre(inscripcion.getNombresPadre())
+                .apellidosPadre(inscripcion.getApellidosPadre())
+                .correoPadre(inscripcion.getCorreoPadre())
+                .telefonoPadre(inscripcion.getTelefonoPadre())
+                .ocupacionPadre(inscripcion.getOcupacionPadre())
+                .nombresMadre(inscripcion.getNombresMadre())
+                .apellidosMadre(inscripcion.getApellidosMadre())
+                .correoMadre(inscripcion.getCorreoMadre())
+                .telefonoMadre(inscripcion.getTelefonoMadre())
+                .ocupacionMadre(inscripcion.getOcupacionMadre())
+                .estado(String.valueOf(inscripcion.getEstado()))
+                .fechaInscripcion(String.valueOf(inscripcion.getFechaInscripcion()))
+                .documentos(convertirDocumentos(inscripcion))
+                .build();
     }
 
 }

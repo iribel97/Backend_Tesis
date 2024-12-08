@@ -32,6 +32,11 @@ public class AdminOpController {
     /*  ---------------------------- Gestión de Matricula  ---------------------------- */
 
     /*  ---------------------------- Gestión de Inscripcion  ---------------------------- */
+    // Listar por estado pendiente
+    @GetMapping("inscripciones/pendientes")
+    public ResponseEntity<?> listarInscripcionesPendientes() {
+        return ResponseEntity.ok(inscripServ.getInscripcionesPendientes());
+    }
 
     // aceptar inscripción
     @PutMapping("inscripcion/aceptar/{cedulaEst}")
