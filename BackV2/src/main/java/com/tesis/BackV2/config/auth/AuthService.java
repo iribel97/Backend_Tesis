@@ -6,8 +6,11 @@ import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
+import com.tesis.BackV2.infra.MensajeHtml;
 import com.tesis.BackV2.repositories.*;
+import com.tesis.BackV2.services.CorreoServ;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +18,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    @Autowired
+    private CorreoServ emailService;
+
+    private final MensajeHtml mensaje = new MensajeHtml();
 
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -83,9 +91,42 @@ public class AuthService {
                 );
         }
 
+        // contraseña vacia y que el correo no contenga la palabra "example"
+        if (request.getPassword() == null && !request.getCorreo().contains("example")) {
+            String username = request.getApellidos() + " " + request.getNombres();
+            String destinatario = request.getCorreo();
+            String asunto = "Creación de Cuenta";
+            String contenidoHtml = mensaje.mensajeCreacionCuenta(username, request.getCedula(), request.getCedula());
+
+            try {
+                emailService.enviarCorreo(destinatario, asunto, contenidoHtml);
+            } catch (Exception e) {
+                throw new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Error al enviar el correo.")
+                        .codigo(500)
+                        .detalles(e.getMessage())
+                        .build()
+                );
+            }
+
+        }
+
         return ApiResponse.<String>builder()
                 .error(false)
                 .mensaje("Usuario registrado con éxito.")
+                .codigo(200)
+                .build();
+    }
+
+    // Registrar lista de usuarios
+    public ApiResponse<String> registerList(List<RegisterRequest> requests, Rol rol, EstadoUsu estado) {
+        for (RegisterRequest request : requests) {
+            register(request, rol, estado);
+        }
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Usuarios registrados con éxito.")
                 .codigo(200)
                 .build();
     }

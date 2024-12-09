@@ -53,6 +53,31 @@ public class CursoServ {
         ;
     }
 
+    // Registrar cursos
+    @Transactional
+    public ApiResponse<String> registrarCursos(List<CursoRequest> request) {
+        for (CursoRequest cursoRequest : request) {
+            validarParaleloYGrado(cursoRequest.getParalelo(), cursoRequest.getGrado());
+            validarTutor(cursoRequest.getCedulaTutor());
+
+            Curso curso = Curso.builder()
+                    .paralelo(cursoRequest.getParalelo())
+                    .maxEstudiantes(cursoRequest.getCantEstudiantes())
+                    .grado(gradoRepo.findByNombre(cursoRequest.getGrado()))
+                    .tutor(docenteRepo.findByUsuarioCedula(cursoRequest.getCedulaTutor()))
+                    .build();
+
+            cursoRepo.save(curso);
+        }
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Aulas creadas")
+                .codigo(200)
+                .detalles("Las aulas han sido creadas correctamente")
+                .build()
+        ;
+    }
+
     // Traer todas
     public List<CursoDTO> obtenerAulas() {
         return cursoRepo.findAll().stream()

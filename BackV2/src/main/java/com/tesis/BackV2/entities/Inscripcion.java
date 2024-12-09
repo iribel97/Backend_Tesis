@@ -69,5 +69,8 @@ public class Inscripcion {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Representante representante;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Grado grado;
     
 }

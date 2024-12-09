@@ -13,6 +13,6 @@ public interface InscripcionRepo extends JpaRepository<Inscripcion, String> {
     List<Inscripcion> findByRepresentante_Usuario_Cedula (String cedula);
 
     // Traes por estado Pendiente
-    @Query("SELECT i FROM Inscripcion i WHERE i.estado = 'PENDIENTE'")
+    @Query("SELECT i FROM Inscripcion i WHERE i.estado = 'Pendiente'")
     List<Inscripcion> findByEstadoPendiente();
 }

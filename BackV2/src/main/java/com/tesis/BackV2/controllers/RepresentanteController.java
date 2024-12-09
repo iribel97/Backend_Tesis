@@ -17,7 +17,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:4200"})
 public class RepresentanteController {
+
     private final InscripcionService inscripServ;
+
     /*  ---------------------------- Visualización de Conducta  ---------------------------- */
 
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */

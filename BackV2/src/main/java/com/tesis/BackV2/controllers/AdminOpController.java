@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/adminop/")
 @RequiredArgsConstructor
@@ -82,6 +84,12 @@ public class AdminOpController {
     @PostMapping("curso")
     public ResponseEntity<ApiResponse<?>> crearAula(@RequestBody CursoRequest request) {
         return ResponseEntity.ok(cursoServ.crearCurso(request));
+    }
+
+    // Registrar cursos
+    @PostMapping("cursos")
+    public ResponseEntity<ApiResponse<?>> registrarCursos(@RequestBody List<CursoRequest> request) {
+        return ResponseEntity.ok(cursoServ.registrarCursos(request));
     }
 
     // Traer todos
