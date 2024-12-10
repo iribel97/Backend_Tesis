@@ -1,5 +1,6 @@
 package com.tesis.BackV2.entities;
 
+import com.tesis.BackV2.entities.config.HorarioConfig;
 import com.tesis.BackV2.enums.DiaSemana;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,11 +22,11 @@ public class Horario {
 
     @Enumerated(EnumType.STRING)
     private DiaSemana diaSemana;
-    private LocalTime horaInicio;
-    private LocalTime horaFin;
     private int cantHoras;
 
     /* ---------- ATRIBUTOS RELACIONADOS ----------*/
     @ManyToOne
     private Distributivo distributivo;
+    @ManyToOne
+    private HorarioConfig horario;
 }

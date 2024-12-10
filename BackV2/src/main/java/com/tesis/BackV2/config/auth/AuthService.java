@@ -220,6 +220,7 @@ public class AuthService {
         String token = jwtService.generateToken(user);
         return AuthResponse.builder()
                 .token(token)
+                .estadoUsuario(String.valueOf(usuRep.findByCedula(request.getCedula()).getEstado()))
                 .build();
     }
 

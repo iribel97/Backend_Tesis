@@ -72,5 +72,8 @@ public class Inscripcion {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Grado grado;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private CicloAcademico cilo;
     
 }

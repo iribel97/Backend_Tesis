@@ -4,9 +4,11 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.HorarioDTO;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Horario;
+import com.tesis.BackV2.entities.config.HorarioConfig;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.DistributivoRepo;
 import com.tesis.BackV2.repositories.HorarioRepo;
+import com.tesis.BackV2.repositories.config.HorarioConfigRepo;
 import com.tesis.BackV2.request.HorarioRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ public class HorarioServ {
     private HorarioRepo horarioRepo;
     @Autowired
     private DistributivoRepo distributivoRepo;
+    @Autowired
+    private HorarioConfigRepo horarioConfigRepo;
 
     // Crear
     @Transactional
@@ -35,6 +39,15 @@ public class HorarioServ {
                         .detalles("El distributivo no ha sido encontrado")
                         .build()
                 ));
+        // Traer la config del horario
+        HorarioConfig horarioConfig = horarioConfigRepo.findById(request.getIdHoraConfig())
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(404)
+                        .detalles("La configuración del horario no ha sido encontrada")
+                        .build()
+                ));
 
         if (distributivo.getCurso() == null) {
             throw new ApiException(ApiResponse.builder()
@@ -46,24 +59,7 @@ public class HorarioServ {
             );
         }
 
-        // Verificar si el horario ya existe o se cruza con otro horario
-        boolean horarioCruzado = horarioRepo.findByDiaSemanaAndDistributivoCursoId(request.getDiaSemana(), distributivo.getCurso().getId())
-                .stream()
-                .anyMatch(horarioExistente ->
-                            (request.getHoraInicio().isBefore(horarioExistente.getHoraFin()) &&
-                             request.getHoraFin().isAfter(horarioExistente.getHoraInicio())));
-
-        if (horarioCruzado) {
-            throw new ApiException(ApiResponse.builder()
-                    .error(true)
-                    .mensaje("Solicitud inválida")
-                    .codigo(400)
-                    .detalles("Existe un choque de horarios")
-                    .build()
-            );
-        }
-
-        if(validarDistributivoHoras(request, 0)) {
+        if(validarDistributivoHoras(request, 0) || validarHorario(request, 0)) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
                     .mensaje("Solicitud inválida")
@@ -73,23 +69,9 @@ public class HorarioServ {
             );
         }
 
-
-        // Obtener la cantidad de horas
-        int cantHoras = calcularHoras(request.getHoraInicio(), request.getHoraFin());
-
         // Traer las horas de la materia
         int horasMateria = distributivo.getMateria().getHoras();
 
-        // Validar la cantidad de horas asignadas
-        if (cantHoras <= 0) {
-            throw new ApiException(ApiResponse.builder()
-                    .error(true)
-                    .mensaje("Solicitud inválida")
-                    .codigo(400)
-                    .detalles("La cantidad de horas no puede ser menor o igual a 0")
-                    .build()
-            );
-        }
         if (distributivo.getHorasAsignadas() == horasMateria) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
@@ -99,7 +81,11 @@ public class HorarioServ {
                     .build()
             );
         }
-        if (distributivo.getHorasAsignadas() + cantHoras > horasMateria) {
+
+        // Obtener la cantidad de horas
+        int cantHoras = distributivo.getHorasAsignadas() + 1;
+
+        if (cantHoras > horasMateria) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
                     .mensaje("Solicitud inválida")
@@ -110,15 +96,14 @@ public class HorarioServ {
         }
 
         // Actualizar las horas asignadas
-        distributivo.setHorasAsignadas(distributivo.getHorasAsignadas() + cantHoras);
+        distributivo.setHorasAsignadas(cantHoras);
         distributivoRepo.save(distributivo);
 
         // Crear y guardar el horario
         Horario horario = Horario.builder()
-                .horaInicio(request.getHoraInicio())
-                .horaFin(request.getHoraFin())
                 .cantHoras(cantHoras)
                 .diaSemana(request.getDiaSemana())
+                .horario(horarioConfig)
                 .distributivo(distributivo)
                 .build();
 
@@ -164,24 +149,6 @@ public class HorarioServ {
             );
         }
 
-        // Verificar si el horario ya existe o se cruza con otro horario diferente al actual
-        boolean horarioCruzado = horarioRepo.findByDiaSemanaAndDistributivoCursoId(request.getDiaSemana(), distributivo.getCurso().getId())
-                .stream()
-                .anyMatch(horarioExistente ->
-                        (request.getHoraInicio().isBefore(horarioExistente.getHoraFin()) &&
-                                request.getHoraFin().isAfter(horarioExistente.getHoraInicio())) &&
-                                horarioExistente.getId() != request.getId());
-
-        if (horarioCruzado) {
-            throw new ApiException(ApiResponse.builder()
-                    .error(true)
-                    .mensaje("Solicitud inválida")
-                    .codigo(400)
-                    .detalles("Existe un choque de horarios")
-                    .build()
-            );
-        }
-
         if(validarDistributivoHoras(request, request.getId())) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
@@ -193,7 +160,7 @@ public class HorarioServ {
         }
 
         // Obtener la cantidad de horas
-        int cantHoras = calcularHoras(request.getHoraInicio(), request.getHoraFin());
+        int cantHoras = 0;
 
         // Traer las horas de la materia
         int horasMateria = distributivo.getMateria().getHoras();
@@ -224,8 +191,6 @@ public class HorarioServ {
         distributivoRepo.save(distributivo);
 
         // Actualizar el horario
-        horario.setHoraInicio(request.getHoraInicio());
-        horario.setHoraFin(request.getHoraFin());
         horario.setCantHoras(cantHoras);
         horario.setDiaSemana(request.getDiaSemana());
         horario.setDistributivo(distributivo);
@@ -281,8 +246,6 @@ public class HorarioServ {
                 .map(horario -> HorarioDTO.builder()
                         .id(horario.getId())
                         .diaSemana(horario.getDiaSemana().name())
-                        .horaInicio(horario.getHoraInicio().toString())
-                        .horaFin(horario.getHoraFin().toString())
                         .ciclo(horario.getDistributivo().getCiclo().getNombre())
                         .curso(horario.getDistributivo().getCurso().getGrado().getNombre() + " " + horario.getDistributivo().getCurso().getParalelo())
                         .materia(horario.getDistributivo().getMateria().getNombre())
@@ -290,20 +253,6 @@ public class HorarioServ {
                         .build()
                 )
                 .toList();
-    }
-
-    private int calcularHoras(LocalTime horaInicio, LocalTime horaFin) {
-        if (horaFin.isBefore(horaInicio)) {
-            throw new ApiException(ApiResponse.builder()
-                    .error(true)
-                    .mensaje("Solicitud inválida")
-                    .codigo(400)
-                    .detalles("La hora de fin no puede ser antes de la hora de inicio")
-                    .build()
-            );
-        }
-        Duration duracion = Duration.between(horaInicio, horaFin);
-        return (int) duracion.toHours(); // Convertir la duración a horas enteras
     }
 
     private boolean validarDistributivoHoras(HorarioRequest request, long idHorario) {
@@ -321,10 +270,36 @@ public class HorarioServ {
         for (Horario horario : horarios) {
             if(horario.getDistributivo().getDocente() == distributivo.getDocente()
                     && horario.getDiaSemana().equals(request.getDiaSemana())
-                    && (request.getHoraInicio().isBefore(horario.getHoraFin())
-                    && request.getHoraFin().isAfter(horario.getHoraInicio()))
                     && horario.getDistributivo().getMateria() == distributivo.getMateria()
                     && horario.getDistributivo().getCiclo() == distributivo.getCiclo()
+                    && horario.getHorario().getId() == request.getIdHoraConfig()
+                    && horario.getId() != idHorario) {
+
+                return true;
+
+            }
+        }
+
+        return false;
+    }
+
+    private boolean validarHorario(HorarioRequest request, long idHorario){
+        // traer distributivos
+        List<Horario> horarios = horarioRepo.findAll();
+        // traer distributivo del request
+        Distributivo distributivo = distributivoRepo.findById(request.getIdDistributivo()).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud inválida")
+                .codigo(404)
+                .detalles("El distributivo no ha sido encontrado")
+                .build()
+        ));
+
+        for (Horario horario : horarios) {
+            if(horario.getDiaSemana().equals(request.getDiaSemana())
+                    && horario.getDistributivo().getCiclo() == distributivo.getCiclo()
+                    && horario.getDistributivo().getCurso() == distributivo.getCurso()
+                    && horario.getHorario().getId() == request.getIdHoraConfig()
                     && horario.getId() != idHorario) {
 
                 return true;

@@ -1,9 +1,7 @@
 package com.tesis.BackV2.entities.config;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.tesis.BackV2.entities.CicloAcademico;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -26,4 +24,7 @@ public class InscripcionConfig {
     private String configuradoPor;
 
     private LocalDateTime fechaConfiguracion;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private CicloAcademico ciclo;
 }

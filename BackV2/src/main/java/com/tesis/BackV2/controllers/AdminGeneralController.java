@@ -5,12 +5,14 @@ import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.config.auth.RegisterRequest;
 import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.Grado;
+import com.tesis.BackV2.entities.config.HorarioConfig;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.request.*;
 import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.cicloacademico.*;
+import com.tesis.BackV2.services.config.HorarioConfigServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +35,7 @@ public class AdminGeneralController {
     private final HorarioServ horarioServ;
     private final SisCalifServ sisCalifServ;
     private final CalendarioAcademicoServ calendarioServ;
+    private final HorarioConfigServ horarioConfigServ;
 
     /* ---------------------------- GESTION DE USUARIOS ---------------------------- */
 
@@ -259,6 +262,30 @@ public class AdminGeneralController {
     @GetMapping("horario/curso/{id}")
     public ResponseEntity<?> getHorariosByCurso(@PathVariable Long id) {
         return ResponseEntity.ok(horarioServ.getHorariosByCurso(id));
+    }
+
+    // Crear la configuración del horario
+    @PostMapping("/horario/config")
+    public ResponseEntity<ApiResponse<?>> crearHorarioConfig(@RequestBody HorarioConfig request) {
+        return ResponseEntity.ok(horarioConfigServ.crearHorarioConfig(request));
+    }
+
+    // Editar
+    @PutMapping("/horario/config")
+    public ResponseEntity<ApiResponse<?>> editarHorarioConfig(@RequestBody HorarioConfig request) {
+        return ResponseEntity.ok(horarioConfigServ.editarHorarioConfig(request));
+    }
+
+    // Listar todos
+    @GetMapping("/horarios")
+    public ResponseEntity<?> horarios() {
+        return ResponseEntity.ok(horarioConfigServ.horarios());
+    }
+
+    // Eliminar
+    @DeleteMapping("/horario/config/{id}")
+    public ResponseEntity<ApiResponse<?>> eliminarHorarioConfig(@PathVariable Long id) {
+        return ResponseEntity.ok(horarioConfigServ.eliminarHorarioConfig(id));
     }
 
     /* ---------------------------- GESTIÓN SISTEMA CALIFICACIONES ---------------------------- */
