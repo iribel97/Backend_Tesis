@@ -77,6 +77,19 @@ public class DistributivoServ {
                 .build();
     }
 
+    // Registrar varios distributivos
+    @Transactional
+    public ApiResponse<String> registrarDistributivos(List<DistributivoRequest> requests) {
+        for (DistributivoRequest request : requests) {
+            crearDistributivo(request);
+        }
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Distributivos registrados con éxito.")
+                .codigo(200)
+                .build();
+    }
+
     // Traer todos
     public List<DistributivoDTO> obtenerDistributivos() {
         return distributivoRepo.findAll().stream()
@@ -100,6 +113,13 @@ public class DistributivoServ {
     // Traer por ciclo académico
     public List<DistributivoDTO> getDistributivoByCiclo(Long id) {
         return distributivoRepo.findByCicloId(id).stream()
+                .map(this::convertirADTO)
+                .toList();
+    }
+
+    // Traer por curso
+    public List<DistributivoDTO> getDistributivoByCurso(Long id) {
+        return distributivoRepo.findByCursoId(id).stream()
                 .map(this::convertirADTO)
                 .toList();
     }

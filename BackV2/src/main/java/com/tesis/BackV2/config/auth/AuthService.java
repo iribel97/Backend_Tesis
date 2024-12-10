@@ -2,18 +2,15 @@ package com.tesis.BackV2.config.auth;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
-import com.tesis.BackV2.entities.Docente;
-import com.tesis.BackV2.entities.Estudiante;
-import com.tesis.BackV2.entities.Representante;
-import com.tesis.BackV2.entities.Usuario;
+import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
-import com.tesis.BackV2.repositories.DocenteRepo;
-import com.tesis.BackV2.repositories.EstudianteRepo;
-import com.tesis.BackV2.repositories.RepresentanteRepo;
-import com.tesis.BackV2.repositories.UsuarioRepo;
+import com.tesis.BackV2.infra.MensajeHtml;
+import com.tesis.BackV2.repositories.*;
+import com.tesis.BackV2.services.CorreoServ;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,10 +18,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    @Autowired
+    private CorreoServ emailService;
+
+    private final MensajeHtml mensaje = new MensajeHtml();
 
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -34,6 +36,7 @@ public class AuthService {
     private final DocenteRepo docRep;
     private final EstudianteRepo estRep;
     private final RepresentanteRepo repRep;
+    private final InscripcionRepo insRep;
 
     public ApiResponse<String> register(RegisterRequest request, Rol rol, EstadoUsu estado) {
 
@@ -72,7 +75,6 @@ public class AuthService {
                 crearYGuardarRepresentante(request, usuario);
                 break;
             case ESTUDIANTE:
-                crearYGuardarEstudiante(request, usuario);
                 break;
             case DOCENTE:
                 crearYGuardarDocente(request, usuario);
@@ -89,11 +91,85 @@ public class AuthService {
                 );
         }
 
+        // contraseña vacia y que el correo no contenga la palabra "example"
+        if (request.getPassword() == null && !request.getCorreo().contains("example")) {
+            String username = request.getApellidos() + " " + request.getNombres();
+            String destinatario = request.getCorreo();
+            String asunto = "Creación de Cuenta";
+            String contenidoHtml = mensaje.mensajeCreacionCuenta(username, request.getCedula(), request.getCedula());
+
+            try {
+                emailService.enviarCorreo(destinatario, asunto, contenidoHtml);
+            } catch (Exception e) {
+                throw new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Error al enviar el correo.")
+                        .codigo(500)
+                        .detalles(e.getMessage())
+                        .build()
+                );
+            }
+
+        }
+
         return ApiResponse.<String>builder()
                 .error(false)
                 .mensaje("Usuario registrado con éxito.")
                 .codigo(200)
                 .build();
+    }
+
+    // Registrar lista de usuarios
+    public ApiResponse<String> registerList(List<RegisterRequest> requests, Rol rol, EstadoUsu estado) {
+        for (RegisterRequest request : requests) {
+            register(request, rol, estado);
+        }
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Usuarios registrados con éxito.")
+                .codigo(200)
+                .build();
+    }
+
+    public void registerEstudiante(String cedula, Rol rol, EstadoUsu estado) {
+
+        Inscripcion inscripcion = insRep.findById(cedula).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud inválida")
+                .codigo(400)
+                .detalles("La inscripción no existe.")
+                .build()
+        ));
+
+        // validar si el usuario ya existe
+        if (usuRep.existsByCedula(inscripcion.getCedula())) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("El usuario ya existe.")
+                    .build()
+            );
+        }
+
+        Usuario usuario = Usuario.builder()
+                .cedula(inscripcion.getCedula())
+                .password(passwordEncoder.encode(inscripcion.getCedula()))
+                .nombres(inscripcion.getNombres())
+                .apellidos(inscripcion.getApellidos())
+                .email(inscripcion.getEmail())
+                .telefono(inscripcion.getTelefono())
+                .nacimiento(inscripcion.getFechaNacimiento())
+                .genero(inscripcion.getGenero())
+                .rol(rol)
+                .estado(estado)
+                .direccion(inscripcion.getDireccion())
+                .creacion(LocalDate.now())
+                .build();
+
+        usuRep.save(usuario);
+
+        crearYGuardarEstudiante(inscripcion, usuario);
     }
 
 
@@ -107,8 +183,8 @@ public class AuthService {
         docRep.save(docente);
     }
 
-    private void crearYGuardarEstudiante(RegisterRequest request, Usuario usuario) {
-        Representante representante = repRep.findByUsuarioCedula(request.getCedulaRepresentante());
+    private void crearYGuardarEstudiante(Inscripcion request, Usuario usuario) {
+        Representante representante = repRep.findByUsuarioCedula(request.getRepresentante().getUsuario().getCedula());
         if (representante == null) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
@@ -120,7 +196,7 @@ public class AuthService {
         }
         Estudiante estudiante = Estudiante.builder()
                 .usuario(usuario)
-                .ingreso(request.getIngreso())
+                .ingreso(LocalDate.now())
                 .representante(representante)
                 .build();
         estRep.save(estudiante);
@@ -144,6 +220,7 @@ public class AuthService {
         String token = jwtService.generateToken(user);
         return AuthResponse.builder()
                 .token(token)
+                .estadoUsuario(String.valueOf(usuRep.findByCedula(request.getCedula()).getEstado()))
                 .build();
     }
 

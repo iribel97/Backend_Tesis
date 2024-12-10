@@ -16,8 +16,7 @@ public class HorarioRequest {
 
     private long id;
     private DiaSemana diaSemana;
-    private LocalTime horaInicio;
-    private LocalTime horaFin;
+    private long idHoraConfig;
     private long idDistributivo;
 
 }

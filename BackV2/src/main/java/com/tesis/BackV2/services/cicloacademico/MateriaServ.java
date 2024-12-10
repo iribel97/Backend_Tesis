@@ -71,6 +71,20 @@ public class MateriaServ {
                 .build();
     }
 
+    // Registrar varias materias
+    @Transactional
+    public ApiResponse<String> crearMaterias(List<MateriaRequest> requests) {
+        for (MateriaRequest request : requests) {
+            crearMateria(request);
+        }
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Materias creadas")
+                .codigo(200)
+                .detalles("Las materias han sido creadas correctamente.")
+                .build();
+    }
+
     // Obtener todas
     public List<MateriaDTO> getMaterias() {
         List<Materia> materias = materiaRepo.findAll();

@@ -3,6 +3,7 @@ package com.tesis.BackV2.services.cicloacademico;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.CursoDTO;
 import com.tesis.BackV2.entities.Curso;
+import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
@@ -15,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class AulaServ {
+public class CursoServ {
 
     @Autowired
     private GradoRepo gradoRepo;
@@ -31,7 +32,7 @@ public class AulaServ {
 
     // Creación
     @Transactional
-    public ApiResponse<String> crearAula(CursoRequest request) {
+    public ApiResponse<String> crearCurso(CursoRequest request) {
         validarParaleloYGrado(request.getParalelo(), request.getGrado());
         validarTutor(request.getCedulaTutor());
 
@@ -48,6 +49,31 @@ public class AulaServ {
                 .mensaje("Aula creada")
                 .codigo(200)
                 .detalles("El aula ha sido creada correctamente")
+                .build()
+        ;
+    }
+
+    // Registrar cursos
+    @Transactional
+    public ApiResponse<String> registrarCursos(List<CursoRequest> request) {
+        for (CursoRequest cursoRequest : request) {
+            validarParaleloYGrado(cursoRequest.getParalelo(), cursoRequest.getGrado());
+            validarTutor(cursoRequest.getCedulaTutor());
+
+            Curso curso = Curso.builder()
+                    .paralelo(cursoRequest.getParalelo())
+                    .maxEstudiantes(cursoRequest.getCantEstudiantes())
+                    .grado(gradoRepo.findByNombre(cursoRequest.getGrado()))
+                    .tutor(docenteRepo.findByUsuarioCedula(cursoRequest.getCedulaTutor()))
+                    .build();
+
+            cursoRepo.save(curso);
+        }
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Aulas creadas")
+                .codigo(200)
+                .detalles("Las aulas han sido creadas correctamente")
                 .build()
         ;
     }
@@ -115,17 +141,10 @@ public class AulaServ {
                         .build()
                 ));
 
-        if (distributivoRepo.existsByCursoId(id)) {
-            throw new ApiException(ApiResponse.<String>builder()
-                    .error(true)
-                    .mensaje("Distributivo asociado")
-                    .codigo(400)
-                    .detalles("El curso tiene distributivos asociados, no se puede eliminar")
-                    .build()
-            );
-        }
+        eliminarCursoDeDistributivo(id);
 
         cursoRepo.delete(curso);
+
         return ApiResponse.<String>builder()
                 .error(false)
                 .mensaje("Aula eliminada")
@@ -163,6 +182,15 @@ public class AulaServ {
                             .build()
                     );
                 });
+    }
+
+    private void eliminarCursoDeDistributivo(Long id){
+        List<Distributivo> distributivos = distributivoRepo.findByCursoId(id);
+
+        for (Distributivo distributivo : distributivos) {
+            distributivo.setCurso(null);
+            distributivoRepo.save(distributivo);
+        }
     }
 
     private void validarTutor(String cedulaTutor) {
