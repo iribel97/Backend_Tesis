@@ -2,49 +2,58 @@ package com.tesis.BackV2.services.inscripcion;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.auth.AuthService;
-import com.tesis.BackV2.config.auth.RegisterRequest;
 import com.tesis.BackV2.dto.InscripcionDTO;
 import com.tesis.BackV2.dto.doc.DocumentoDTO;
 import com.tesis.BackV2.entities.Inscripcion;
-import com.tesis.BackV2.entities.Usuario;
+import com.tesis.BackV2.entities.Matricula;
 import com.tesis.BackV2.entities.documentation.DocCedula;
 import com.tesis.BackV2.entities.documentation.DocCertifNota;
 import com.tesis.BackV2.entities.documentation.DocServBasicos;
+import com.tesis.BackV2.entities.documentation.InscripPruebaAdicional;
 import com.tesis.BackV2.enums.EstadoInscripcion;
+import com.tesis.BackV2.enums.EstadoMatricula;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
-import com.tesis.BackV2.repositories.EstudianteRepo;
-import com.tesis.BackV2.repositories.InscripcionRepo;
-import com.tesis.BackV2.repositories.RepresentanteRepo;
-import com.tesis.BackV2.repositories.UsuarioRepo;
+import com.tesis.BackV2.infra.MensajeHtml;
+import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.repositories.documentation.DocCedulaRepo;
 import com.tesis.BackV2.repositories.documentation.DocCertifNotaRepo;
 import com.tesis.BackV2.repositories.documentation.DocServBasicosRepo;
+import com.tesis.BackV2.repositories.documentation.InscripPruebaAdicionalRepo;
 import com.tesis.BackV2.request.InscripcionRequest;
+import com.tesis.BackV2.request.MatriculacionRequest;
+import com.tesis.BackV2.services.CorreoServ;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class InscripcionService {
+    @Autowired
+    private CorreoServ emailService;
+    @Autowired
+    private AuthService authService;
 
-    @Autowired
-    private InscripcionRepo repo;
-    @Autowired
-    private DocCedulaRepo repoCedula;
-    @Autowired
-    private DocCertifNotaRepo repoNotas;
-    @Autowired
-    private DocServBasicosRepo repoServBasicos;
-    @Autowired
-    private RepresentanteRepo repoRepresentante;
-    @Autowired
-    private UsuarioRepo repoUsuario;
+    private final InscripcionRepo repo;
+    private final DocCedulaRepo repoCedula;
+    private final DocCertifNotaRepo repoNotas;
+    private final DocServBasicosRepo repoServBasicos;
+    private final RepresentanteRepo repoRepresentante;
+    private final UsuarioRepo repoUsuario;
+    private final CicloAcademicoRepo repoCicloAcademico;
+    private final InscripPruebaAdicionalRepo repoPruebaAdicional;
+    private final MatriculaRepo repoMatricula;
+    private final CursoRepo repoCurso;
+
+    private final MensajeHtml mensaje = new MensajeHtml();
 
     // CREAR LA INSCRIPCION
     public ApiResponse<String> inscripcion(InscripcionRequest request,
@@ -77,6 +86,7 @@ public class InscripcionService {
                     .ocupacionMadre(request.getOcupacionMadre())
                     .estado(EstadoInscripcion.Pendiente)
                     .fechaInscripcion(java.time.LocalDate.now())
+                    .cilo(repoCicloAcademico.findTopByOrderByIdDesc())
                     .cedulaEstudiante(repoCedula.save(DocCedula.builder()
                             .nombre(cedulaEstudiante.getOriginalFilename())
                             .contenido(cedulaEstudiante.getBytes())
@@ -192,7 +202,7 @@ public class InscripcionService {
         }
     }
 
-    // Editar el estado a aceptado
+    // Editar el estado
     public ApiResponse<String> cambiarEstadoInscripcion(String cedula, EstadoInscripcion estado) {
         Inscripcion inscripcion = repo.findById(cedula).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
                 .error(true)
@@ -201,7 +211,20 @@ public class InscripcionService {
                 .detalles("La inscripcion con la cedula " + cedula + " no existe")
                 .build()));
 
-        inscripcion.setEstado(estado);
+        // Si el estado es aceptado y requiere pruebas
+        if (estado.equals(EstadoInscripcion.Aceptado) && inscripcion.getCilo().getInscripConfig().isRequierePruebas()) {
+            // Crear prueba de conocimiento
+            crearPruebaAdicional(cedula,
+                    "Prueba de conocimiento",
+                    "Evaluar los conocimientos del estudiante en áreas clave (matemáticas, lengua, ciencias)",
+                    java.time.LocalDate.now().plusDays(7),"","",null);
+
+            // Cambiar estado a prueba
+            inscripcion.setEstado(EstadoInscripcion.Prueba);
+        } else {
+            inscripcion.setEstado(estado);
+        }
+
         repo.save(inscripcion);
 
         return ApiResponse.<String>builder()
@@ -270,6 +293,74 @@ public class InscripcionService {
         }
 
         return dtos;
+    }
+
+    // Cambiar estado de la Prueba de conocimiento
+    public ApiResponse<String> cambiarEstadoPruebaAdicional(Long id,String tipoPrueba, EstadoInscripcion estado, MatriculacionRequest request) {
+        InscripPruebaAdicional prueba = repoPruebaAdicional.findByTipoPruebaAndInscripcionCedula(tipoPrueba, String.valueOf(id));
+
+        if (estado.equals(EstadoInscripcion.Aceptado)) {
+            switch (prueba.getTipoPrueba()) {
+                case "Prueba de conocimiento":
+
+                    crearPruebaAdicional(prueba.getInscripcion().getCedula(),
+                            "Prueba Psicológica",
+                            "Evaluar aspectos emocionales, sociales, y habilidades cognitivas del estudiante.",
+                            java.time.LocalDate.now().plusDays(7),prueba.getTipoPrueba(),prueba.getDescripcion(),prueba.getFechaPrueba());
+                    break;
+                case "Prueba Psicológica":
+                    crearPruebaAdicional(prueba.getInscripcion().getCedula(),
+                            "Entrevista Personal",
+                            "Conocer al estudiante y su familia para evaluar aspectos no académicos.",
+                            java.time.LocalDate.now().plusDays(7),prueba.getTipoPrueba(),prueba.getDescripcion(),prueba.getFechaPrueba());
+                    break;
+                case "Entrevista Personal":
+                    String estudiante = prueba.getInscripcion().getNombres() + " " + prueba.getInscripcion().getApellidos();
+                    crearMatricula(prueba.getInscripcion(), request);
+                    String destinatario = prueba.getInscripcion().getRepresentante().getUsuario().getEmail();
+                    String asunto = "Citación a prueba de evaluación académica";
+
+                    try {
+                        emailService.enviarCorreo(destinatario, asunto, mensaje.mensajeAprobacionPruebasIns(estudiante, prueba.getTipoPrueba(), prueba.getDescripcion(), String.valueOf(LocalDate.now()), request.getGrado() + " " + request.getParalelo()));
+                    } catch (Exception e) {
+
+                        throw new ApiException(ApiResponse.builder()
+                                .error(true)
+                                .mensaje("Error al enviar el correo.")
+                                .codigo(500)
+                                .detalles(e.getMessage())
+                                .build()
+                        );
+                    }
+
+                    crearMatricula(prueba.getInscripcion(), request);
+
+                    // Crear estudiante
+                    authService.registerEstudiante(prueba.getInscripcion().getCedula(), Rol.ESTUDIANTE, EstadoUsu.Inactivo);
+                    break;
+            }
+        }
+
+        prueba.setResultado(estado);
+        repoPruebaAdicional.save(prueba);
+
+        return ApiResponse.<String>builder()
+                .error(false)
+                .codigo(200)
+                .mensaje("Prueba " + estado)
+                .detalles("La prueba fue " + estado + " con exito")
+                .build();
+    }
+
+    private void crearMatricula(Inscripcion inscripcion, MatriculacionRequest request) {
+        repoMatricula.save(Matricula.builder()
+                .inscripcion(inscripcion)
+                .estado(EstadoMatricula.Matriculado)
+                .fechaMatricula(java.time.LocalDate.now())
+                .grado(inscripcion.getGrado())
+                .curso(repoCurso.findByParaleloAndGradoNombre(request.getParalelo(), inscripcion.getGrado().getNombre()))
+                .build());
+
     }
 
     /* ---------- OTROS METODOS ---------- */
@@ -396,6 +487,50 @@ public class InscripcionService {
                 .fechaInscripcion(String.valueOf(inscripcion.getFechaInscripcion()))
                 .documentos(convertirDocumentos(inscripcion))
                 .build();
+    }
+
+    // Prueba de Evaluación académica
+    private void crearPruebaAdicional(String idInscrip, String tipoPrueba, String descripcion, java.time.LocalDate fechaPrueba, String tipoPruebaAnt, String descripcionAnt, java.time.LocalDate fechaPruebaAnt) {
+        String mensaje = "";
+
+        Inscripcion inscripcion = repo.findById(idInscrip).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                .error(true)
+                .codigo(404)
+                .mensaje("Solicitud invalida")
+                .detalles("La inscripcion con la cedula " + idInscrip + " no existe")
+                .build()));
+
+        repoPruebaAdicional.save(InscripPruebaAdicional.builder()
+                .tipoPrueba(tipoPrueba)
+                .descripcion(descripcion)
+                .resultado(EstadoInscripcion.Pendiente)
+                .fechaPrueba(fechaPrueba)
+                .inscripcion(inscripcion)
+                .build());
+
+        String estudiante = inscripcion.getNombres() + " " + inscripcion.getApellidos();
+
+        if (tipoPrueba.equalsIgnoreCase("Prueba de conocimiento")) {
+            mensaje = this.mensaje.mensajeCitacionPruebaIns(estudiante, tipoPrueba, descripcion, String.valueOf(fechaPrueba));
+        } else if (tipoPrueba.equalsIgnoreCase("Entrevista Personal")) {
+            mensaje = this.mensaje.mensajeAprobacionPruebaIns(estudiante, tipoPruebaAnt, descripcionAnt, String.valueOf(fechaPruebaAnt), tipoPrueba, descripcion, String.valueOf(fechaPrueba));
+        }
+
+        String destinatario = inscripcion.getRepresentante().getUsuario().getEmail();
+        String asunto = "Citación a prueba de evaluación académica";
+
+        try {
+            emailService.enviarCorreo(destinatario, asunto, mensaje);
+        } catch (Exception e) {
+
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Error al enviar el correo.")
+                    .codigo(500)
+                    .detalles(e.getMessage())
+                    .build()
+            );
+        }
     }
 
 }

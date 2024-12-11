@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CicloAcademicoRepo extends JpaRepository<CicloAcademico, Long> {
+
+    // Devolver el último registro
+    CicloAcademico findTopByOrderByIdDesc();
 }

@@ -43,7 +43,6 @@ public class AdminOpController {
     // aceptar inscripción
     @PutMapping("inscripcion/aceptar/{cedulaEst}")
     public ResponseEntity<ApiResponse<?>> aceptarInscripcion(@PathVariable String cedulaEst) {
-        authService.registerEstudiante(cedulaEst, Rol.ESTUDIANTE, EstadoUsu.Suspendido);
         return ResponseEntity.ok(inscripServ.cambiarEstadoInscripcion(cedulaEst, EstadoInscripcion.Aceptado));
     }
 
@@ -51,6 +50,25 @@ public class AdminOpController {
     @PutMapping("inscripcion/rechazar/{cedulaEst}")
     public ResponseEntity<ApiResponse<?>> rechazarInscripcion(@PathVariable String cedulaEst) {
         return ResponseEntity.ok(inscripServ.cambiarEstadoInscripcion(cedulaEst, EstadoInscripcion.Rechazado));
+    }
+
+    /*  ---------------------------- Gestión de Pruebas Adicionales  Inscripción ---------------------------- */
+    // Aceptar primera prueba
+    @PutMapping("inscripcion/prueba/Prueba de conocimiento/{idInscripcion}")
+    public ResponseEntity<ApiResponse<?>> aceptarPruebaAdicional(@PathVariable Long idInscripcion) {
+        return ResponseEntity.ok(inscripServ.cambiarEstadoPruebaAdicional(idInscripcion, "Prueba de conocimiento", EstadoInscripcion.Aceptado, null));
+    }
+
+    // Aceptar segunda prueba
+    @PutMapping("inscripcion/prueba/Prueba de aptitud/{idInscripcion}")
+    public ResponseEntity<ApiResponse<?>> aceptarPruebaAdicional2(@PathVariable Long idInscripcion) {
+        return ResponseEntity.ok(inscripServ.cambiarEstadoPruebaAdicional(idInscripcion, "Prueba de aptitud", EstadoInscripcion.Aceptado, null));
+    }
+
+    // Aceptar tercera prueba
+    @PutMapping("inscripcion/prueba/Prueba de personalidad/{idInscripcion}")
+    public ResponseEntity<ApiResponse<?>> aceptarPruebaAdicional3(@PathVariable Long idInscripcion) {
+        return ResponseEntity.ok(inscripServ.cambiarEstadoPruebaAdicional(idInscripcion, "Prueba de personalidad", EstadoInscripcion.Aceptado, null));
     }
 
     /*  ---------------------------- Gestión de Horarios  ---------------------------- */

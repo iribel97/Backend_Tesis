@@ -167,6 +167,26 @@ public class AuthService {
                 .creacion(LocalDate.now())
                 .build();
 
+        if (!usuario.getEmail().contains("example")) {
+            String username = usuario.getApellidos() + " " + usuario.getNombres();
+            String destinatario = usuario.getEmail();
+            String asunto = "Creación de Cuenta";
+            String contenidoHtml = mensaje.mensajeCreacionCuenta(username, usuario.getCedula(), usuario.getCedula());
+
+            try {
+                emailService.enviarCorreo(destinatario, asunto, contenidoHtml);
+            } catch (Exception e) {
+                throw new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Error al enviar el correo.")
+                        .codigo(500)
+                        .detalles(e.getMessage())
+                        .build()
+                );
+            }
+
+        }
+
         usuRep.save(usuario);
 
         crearYGuardarEstudiante(inscripcion, usuario);
