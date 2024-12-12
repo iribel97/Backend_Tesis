@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MatriculaRepo extends JpaRepository<Matricula, Long> {
+
+    // ultimo registro de una inscripcion
+    Matricula findTopByInscripcionCedulaOrderByIdDesc(String cedula);
 }

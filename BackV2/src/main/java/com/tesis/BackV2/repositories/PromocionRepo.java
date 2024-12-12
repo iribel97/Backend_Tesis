@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PromocionRepo extends JpaRepository<Promocion, Long> {
+
+    // Encontrar el último por grado
+    Promocion findTopByGradoNombreOrderByIdDesc(String nombre);
 }
