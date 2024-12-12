@@ -1,0 +1,69 @@
+{
+	"info": {
+		"_postman_id": "6647c19a-2721-4fa4-a234-6201cc0ef64f",
+		"name": "Prueba",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30810364"
+	},
+	"item": [
+		{
+			"name": "usu1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"usuario\": {\r\n        \"cedula\": \"1234567890\",\r\n        \"nombres\": \"Juan\",\r\n        \"apellidos\": \"Pérez\",\r\n        \"email\": \"juan.perez@example.com\",\r\n        \"password\": \"mi_password_secreto\",\r\n        \"nacimiento\": \"1980-05-15\",\r\n        \"genero\": \"Masculino\",\r\n        \"rol\":\"DOCENTE\",\r\n        \"direccion\": \"Calle Falsa 123\",\r\n        \"telefono\": \"0987654321\",\r\n        \"estado\": \"Activo\"\r\n    },\r\n    \"docente\": {\r\n        \"titulo\": \"Licenciado\",\r\n        \"especialidad\": \"Matemáticas\",\r\n        \"experiencia\": 10\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/usuario/registrar/Docente",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"usuario",
+						"registrar",
+						"Docente"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "usu2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"cedula\": \"1234567890\",\r\n        \"password\": \"mi_password_secreto\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/usuario/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"usuario",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
