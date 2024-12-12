@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface InscripciónConfigRepo extends JpaRepository<InscripcionConfig, Long> {
+public interface InscripcionConfigRepo extends JpaRepository<InscripcionConfig, Long> {
 }

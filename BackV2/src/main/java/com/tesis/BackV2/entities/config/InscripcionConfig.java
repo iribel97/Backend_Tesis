@@ -21,10 +21,5 @@ public class InscripcionConfig {
 
     private boolean requierePruebas;
 
-    private String configuradoPor;
-
     private LocalDateTime fechaConfiguracion;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    private CicloAcademico ciclo;
 }

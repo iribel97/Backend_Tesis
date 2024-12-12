@@ -7,9 +7,11 @@ import com.tesis.BackV2.entities.Inscripcion;
 import com.tesis.BackV2.enums.EstadoInscripcion;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
+import com.tesis.BackV2.enums.TipoPrueba;
 import com.tesis.BackV2.repositories.InscripcionRepo;
 import com.tesis.BackV2.request.CursoRequest;
 import com.tesis.BackV2.request.HorarioRequest;
+import com.tesis.BackV2.request.MatriculacionRequest;
 import com.tesis.BackV2.services.cicloacademico.CursoServ;
 import com.tesis.BackV2.services.cicloacademico.HorarioServ;
 import com.tesis.BackV2.services.inscripcion.InscripcionService;
@@ -41,16 +43,21 @@ public class AdminOpController {
     }
 
     // aceptar inscripción
-    @PutMapping("inscripcion/aceptar/{cedulaEst}")
-    public ResponseEntity<ApiResponse<?>> aceptarInscripcion(@PathVariable String cedulaEst) {
-        authService.registerEstudiante(cedulaEst, Rol.ESTUDIANTE, EstadoUsu.Suspendido);
-        return ResponseEntity.ok(inscripServ.cambiarEstadoInscripcion(cedulaEst, EstadoInscripcion.Aceptado));
+    @PutMapping("inscripcion/aceptar")
+    public ResponseEntity<ApiResponse<?>> aceptarInscripcion(@RequestBody MatriculacionRequest request) {
+        return ResponseEntity.ok(inscripServ.cambiarEstadoInscripcion(request.getCedulaEstudiante(), EstadoInscripcion.Aceptado, request.getParalelo()));
+    }
+
+    @PutMapping("inscripcion/prueba/{tipoPrueba}/{cedula}")
+    public ResponseEntity<ApiResponse<?>> aceptarPruebaAdicional(@PathVariable String tipoPrueba, @PathVariable String cedula) {
+        TipoPrueba tipo = TipoPrueba.valueOf(tipoPrueba.toUpperCase());
+        return ResponseEntity.ok(inscripServ.cambiarEstadoPruebaAdicional(cedula, tipo, EstadoInscripcion.Aceptado));
     }
 
     // rechazar inscripción
-    @PutMapping("inscripcion/rechazar/{cedulaEst}")
-    public ResponseEntity<ApiResponse<?>> rechazarInscripcion(@PathVariable String cedulaEst) {
-        return ResponseEntity.ok(inscripServ.cambiarEstadoInscripcion(cedulaEst, EstadoInscripcion.Rechazado));
+    @PutMapping("inscripcion/rechazar")
+    public ResponseEntity<ApiResponse<?>> rechazarInscripcion(@RequestBody MatriculacionRequest request) {
+        return ResponseEntity.ok(inscripServ.cambiarEstadoInscripcion(request.getCedulaEstudiante(), EstadoInscripcion.Rechazado, null));
     }
 
     /*  ---------------------------- Gestión de Horarios  ---------------------------- */

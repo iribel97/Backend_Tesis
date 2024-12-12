@@ -1,4 +1,4 @@
-package com.tesis.BackV2.entities;
+package com.tesis.BackV2.entities.temp;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,17 +7,17 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 @Entity
+@Builder
 @Getter
 @Setter
-@Builder
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class Promoción {
+public class TempMatricula {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private String cedula;
+    private String grado;
+    private String paralelo;
 
-    private String nombre;
 }

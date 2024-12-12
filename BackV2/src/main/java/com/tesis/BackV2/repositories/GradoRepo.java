@@ -13,4 +13,7 @@ public interface GradoRepo extends JpaRepository<Grado, Long> {
     boolean existsByNombreIgnoreCase(String nombre);
 
     boolean existsByNombreIgnoreCaseAndIdNot(String nombre, long id);
+
+    // Devolver el perimer registro
+    Grado findTopByOrderByIdAsc();
 }

@@ -37,6 +37,8 @@ public class AuthService {
     private final EstudianteRepo estRep;
     private final RepresentanteRepo repRep;
     private final InscripcionRepo insRep;
+    private final MatriculaRepo matrRep;
+    private final PromocionRepo promRep;
 
     public ApiResponse<String> register(RegisterRequest request, Rol rol, EstadoUsu estado) {
 
@@ -167,6 +169,26 @@ public class AuthService {
                 .creacion(LocalDate.now())
                 .build();
 
+        if (!usuario.getEmail().contains("example")) {
+            String username = usuario.getApellidos() + " " + usuario.getNombres();
+            String destinatario = usuario.getEmail();
+            String asunto = "Creación de Cuenta";
+            String contenidoHtml = mensaje.mensajeCreacionCuenta(username, usuario.getCedula(), usuario.getCedula());
+
+            try {
+                emailService.enviarCorreo(destinatario, asunto, contenidoHtml);
+            } catch (Exception e) {
+                throw new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Error al enviar el correo.")
+                        .codigo(500)
+                        .detalles(e.getMessage())
+                        .build()
+                );
+            }
+
+        }
+
         usuRep.save(usuario);
 
         crearYGuardarEstudiante(inscripcion, usuario);
@@ -194,10 +216,13 @@ public class AuthService {
                     .build()
             );
         }
+        Matricula matricula = matrRep.findTopByInscripcionCedulaOrderByIdDesc(request.getCedula());
         Estudiante estudiante = Estudiante.builder()
                 .usuario(usuario)
                 .ingreso(LocalDate.now())
                 .representante(representante)
+                .matricula(matricula)
+                .promocion(promRep.findTopByGradoNombreOrderByIdDesc(request.getGrado().getNombre()))
                 .build();
         estRep.save(estudiante);
     }
