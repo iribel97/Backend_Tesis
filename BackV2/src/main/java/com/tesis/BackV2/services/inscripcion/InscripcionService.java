@@ -363,6 +363,7 @@ public class InscripcionService {
                 .fechaMatricula(java.time.LocalDate.now())
                 .grado(inscripcion.getGrado())
                 .curso(repoCurso.findByParaleloAndGradoNombre(paralelo, inscripcion.getGrado().getNombre()))
+                .ciclo(inscripcion.getCilo())
                 .build());
 
     }

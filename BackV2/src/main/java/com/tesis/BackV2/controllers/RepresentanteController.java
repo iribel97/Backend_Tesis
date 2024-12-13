@@ -3,7 +3,9 @@ package com.tesis.BackV2.controllers;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.InscripcionDTO;
 import com.tesis.BackV2.request.InscripcionRequest;
+import com.tesis.BackV2.request.MatriculacionRequest;
 import com.tesis.BackV2.services.inscripcion.InscripcionService;
+import com.tesis.BackV2.services.inscripcion.MatriculaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ import java.util.List;
 public class RepresentanteController {
 
     private final InscripcionService inscripServ;
+    private final MatriculaService matricServ;
 
     /*  ---------------------------- Visualización de Conducta  ---------------------------- */
 
@@ -60,6 +63,23 @@ public class RepresentanteController {
     }
 
     /*  ---------------------------- Gestión de Matricula  ---------------------------- */
+    // Crear
+    @PostMapping("matricula")
+    public ResponseEntity<ApiResponse<?>> crearMatricula(@RequestBody MatriculacionRequest request){
+        return ResponseEntity.ok(matricServ.crearMatricula(request));
+    }
+
+    // Editar
+    @PutMapping("matricula")
+    public ResponseEntity<ApiResponse<?>> editarMatricula(@RequestBody MatriculacionRequest request){
+        return ResponseEntity.ok(matricServ.actualizarMatricula(request));
+    }
+
+    // Eliminar
+    @DeleteMapping("matricula/{id}")
+    public ResponseEntity<ApiResponse<?>> eliminarMatricula(@PathVariable Long id){
+        return ResponseEntity.ok(matricServ.eliminarMatricula(id));
+    }
 
     /*  ---------------------------- Visualización de Horarios  ---------------------------- */
 

@@ -4,10 +4,7 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.config.auth.RegisterRequest;
 import com.tesis.BackV2.entities.Inscripcion;
-import com.tesis.BackV2.enums.EstadoInscripcion;
-import com.tesis.BackV2.enums.EstadoUsu;
-import com.tesis.BackV2.enums.Rol;
-import com.tesis.BackV2.enums.TipoPrueba;
+import com.tesis.BackV2.enums.*;
 import com.tesis.BackV2.repositories.InscripcionRepo;
 import com.tesis.BackV2.request.CursoRequest;
 import com.tesis.BackV2.request.HorarioRequest;
@@ -15,6 +12,7 @@ import com.tesis.BackV2.request.MatriculacionRequest;
 import com.tesis.BackV2.services.cicloacademico.CursoServ;
 import com.tesis.BackV2.services.cicloacademico.HorarioServ;
 import com.tesis.BackV2.services.inscripcion.InscripcionService;
+import com.tesis.BackV2.services.inscripcion.MatriculaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +30,14 @@ public class AdminOpController {
     private final CursoServ cursoServ;
     private final HorarioServ horarioServ;
     private final AuthService authService;
+    private final MatriculaService matriculaService;
 
     /*  ---------------------------- Gestión de Matricula  ---------------------------- */
+    // Listar por pendientes
+    @GetMapping("matriculas/pendientes")
+    public ResponseEntity<?> listarMatriculasPendientes() {
+        return ResponseEntity.ok(matriculaService.listarPorEstado(EstadoMatricula.Pendiente));
+    }
 
     /*  ---------------------------- Gestión de Inscripcion  ---------------------------- */
     // Listar por estado pendiente
@@ -48,6 +52,7 @@ public class AdminOpController {
         return ResponseEntity.ok(inscripServ.cambiarEstadoInscripcion(request.getCedulaEstudiante(), EstadoInscripcion.Aceptado, request.getParalelo()));
     }
 
+    // aceptar prueba adicional
     @PutMapping("inscripcion/prueba/{tipoPrueba}/{cedula}")
     public ResponseEntity<ApiResponse<?>> aceptarPruebaAdicional(@PathVariable String tipoPrueba, @PathVariable String cedula) {
         TipoPrueba tipo = TipoPrueba.valueOf(tipoPrueba.toUpperCase());
