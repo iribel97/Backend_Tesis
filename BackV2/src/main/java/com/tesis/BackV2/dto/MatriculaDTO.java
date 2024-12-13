@@ -1,4 +1,4 @@
-package com.tesis.BackV2.request;
+package com.tesis.BackV2.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MatriculacionRequest {
-
-    private long id;
+public class MatriculaDTO {
+    private Long id;
     private String cedulaEstudiante;
+    private String nombreEstudiante;
     private String grado;
-    private String paralelo;
-
+    private String estado;
+    private String ciclo;
+    private String fechaMatricula;
 }

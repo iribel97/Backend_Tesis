@@ -62,7 +62,7 @@ public class CicloServ {
         // Crear Promoción
         Promocion prom = Promocion.builder()
                 .cicloAcademico(ciclo)
-                .nombre("Promoción " + convertirARomano(cicloRepo.findAll().size()))
+                .nombre("Promoción " + convertirARomano(promocionRepo.findAll().size() + 1))
                 .grado(gradoRepo.findTopByOrderByIdAsc() != null ? gradoRepo.findTopByOrderByIdAsc() : null)
                 .build();
 
