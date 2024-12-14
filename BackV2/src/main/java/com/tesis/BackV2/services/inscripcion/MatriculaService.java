@@ -165,7 +165,13 @@ public class MatriculaService {
                 );
             }
             curso.setEstudiantesAsignados(curso.getEstudiantesAsignados() + 1);
+
             Usuario estudiante = traerEstudiante(matricula.getInscripcion().getCedula());
+
+            Estudiante est = estRep.findByUsuarioCedula(estudiante.getCedula());
+            est.setMatricula(matricula);
+            estRep.save(est);
+
             matricula.setCurso(curso);
             service.cambiarContraUsuario(estudiante);
         }
