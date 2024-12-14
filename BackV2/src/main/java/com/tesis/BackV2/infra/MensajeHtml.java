@@ -498,4 +498,117 @@ public class MensajeHtml {
                 "</body>\n" +
                 "</html>\n";
     }
+
+    public String mensajeActivarCuenta(String nombres, String usuario, String contrasena) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "  <meta charset=\"UTF-8\">\n" +
+                "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "  <title>Cuenta Activada</title>\n" +
+                "  <style>\n" +
+                "    body {\n" +
+                "      font-family: Arial, sans-serif;\n" +
+                "      background-color: #f4f4f4;\n" +
+                "      margin: 0;\n" +
+                "      padding: 0;\n" +
+                "    }\n" +
+                "\n" +
+                "    .email-container {\n" +
+                "      width: 100%;\n" +
+                "      max-width: 600px;\n" +
+                "      margin: 20px auto;\n" +
+                "      background-color: #ffffff;\n" +
+                "      border: 1px solid #ddd;\n" +
+                "      border-radius: 10px;\n" +
+                "      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\n" +
+                "      overflow: hidden;\n" +
+                "    }\n" +
+                "\n" +
+                "    .email-header {\n" +
+                "      background-color: #4CAF50;\n" +
+                "      color: white;\n" +
+                "      padding: 20px;\n" +
+                "      text-align: center;\n" +
+                "      font-size: 24px;\n" +
+                "    }\n" +
+                "\n" +
+                "    .email-body {\n" +
+                "      padding: 20px;\n" +
+                "      color: #333;\n" +
+                "    }\n" +
+                "\n" +
+                "    .email-body h2 {\n" +
+                "      color: #4CAF50;\n" +
+                "      font-size: 22px;\n" +
+                "    }\n" +
+                "\n" +
+                "    .email-body p {\n" +
+                "      font-size: 16px;\n" +
+                "      margin-bottom: 15px;\n" +
+                "    }\n" +
+                "\n" +
+                "    .user-info {\n" +
+                "      background-color: #f9f9f9;\n" +
+                "      padding: 10px;\n" +
+                "      margin-top: 20px;\n" +
+                "      border-radius: 5px;\n" +
+                "      border-left: 5px solid #4CAF50;\n" +
+                "    }\n" +
+                "\n" +
+                "    .user-info p {\n" +
+                "      margin: 5px 0;\n" +
+                "      font-size: 16px;\n" +
+                "    }\n" +
+                "\n" +
+                "    .email-footer {\n" +
+                "      background-color: #f4f4f4;\n" +
+                "      padding: 15px;\n" +
+                "      text-align: center;\n" +
+                "      font-size: 14px;\n" +
+                "      color: #888;\n" +
+                "    }\n" +
+                "\n" +
+                "    .email-footer a {\n" +
+                "      color: #4CAF50;\n" +
+                "      text-decoration: none;\n" +
+                "    }\n" +
+                "\n" +
+                "    @media (max-width: 600px) {\n" +
+                "      .email-body {\n" +
+                "        padding: 15px;\n" +
+                "      }\n" +
+                "\n" +
+                "      .email-header {\n" +
+                "        font-size: 20px;\n" +
+                "        padding: 15px;\n" +
+                "      }\n" +
+                "    }\n" +
+                "  </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "  <div class=\"email-container\">\n" +
+                "    <div class=\"email-header\">\n" +
+                "      Tu Cuenta Ha Sido Activada\n" +
+                "    </div>\n" +
+                "    <div class=\"email-body\">\n" +
+                "      <h2>¡Hola "+nombres+"!</h2>\n" +
+                "      <p>Nos complace informarte que tu cuenta ha sido activada de nuevo. Ahora puedes acceder a tu cuenta utilizando las siguientes credenciales:</p>\n" +
+                "      \n" +
+                "      <div class=\"user-info\">\n" +
+                "        <p><strong>Nombre de Usuario:</strong> "+usuario+"</p>\n" +
+                "        <p><strong>Contraseña:</strong> "+contrasena+"</p>\n" +
+                "      </div>\n" +
+                "      \n" +
+                "      <p>Si no has solicitado esta activación o tienes alguna duda, por favor, contacta con nuestro soporte.</p>\n" +
+                "      <p>Gracias por ser parte de nuestra comunidad.</p>\n" +
+                "    </div>\n" +
+                "    <div class=\"email-footer\">\n" +
+                "      &copy; 2024 - Tu Empresa. Todos los derechos reservados.<br>\n" +
+                "      <a href=\"#\">Contáctanos</a> | <a href=\"#\">Política de Privacidad</a>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</body>\n" +
+                "</html>\n";
+    }
 }

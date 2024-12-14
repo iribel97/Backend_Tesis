@@ -39,6 +39,13 @@ public class AdminOpController {
         return ResponseEntity.ok(matriculaService.listarPorEstado(EstadoMatricula.Pendiente));
     }
 
+    // Aceptar
+    @PutMapping("matricula/aceptar")
+    public ResponseEntity<ApiResponse<?>> aceptarMatricula(@RequestBody MatriculacionRequest request) {
+        return ResponseEntity.ok(matriculaService.cambiarEstMatricula(EstadoMatricula.Matriculado, request));
+    }
+
+
     /*  ---------------------------- Gestión de Inscripcion  ---------------------------- */
     // Listar por estado pendiente
     @GetMapping("inscripciones/pendientes")

@@ -95,22 +95,8 @@ public class AuthService {
 
         // contraseña vacia y que el correo no contenga la palabra "example"
         if (request.getPassword() == null && !request.getCorreo().contains("example")) {
-            String username = request.getApellidos() + " " + request.getNombres();
-            String destinatario = request.getCorreo();
-            String asunto = "Creación de Cuenta";
-            String contenidoHtml = mensaje.mensajeCreacionCuenta(username, request.getCedula(), request.getCedula());
 
-            try {
-                emailService.enviarCorreo(destinatario, asunto, contenidoHtml);
-            } catch (Exception e) {
-                throw new ApiException(ApiResponse.builder()
-                        .error(true)
-                        .mensaje("Error al enviar el correo.")
-                        .codigo(500)
-                        .detalles(e.getMessage())
-                        .build()
-                );
-            }
+            crearMensaje(usuario.getEmail(), "Creación de Cuenta", mensaje.mensajeCreacionCuenta(usuario.getApellidos() + " " + usuario.getNombres(), usuario.getCedula(), usuario.getCedula()));
 
         }
 
@@ -170,28 +156,51 @@ public class AuthService {
                 .build();
 
         if (!usuario.getEmail().contains("example")) {
-            String username = usuario.getApellidos() + " " + usuario.getNombres();
-            String destinatario = usuario.getEmail();
-            String asunto = "Creación de Cuenta";
-            String contenidoHtml = mensaje.mensajeCreacionCuenta(username, usuario.getCedula(), usuario.getCedula());
 
-            try {
-                emailService.enviarCorreo(destinatario, asunto, contenidoHtml);
-            } catch (Exception e) {
-                throw new ApiException(ApiResponse.builder()
-                        .error(true)
-                        .mensaje("Error al enviar el correo.")
-                        .codigo(500)
-                        .detalles(e.getMessage())
-                        .build()
-                );
-            }
+            crearMensaje(usuario.getEmail(), "Creación de Cuenta", mensaje.mensajeCreacionCuenta(usuario.getApellidos() + " " + usuario.getNombres(), usuario.getCedula(), usuario.getCedula()));
 
         }
 
         usuRep.save(usuario);
 
         crearYGuardarEstudiante(inscripcion, usuario);
+    }
+
+    // cambiar contraseña
+    public void cambiarContraUsuario(Usuario usuario) {
+
+        usuario.setPassword(passwordEncoder.encode(usuario.getCedula()));
+        usuario.setEstado(EstadoUsu.Inactivo);
+        crearMensaje(usuario.getEmail(), "Habilitar cuenta", mensaje.mensajeActivarCuenta(usuario.getApellidos() + " " + usuario.getNombres(), usuario.getCedula(), usuario.getCedula()));
+        usuRep.save(usuario);
+
+    }
+
+    public ApiResponse<?> cambiarPassUsuario (String passActual, String passUsu, String cedula) {
+        Usuario usuario = usuRep.findByCedula(cedula);
+
+        if (!passwordEncoder.matches(passActual, usuario.getPassword())) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(400)
+                    .detalles("La contraseña actual no coincide.")
+                    .build()
+            );
+        }
+
+        usuario.setPassword(passwordEncoder.encode(passUsu));
+        if (usuario.getEstado().equals(EstadoUsu.Inactivo)) {
+            usuario.setEstado(EstadoUsu.Activo);
+        }
+        usuRep.save(usuario);
+
+        return ApiResponse.<String> builder()
+                .error(false)
+                .codigo(200)
+                .mensaje("Cambio de estado correcto")
+                .detalles("Se cambió el estado de la cuenta exitosamente")
+                .build();
     }
 
 
@@ -236,6 +245,20 @@ public class AuthService {
                 .telefono(request.getTelefonoEmpresa())
                 .build();
         repRep.save(representante);
+    }
+
+    public void crearMensaje (String destinatario, String asunto, String contenidoHtml) {
+        try {
+            emailService.enviarCorreo(destinatario, asunto, contenidoHtml);
+        } catch (Exception e) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Error al enviar el correo.")
+                    .codigo(500)
+                    .detalles(e.getMessage())
+                    .build()
+            );
+        }
     }
     // -------------------------------------------------------------------------------------
 

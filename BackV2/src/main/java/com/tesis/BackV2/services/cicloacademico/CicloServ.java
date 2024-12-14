@@ -75,8 +75,8 @@ public class CicloServ {
         int minTamano = Math.min(promociones.size(), grados.size());
 
         for (int i = 0; i < minTamano; i++) {
-            promociones.get(promociones.size()-2-i).setGrado(grados.get(i));
-            promocionRepo.save(promociones.get(promociones.size()-2-i));
+            promociones.get(promociones.size()-1-i).setGrado(grados.get(i));
+            promocionRepo.save(promociones.get(promociones.size()-1-i));
         }
 
         return ApiResponse.<String>builder()

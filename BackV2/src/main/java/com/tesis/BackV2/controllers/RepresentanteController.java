@@ -81,6 +81,12 @@ public class RepresentanteController {
         return ResponseEntity.ok(matricServ.eliminarMatricula(id));
     }
 
+    // Listar por representante
+    @GetMapping("matriculas/{cedulaRepresentante}")
+    public ResponseEntity<?> traerPorRepresentante(@PathVariable String cedulaRepresentante){
+        return ResponseEntity.ok(matricServ.listarPorRepresentante(cedulaRepresentante));
+    }
+
     /*  ---------------------------- Visualización de Horarios  ---------------------------- */
 
     /*  ---------------------------- Visualización de Cursos  ---------------------------- */

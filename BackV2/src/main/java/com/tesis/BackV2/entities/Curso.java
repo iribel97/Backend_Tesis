@@ -18,6 +18,7 @@ public class Curso {
 
     private String paralelo;
     private int maxEstudiantes;
+    private int estudiantesAsignados;
 
 
     /*---- ATRIBUTOS RELACIONADOS ----*/
