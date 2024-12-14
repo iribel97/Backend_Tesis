@@ -17,6 +17,10 @@ public interface MatriculaRepo extends JpaRepository<Matricula, Long> {
 
     boolean existsByInscripcionAndCiclo(Inscripcion inscripcion, CicloAcademico topByOrderByIdDesc);
 
+    boolean existsByInscripcionAndCicloAndIdNot(Inscripcion inscripcion, CicloAcademico topByOrderByIdDesc, Long id);
+
     // Listar por estado
     List<Matricula> findByEstado(EstadoMatricula estado);
+
+    List<Matricula> findByInscripcion_Representante_Usuario_Cedula(String inscripcionRepresentanteUsuarioCedula);
 }
