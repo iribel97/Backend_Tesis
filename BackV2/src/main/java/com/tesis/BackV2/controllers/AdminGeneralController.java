@@ -258,11 +258,6 @@ public class AdminGeneralController {
     }
 
     /* ---------------------------- VISUALIZACIÓN DE HORARIOS ---------------------------- */
-    // Traer horarios por curso
-    @GetMapping("horario/curso/{id}")
-    public ResponseEntity<?> getHorariosByCurso(@PathVariable Long id) {
-        return ResponseEntity.ok(horarioServ.getHorariosByCurso(id));
-    }
 
     // Crear la configuración del horario
     @PostMapping("/horario/config")

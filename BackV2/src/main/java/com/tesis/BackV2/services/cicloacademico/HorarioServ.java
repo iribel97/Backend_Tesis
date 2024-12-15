@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -59,7 +57,7 @@ public class HorarioServ {
             );
         }
 
-        if(validarDistributivoHoras(request, 0) || validarHorario(request, 0)) {
+        if(validarDistributivoHoras(request, 0) || validarHorario(request)) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
                     .mensaje("Solicitud inválida")
@@ -283,7 +281,7 @@ public class HorarioServ {
         return false;
     }
 
-    private boolean validarHorario(HorarioRequest request, long idHorario){
+    private boolean validarHorario(HorarioRequest request){
         // traer distributivos
         List<Horario> horarios = horarioRepo.findAll();
         // traer distributivo del request
@@ -300,7 +298,7 @@ public class HorarioServ {
                     && horario.getDistributivo().getCiclo() == distributivo.getCiclo()
                     && horario.getDistributivo().getCurso() == distributivo.getCurso()
                     && horario.getHorario().getId() == request.getIdHoraConfig()
-                    && horario.getId() != idHorario) {
+                    && horario.getId() != 0) {
 
                 return true;
 

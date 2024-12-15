@@ -91,12 +91,6 @@ public class AdminOpController {
         return ResponseEntity.ok(horarioServ.eliminarHorario(id));
     }
 
-    // Traer por curso
-    @GetMapping("horarios/{idCurso}")
-    public ResponseEntity<?> obtenerHorarios(@PathVariable Long idCurso) {
-        return ResponseEntity.ok(horarioServ.getHorariosByCurso(idCurso));
-    }
-
     /*  ---------------------------- Gestión de Cursos  ---------------------------- */
 
     // Crear
