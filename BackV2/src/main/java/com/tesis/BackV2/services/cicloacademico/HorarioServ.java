@@ -245,6 +245,8 @@ public class HorarioServ {
                         .id(horario.getId())
                         .diaSemana(horario.getDiaSemana().name())
                         .ciclo(horario.getDistributivo().getCiclo().getNombre())
+                        .horaInicio(String.valueOf(horario.getHorario().getHoraInicio()))
+                        .horaFin(String.valueOf(horario.getHorario().getHoraFin()))
                         .curso(horario.getDistributivo().getCurso().getGrado().getNombre() + " " + horario.getDistributivo().getCurso().getParalelo())
                         .materia(horario.getDistributivo().getMateria().getNombre())
                         .docente(horario.getDistributivo().getDocente().getUsuario().getNombres() + " " + horario.getDistributivo().getDocente().getUsuario().getApellidos())
