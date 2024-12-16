@@ -16,6 +16,7 @@ import com.tesis.BackV2.services.CorreoServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,6 +40,7 @@ public class MatriculaService {
     private final EstudianteRepo estRep;
 
     // Crear Matricula
+    @Transactional
     public ApiResponse<String> crearMatricula(MatriculacionRequest request) {
 
         CicloAcademico ciclo = cicloRep.findTopByOrderByIdDesc();
@@ -71,6 +73,7 @@ public class MatriculaService {
     }
 
     // Actualizar Matricula
+    @Transactional
     public ApiResponse<String> actualizarMatricula(MatriculacionRequest request) {
 
         // Comprobar si la matricula existe
@@ -99,6 +102,7 @@ public class MatriculaService {
     }
 
     // Eliminar Matricula
+    @Transactional
     public ApiResponse<String> eliminarMatricula(Long id){
 
         // Validar Matricula
@@ -140,6 +144,7 @@ public class MatriculaService {
     }
 
     // Cambiar el estado de la matricula
+    @Transactional
     public ApiResponse<String> cambiarEstMatricula(EstadoMatricula estado, MatriculacionRequest request){
         Matricula matricula = validarMatricula(request.getId());
 

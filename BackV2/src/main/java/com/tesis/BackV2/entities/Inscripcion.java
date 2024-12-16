@@ -1,8 +1,6 @@
 package com.tesis.BackV2.entities;
 
-import com.tesis.BackV2.entities.documentation.DocCedula;
-import com.tesis.BackV2.entities.documentation.DocCertifNota;
-import com.tesis.BackV2.entities.documentation.DocServBasicos;
+import com.tesis.BackV2.entities.documentation.Documento;
 import com.tesis.BackV2.enums.EstadoInscripcion;
 import com.tesis.BackV2.enums.Genero;
 import jakarta.persistence.*;
@@ -53,19 +51,19 @@ public class Inscripcion {
 
     /* ----------------- ATRIBUTOS RELACIONADOS ----------------- */
     @OneToOne(fetch = FetchType.LAZY)
-    private DocCedula cedulaEstudiante;
+    private Documento cedulaEstudiante;
 
     @OneToOne(fetch = FetchType.LAZY)
-    private DocCedula cedulaPadre;
+    private Documento cedulaPadre;
 
     @OneToOne(fetch = FetchType.LAZY)
-    private DocCedula cedulaMadre;
+    private Documento cedulaMadre;
     
     @OneToOne(fetch = FetchType.LAZY)
-    private DocCertifNota certificadoNotas;
+    private Documento certificadoNotas;
 
     @OneToOne(fetch = FetchType.LAZY)
-    private DocServBasicos serviciosBasicos;
+    private Documento serviciosBasicos;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Representante representante;

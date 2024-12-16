@@ -10,15 +10,15 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocServBasicos {
+public class Documento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
+    @Lob @Basic(fetch = FetchType.LAZY)
     private byte[] contenido;
     private String nombre;
     private String mime;
+    private String tipoDoc;
 }
