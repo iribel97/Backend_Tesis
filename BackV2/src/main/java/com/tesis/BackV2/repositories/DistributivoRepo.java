@@ -15,6 +15,11 @@ public interface DistributivoRepo extends JpaRepository<Distributivo, Long> {
     // Traer por curso
     List<Distributivo> findByCursoId(long cursoId);
 
+    List<Distributivo> findByDocente_Usuario_Cedula(String docenteUsuarioCedula);
+
+    // Traer distributivo por materia, curso
+    Distributivo findByCursoIdAndMateriaId(long cursoId, long materiaId);
+
     // Existe por id del ciclo
     boolean existsByCicloId(long cicloId);
 

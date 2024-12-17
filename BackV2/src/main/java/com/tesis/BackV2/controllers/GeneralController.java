@@ -41,7 +41,7 @@ public class GeneralController {
         return ResponseEntity.ok(horarioServ.getHorariosByCurso(idCurso));
     }
 
-    // Método para extraer el token del encabezado de la solicitud
+    // Metodo para extraer el token del encabezado de la solicitud
     private String extractTokenFromRequest(HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
