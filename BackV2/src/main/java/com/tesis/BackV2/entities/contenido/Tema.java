@@ -18,6 +18,7 @@ public class Tema {
 
     private boolean activo;
     private String tema;
+    private String detalle;
 
     /* ---- ATRIBUTOS RELACIONADOS ---- */
     @ManyToOne
