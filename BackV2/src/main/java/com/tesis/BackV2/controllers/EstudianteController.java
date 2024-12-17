@@ -1,9 +1,16 @@
 package com.tesis.BackV2.controllers;
 
+import com.tesis.BackV2.config.ApiResponse;
+import com.tesis.BackV2.config.jwt.JwtService;
+import com.tesis.BackV2.entities.Estudiante;
+import com.tesis.BackV2.repositories.EstudianteRepo;
+import com.tesis.BackV2.request.DistributivoRequest;
+import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.contenido.UnidadServ;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/estudiante/")
@@ -11,9 +18,42 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = {"http://localhost:4200"})
 public class EstudianteController {
 
-    /*  ---------------------------- Visualización de Horario  ---------------------------- */
+    private final DistributivoServ disServ;
+    private final UnidadServ uniServ;
+
+    private final JwtService jwtService;
+
+    private final EstudianteRepo repEst;
 
     /*  ---------------------------- Materias  ---------------------------- */
+    // Traer Materia por curso del Estudiante
+    @GetMapping("materias")
+    public ResponseEntity<?> listarMaterias(HttpServletRequest request) {
+
+        Estudiante estudiante = validarEstudiante(request);
+        if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
+
+        return ResponseEntity.ok(disServ.getDistributivoByCurso(estudiante.getMatricula().getCurso().getId()));
+
+    }
+
+    // Traer una Materia que cursa un estudiante
+    @GetMapping("materia/{idDistributivo}")
+    public ResponseEntity<?> obtenerMateria(@PathVariable Long idDistributivo) {
+        return ResponseEntity.ok(disServ.obtenerDistributivo(idDistributivo));
+    }
+
+    // Visualizar Unidades de una Materia activa
+    @GetMapping("materia/unidades/{idDistributivo}")
+    public ResponseEntity<?> listarUnidadesActivas(@PathVariable Long idDistributivo) {
+        return ResponseEntity.ok(uniServ.obtenerUnidadesActivas(idDistributivo));
+    }
+
+    // Visualizar una unidad
+    @GetMapping("materia/unidad/{idUnidad}")
+    public ResponseEntity<?> obtenerUnidad(@PathVariable Long idUnidad) {
+        return ResponseEntity.ok(uniServ.obtenerUnidadActiva(idUnidad));
+    }
 
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */
 
@@ -22,4 +62,32 @@ public class EstudianteController {
     /*  ---------------------------- Visualización de Conducta  ---------------------------- */
 
     /*  ---------------------------- Visualización de Asistencia  ---------------------------- */
+
+    /* ---------------------------- Métodos Privados ---------------------------- */
+    // Valida y extrae el docente del token
+    private Estudiante validarEstudiante(HttpServletRequest request) {
+        String token = extractTokenFromRequest(request);
+        String userCedula = jwtService.extractUsername(token);
+        return repEst.findByUsuarioCedula(userCedula);
+    }
+
+    // Construye respuestas de error consistentes
+    private ResponseEntity<ApiResponse<?>> buildErrorResponse(String detalles, int codigo) {
+        return ResponseEntity.status(codigo).body(
+                ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Error")
+                        .codigo(codigo)
+                        .detalles(detalles)
+                        .build()
+        );
+    }
+    // Metodo para extraer el token del encabezado de la solicitud
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7); // Remover el prefijo "Bearer "
+        }
+        throw new RuntimeException("Token no encontrado o inválido");
+    }
 }

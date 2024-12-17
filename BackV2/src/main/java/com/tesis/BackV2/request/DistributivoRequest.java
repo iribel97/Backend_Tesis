@@ -16,4 +16,7 @@ public class DistributivoRequest {
     private long aulaId;
     private long materiaId;
     private String cedulaDocente;
+    private String materia;
+    private String grado;
+    private String paralelo;
 }

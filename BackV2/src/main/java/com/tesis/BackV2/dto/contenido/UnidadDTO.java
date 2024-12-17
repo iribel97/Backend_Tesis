@@ -1,4 +1,4 @@
-package com.tesis.BackV2.request.contenido;
+package com.tesis.BackV2.dto.contenido;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UnidadRequest {
+public class UnidadDTO {
 
     private long id;
     private String tema;
     private boolean activo;
-    private long idDistributivo;
 }

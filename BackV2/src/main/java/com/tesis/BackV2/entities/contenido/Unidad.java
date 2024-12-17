@@ -1,6 +1,6 @@
 package com.tesis.BackV2.entities.contenido;
 
-import com.tesis.BackV2.entities.Materia;
+import com.tesis.BackV2.entities.Distributivo;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,5 +22,5 @@ public class Unidad {
 
     /* ----- ATRIBUTOS RELACIONADOS ----- */
     @ManyToOne
-    private Materia materia;
+    private Distributivo distributivo;
 }
