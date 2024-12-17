@@ -6,6 +6,7 @@ import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.request.DistributivoRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.contenido.TemaService;
 import com.tesis.BackV2.services.contenido.UnidadServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class EstudianteController {
 
     private final DistributivoServ disServ;
     private final UnidadServ uniServ;
+    private final TemaService temaServ;
 
     private final JwtService jwtService;
 
@@ -53,6 +55,18 @@ public class EstudianteController {
     @GetMapping("materia/unidad/{idUnidad}")
     public ResponseEntity<?> obtenerUnidad(@PathVariable Long idUnidad) {
         return ResponseEntity.ok(uniServ.obtenerUnidadActiva(idUnidad));
+    }
+
+    // Visualizar Temas de una Unidad activa
+    @GetMapping("materia/unidad/temas/{idUnidad}")
+    public ResponseEntity<?> listarTemasActivos(@PathVariable Long idUnidad) {
+        return ResponseEntity.ok(temaServ.obtenerTemasActivos(idUnidad));
+    }
+
+    // Visualizar un tema
+    @GetMapping("materia/unidad/tema/{idTema}")
+    public ResponseEntity<?> obtenerTema(@PathVariable Long idTema) {
+        return ResponseEntity.ok(temaServ.obtenerTemaActivo(idTema));
     }
 
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */

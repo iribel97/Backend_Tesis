@@ -5,8 +5,10 @@ import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.request.DistributivoRequest;
+import com.tesis.BackV2.request.contenido.TemaRequest;
 import com.tesis.BackV2.request.contenido.UnidadRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.contenido.TemaService;
 import com.tesis.BackV2.services.contenido.UnidadServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class DocenteController {
 
     private final DistributivoServ disServ;
     private final UnidadServ uniServ;
+    private final TemaService temaServ;
 
     private final DocenteRepo repDocente;
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
@@ -80,6 +83,36 @@ public class DocenteController {
     @DeleteMapping("materia/contenido/unidad/{idUnidad}")
     public ResponseEntity<?> eliminarUnidad(@PathVariable Long idUnidad){
         return ResponseEntity.ok(uniServ.eliminarUnidad(idUnidad));
+    }
+
+    // Agregar tema a la unidad
+    @PostMapping("materia/contenido/tema")
+    public ResponseEntity<?> agregarTema (@RequestBody TemaRequest request){
+        return ResponseEntity.ok(temaServ.crearTema(request));
+    }
+
+    // Traer temas de una unidad
+    @GetMapping("materia/contenido/temas/{idUnidad}")
+    public ResponseEntity<?> obtenerTemas(@PathVariable Long idUnidad){
+        return ResponseEntity.ok(temaServ.obtenerTemas(idUnidad));
+    }
+
+    // Traer un tema
+    @GetMapping("materia/contenido/tema/{idTema}")
+    public ResponseEntity<?> obtenerTema(@PathVariable Long idTema){
+        return ResponseEntity.ok(temaServ.obtenerTema(idTema));
+    }
+
+    // Actualizar un tema
+    @PutMapping("materia/contenido/tema")
+    public ResponseEntity<?> actualizarTema(@RequestBody TemaRequest request){
+        return ResponseEntity.ok(temaServ.editarTema(request));
+    }
+
+    // Eliminar un tema
+    @DeleteMapping("materia/contenido/tema/{idTema}")
+    public ResponseEntity<?> eliminarTema(@PathVariable Long idTema){
+        return ResponseEntity.ok(temaServ.eliminarTema(idTema));
     }
 
     /*  ---------------------------- Visualización de Horario  ---------------------------- */
