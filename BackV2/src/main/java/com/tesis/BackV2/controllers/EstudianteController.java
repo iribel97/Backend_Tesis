@@ -6,6 +6,7 @@ import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.request.DistributivoRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.contenido.UnidadServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class EstudianteController {
 
     private final DistributivoServ disServ;
+    private final UnidadServ uniServ;
 
     private final JwtService jwtService;
 
     private final EstudianteRepo repEst;
-
-    /*  ---------------------------- Visualización de Horario  ---------------------------- */
 
     /*  ---------------------------- Materias  ---------------------------- */
     // Traer Materia por curso del Estudiante
@@ -41,6 +41,18 @@ public class EstudianteController {
     @GetMapping("materia/{idDistributivo}")
     public ResponseEntity<?> obtenerMateria(@PathVariable Long idDistributivo) {
         return ResponseEntity.ok(disServ.obtenerDistributivo(idDistributivo));
+    }
+
+    // Visualizar Unidades de una Materia activa
+    @GetMapping("materia/unidades/{idDistributivo}")
+    public ResponseEntity<?> listarUnidadesActivas(@PathVariable Long idDistributivo) {
+        return ResponseEntity.ok(uniServ.obtenerUnidadesActivas(idDistributivo));
+    }
+
+    // Visualizar una unidad
+    @GetMapping("materia/unidad/{idUnidad}")
+    public ResponseEntity<?> obtenerUnidad(@PathVariable Long idUnidad) {
+        return ResponseEntity.ok(uniServ.obtenerUnidadActiva(idUnidad));
     }
 
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */

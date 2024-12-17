@@ -5,7 +5,9 @@ import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.request.DistributivoRequest;
+import com.tesis.BackV2.request.contenido.UnidadRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.contenido.UnidadServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ public class DocenteController {
     private final JwtService jwtService;
 
     private final DistributivoServ disServ;
+    private final UnidadServ uniServ;
 
     private final DocenteRepo repDocente;
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
@@ -39,7 +42,6 @@ public class DocenteController {
         Docente docente = validarDocente(request);
         if (docente == null) return buildErrorResponse("No se encontró el docente", 404);
 
-
         return ResponseEntity.ok(disServ.getDistributivoByDocente(docente.getUsuario().getCedula()));
 
     }
@@ -48,6 +50,36 @@ public class DocenteController {
     @GetMapping("materia/{idDistributivo}")
     public ResponseEntity<?> obtenerMateria(@PathVariable Long idDistributivo) {
         return ResponseEntity.ok(disServ.obtenerDistributivo(idDistributivo));
+    }
+
+    // Agregar contenido a un distributivo
+    @PostMapping("materia/contenido/unidad")
+    public ResponseEntity<?> agregarUnidad (@RequestBody UnidadRequest request){
+        return ResponseEntity.ok(uniServ.crearUnidad(request));
+    }
+
+    // Traer unidades de un distributivo
+    @GetMapping("materia/contenido/unidades/{idDistributivo}")
+    public ResponseEntity<?> obtenerUnidades(@PathVariable Long idDistributivo){
+        return ResponseEntity.ok(uniServ.obtenerUnidades(idDistributivo));
+    }
+
+    // Traer una unidad
+    @GetMapping("materia/contenido/unidad/{idUnidad}")
+    public ResponseEntity<?> obtenerUnidad(@PathVariable Long idUnidad){
+        return ResponseEntity.ok(uniServ.obtenerUnidad(idUnidad));
+    }
+
+    // Actualizar una unidad
+    @PutMapping("materia/contenido/unidad")
+    public ResponseEntity<?> actualizarUnidad(@RequestBody UnidadRequest request){
+        return ResponseEntity.ok(uniServ.editarUnidad(request));
+    }
+
+    // Eliminar una unidad
+    @DeleteMapping("materia/contenido/unidad/{idUnidad}")
+    public ResponseEntity<?> eliminarUnidad(@PathVariable Long idUnidad){
+        return ResponseEntity.ok(uniServ.eliminarUnidad(idUnidad));
     }
 
     /*  ---------------------------- Visualización de Horario  ---------------------------- */
