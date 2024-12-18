@@ -83,7 +83,7 @@ public class InscripcionService {
                 .build();
     }
 
-    // Método auxiliar para construir la inscripción
+    // Metodo auxiliar para construir la inscripción
     private Inscripcion buildInscripcion(InscripcionRequest request,
                                          MultipartFile cedulaEstudiante,
                                          MultipartFile cedulaPadre,
