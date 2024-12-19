@@ -10,6 +10,7 @@ import com.tesis.BackV2.repositories.contenido.MaterialApoyoRepo;
 import com.tesis.BackV2.repositories.contenido.TemaRepo;
 import com.tesis.BackV2.repositories.documentation.DocMaterialApoyoRepo;
 import com.tesis.BackV2.request.contenido.MaterialApoyoRequest;
+import com.tesis.BackV2.request.documentation.DocumentoRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +31,7 @@ public class MaterialApoyoServ {
 
     // Crear material apoyo
     @Transactional
-    public ApiResponse<String> crearMaterialApoyo(MaterialApoyoRequest request, MultipartFile documento) {
+    public ApiResponse<String> crearMaterialApoyo(MaterialApoyoRequest request) {
 
         // Validar si el tema existe
         Tema tema = repoTema.findById(request.getIdTema())
@@ -42,11 +44,13 @@ public class MaterialApoyoServ {
 
         MaterialApoyo material = MaterialApoyo.builder()
                 .activo(request.isActivo())
-                .link(request.getLink())
-                .nombreLink("MaterialApoyo_"+tema.getTema())
+                .link(request.getLink() != null ? request.getLink() : null)
+                .nombreLink(request.getLink() != null ? "MaterialApoyo_"+tema.getTema() : null)
                 .tema(tema)
-                .documento(guardarDoc(documento, tema.getTema(), tema))
+                .documento( request.getDocumento() != null ? guardarDoc(request.getDocumento(), tema.getTema(), tema) : null)
                 .build();
+
+        repo.save(material);
 
         return ApiResponse.<String>builder()
                 .error(false)
@@ -76,21 +80,26 @@ public class MaterialApoyoServ {
                 .build());
     }
 
-    private DocMaterialApoyo guardarDoc(MultipartFile file, String titulo, Tema tema) {
+    private DocMaterialApoyo guardarDoc(DocumentoRequest file, String titulo, Tema tema) {
         try {
             String timestamp = tiempo();
-            String nombre = String.format("%s_%s_%s_v%d", "Material Apoyo", titulo, timestamp, 1);
+            String nombre = String.format("%s_%s_%s_v%d", "Material Apoyo ", titulo, timestamp, 1);
 
             DocMaterialApoyo documento = DocMaterialApoyo.builder()
                     .nombre(nombre)
-                    .contenido(file.getBytes())
-                    .mime(file.getContentType())
+                    .contenido(Base64.getDecoder().decode(file.getBase64()))
+                    .mime(file.getMime())
                     .tipoDoc("Material Apoyo")
                     .tema(tema)
                     .build();
             return repoDoc.save(documento);
-        } catch (IOException e) {
-            throw new RuntimeException("Error al leer el archivo", e);
+        } catch (RuntimeException e) {
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .codigo(500)
+                    .mensaje("Error interno")
+                    .detalles("Ha ocurrido un error al guardar el documento")
+                    .build());
         }
     }
 
