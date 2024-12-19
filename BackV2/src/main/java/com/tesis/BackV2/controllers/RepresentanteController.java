@@ -30,24 +30,14 @@ public class RepresentanteController {
     /*  ---------------------------- Gestión de Inscripciones  ---------------------------- */
     // Crear
     @PostMapping("inscripcion/estudiante")
-    public ResponseEntity<ApiResponse<?>> crearInscripcion(@ModelAttribute InscripcionRequest request,
-                                                           @RequestParam("cedulaEstudiante") MultipartFile cedulaEstudiante,
-                                                           @RequestParam("cedulaPadre")MultipartFile cedulaPadre,
-                                                           @RequestParam("cedulaMadre")MultipartFile cedulaMadre,
-                                                           @RequestParam("certificadoNotas")MultipartFile certificadoNotas,
-                                                           @RequestParam("serviciosBasicos")MultipartFile serviciosBasicos) throws IOException {
-        return ResponseEntity.ok(inscripServ.inscripcion(request, cedulaEstudiante, cedulaPadre, cedulaMadre, certificadoNotas, serviciosBasicos));
+    public ResponseEntity<ApiResponse<?>> crearInscripcion(@RequestBody InscripcionRequest request) throws IOException {
+        return ResponseEntity.ok(inscripServ.inscripcion(request));
     }
 
     // Editar
     @PutMapping("inscripcion/estudiante")
-    public ResponseEntity<ApiResponse<?>> editarInscripcion(@ModelAttribute InscripcionRequest request,
-                                                            @RequestParam("cedulaEstudiante") MultipartFile cedulaEstudiante,
-                                                            @RequestParam("cedulaPadre")MultipartFile cedulaPadre,
-                                                            @RequestParam("cedulaMadre")MultipartFile cedulaMadre,
-                                                            @RequestParam("certificadoNotas")MultipartFile certificadoNotas,
-                                                            @RequestParam("serviciosBasicos")MultipartFile serviciosBasicos) throws IOException {
-        return ResponseEntity.ok(inscripServ.editarInscripcion(request, cedulaEstudiante, cedulaPadre, cedulaMadre, certificadoNotas, serviciosBasicos));
+    public ResponseEntity<ApiResponse<?>> editarInscripcion(@RequestBody InscripcionRequest request) throws IOException {
+        return ResponseEntity.ok(inscripServ.editarInscripcion(request));
     }
 
     // Eliminar

@@ -17,6 +17,7 @@ import com.tesis.BackV2.repositories.documentation.DocumentoRepo;
 import com.tesis.BackV2.repositories.documentation.InscripPruebaAdicionalRepo;
 import com.tesis.BackV2.repositories.temp.TempMatriculaRpo;
 import com.tesis.BackV2.request.InscripcionRequest;
+import com.tesis.BackV2.request.documentation.DocumentoRequest;
 import com.tesis.BackV2.services.CorreoServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +25,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.print.Doc;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -53,16 +56,11 @@ public class InscripcionService {
     private final MensajeHtml mensaje = new MensajeHtml();
 
     // CREAR LA INSCRIPCION
-    public ApiResponse<String> inscripcion(InscripcionRequest request,
-                                           MultipartFile cedulaEstudiante,
-                                           MultipartFile cedulaPadre,
-                                           MultipartFile cedulaMadre,
-                                           MultipartFile certificadoNotas,
-                                           MultipartFile serviciosBasicos) throws IOException {
+    public ApiResponse<String> inscripcion(InscripcionRequest request) throws IOException {
         try {
             validarInscripcion(request.getCedula());
 
-            Inscripcion inscripcion = buildInscripcion(request, cedulaEstudiante, cedulaPadre, cedulaMadre, certificadoNotas, serviciosBasicos);
+            Inscripcion inscripcion = buildInscripcion(request);
 
             repo.save(inscripcion);
 
@@ -83,13 +81,8 @@ public class InscripcionService {
                 .build();
     }
 
-    // Método auxiliar para construir la inscripción
-    private Inscripcion buildInscripcion(InscripcionRequest request,
-                                         MultipartFile cedulaEstudiante,
-                                         MultipartFile cedulaPadre,
-                                         MultipartFile cedulaMadre,
-                                         MultipartFile certificadoNotas,
-                                         MultipartFile serviciosBasicos) throws IOException {
+    // Metodo auxiliar para construir la inscripción
+    private Inscripcion buildInscripcion(InscripcionRequest request) throws IOException {
         return Inscripcion.builder()
                 .cedula(request.getCedula())
                 .nombres(request.getNombres())
@@ -113,40 +106,41 @@ public class InscripcionService {
                 .fechaInscripcion(java.time.LocalDate.now())
                 .cilo(repoCicloAcademico.findTopByOrderByIdDesc())
                 .grado(repoGrado.findByNombre(request.getGrado()))
-                .cedulaEstudiante(guardarDoc(cedulaEstudiante, "cedulaEstudiante", request.getCedula()))
-                .cedulaPadre(guardarDoc(cedulaPadre, "cedulaPadre", request.getCedula()))
-                .cedulaMadre(guardarDoc(cedulaMadre, "cedulaMadre", request.getCedula()))
-                .certificadoNotas(guardarDoc(certificadoNotas, "certificadoNotas", request.getCedula()))
-                .serviciosBasicos(guardarDoc(serviciosBasicos, "serviciosBasicos", request.getCedula()))
+                .cedulaEstudiante(guardarDoc(request.getCedulaEstudiante(), "Cedula Estudiante", request.getCedula()))
+                .cedulaPadre(guardarDoc(request.getCedulaPadre(), "Cedula Padre", request.getCedula()))
+                .cedulaMadre(guardarDoc(request.getCedulaMadre(), "Cedula Madre", request.getCedula()))
+                .certificadoNotas(guardarDoc(request.getCertificadoNotas(), "Certificado Notas", request.getCedula()))
+                .serviciosBasicos(guardarDoc(request.getServiciosBasicos(), "Servicios Básicos", request.getCedula()))
                 .representante(repoRepresentante.findByUsuarioCedula(request.getRepresentanteId()))
                 .build();
     }
 
     // Métodos auxiliares para guardar documentos en sus respectivos repositorios
-    private Documento guardarDoc(MultipartFile file, String tipo, String cedulaEst) {
+    private Documento guardarDoc(DocumentoRequest request, String tipo, String cedulaEst) {
         try {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
             String nombre = String.format("%s_%s_%s_v%d", tipo, cedulaEst, timestamp, 1);
 
             Documento documento = Documento.builder()
                     .nombre(nombre)
-                    .contenido(file.getBytes())
-                    .mime(file.getContentType())
+                    .contenido(Base64.getDecoder().decode(request.getBase64()))
+                    .mime(request.getMime())
                     .tipoDoc(tipo)
                     .build();
             return repoDoc.save(documento);
-        } catch (IOException e) {
-            throw new RuntimeException("Error al leer el archivo", e);
+        } catch (RuntimeException e) {
+            throw new ApiException( ApiResponse.<String>builder()
+                    .error(true)
+                    .codigo(400)
+                    .mensaje("Error al leer el archivo")
+                    .detalles(e.getMessage())
+                    .build()
+            );
         }
     }
 
     // EDITAR LA INSCRIPCION
-    public ApiResponse<String> editarInscripcion(InscripcionRequest request,
-                                                 MultipartFile cedulaEstudiante,
-                                                 MultipartFile cedulaPadre,
-                                                 MultipartFile cedulaMadre,
-                                                 MultipartFile certificadoNotas,
-                                                 MultipartFile serviciosBasicos) throws IOException {
+    public ApiResponse<String> editarInscripcion(InscripcionRequest request) throws IOException {
         try {
             Inscripcion inscripcion = repo.findById(request.getCedula())
                     .orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
@@ -168,7 +162,7 @@ public class InscripcionService {
             actualizarInscripcion(inscripcion, request);
             repo.save(inscripcion);
 
-            actualizarDocumentos(inscripcion, cedulaEstudiante, cedulaPadre, cedulaMadre, certificadoNotas, serviciosBasicos);
+            actualizarDocumentos(inscripcion, request.getCedulaEstudiante(), request.getCedulaPadre(), request.getCedulaMadre(), request.getCertificadoNotas(), request.getServiciosBasicos());
 
             return ApiResponse.<String>builder()
                     .error(false)
@@ -210,33 +204,57 @@ public class InscripcionService {
 
     // Metodo auxiliar para actualizar documentos
     private void actualizarDocumentos(Inscripcion inscripcion,
-                                      MultipartFile cedulaEstudiante,
-                                      MultipartFile cedulaPadre,
-                                      MultipartFile cedulaMadre,
-                                      MultipartFile certificadoNotas,
-                                      MultipartFile serviciosBasicos) throws IOException {
-        if (!cedulaEstudiante.isEmpty()) {
-            Documento nuevoCedulaEstudiante = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getCedulaEstudiante(), cedulaEstudiante);
+                                      DocumentoRequest cedulaEstudiante,
+                                      DocumentoRequest cedulaPadre,
+                                      DocumentoRequest cedulaMadre,
+                                      DocumentoRequest certificadoNotas,
+                                      DocumentoRequest serviciosBasicos) throws IOException {
+
+        // Inicialización de atributos
+        Documento nuevoCedulaEstudiante, nuevoCedulaPadre, nuevoCedulaMadre, nuevoCertificadoNotas, nuevoServiciosBasicos;
+
+        if (cedulaEstudiante != null ) {
+            if (inscripcion.getCedulaEstudiante() == null) {
+                nuevoCedulaEstudiante = guardarDoc(cedulaEstudiante, "Cedula Estudiante", inscripcion.getCedula());
+            } else {
+                nuevoCedulaEstudiante = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getCedulaEstudiante(), cedulaEstudiante);
+            }
             inscripcion.setCedulaEstudiante(nuevoCedulaEstudiante);
         }
 
-        if (!cedulaPadre.isEmpty()) {
-            Documento nuevoCedulaPadre = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getCedulaPadre(), cedulaPadre);
+        if (cedulaPadre != null) {
+            if (inscripcion.getCedulaPadre() == null) {
+                nuevoCedulaPadre = guardarDoc(cedulaPadre, "Cedula Padre", inscripcion.getCedula());
+            } else {
+                nuevoCedulaPadre = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getCedulaPadre(), cedulaPadre);
+            }
             inscripcion.setCedulaPadre(nuevoCedulaPadre);
         }
 
-        if (!cedulaMadre.isEmpty()) {
-            Documento nuevoCedulaMadre = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getCedulaMadre(), cedulaMadre);
+        if (cedulaMadre != null) {
+            if (inscripcion.getCedulaMadre() == null){
+                nuevoCedulaMadre = guardarDoc(cedulaMadre, "Cedula Madre", inscripcion.getCedula());
+            } else {
+                nuevoCedulaMadre = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getCedulaMadre(), cedulaMadre);
+            }
             inscripcion.setCedulaMadre(nuevoCedulaMadre);
         }
 
-        if (!certificadoNotas.isEmpty()) {
-            Documento nuevoCertificadoNotas = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getCertificadoNotas(), certificadoNotas);
+        if (certificadoNotas != null) {
+            if (inscripcion.getCertificadoNotas() == null){
+                nuevoCertificadoNotas = guardarDoc(certificadoNotas, "Certificado Notas", inscripcion.getCedula());
+            } else {
+                nuevoCertificadoNotas = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getCertificadoNotas(), certificadoNotas);
+            }
             inscripcion.setCertificadoNotas(nuevoCertificadoNotas);
         }
 
-        if (!serviciosBasicos.isEmpty()) {
-            Documento nuevoServiciosBasicos = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getServiciosBasicos(), serviciosBasicos);
+        if (serviciosBasicos != null) {
+            if (inscripcion.getServiciosBasicos() == null) {
+                nuevoServiciosBasicos = guardarDoc(serviciosBasicos, "Servicios Básicos", inscripcion.getCedula());
+            } else {
+                nuevoServiciosBasicos = crearNuevoDocumento(inscripcion.getCedula(), inscripcion.getServiciosBasicos(), serviciosBasicos);
+            }
             inscripcion.setServiciosBasicos(nuevoServiciosBasicos);
         }
     }
@@ -537,7 +555,7 @@ public class InscripcionService {
         authService.registerEstudiante(inscripcion.getCedula(), Rol.ESTUDIANTE, EstadoUsu.Inactivo);
     }
 
-    private Documento crearNuevoDocumento(String cedula, Documento documentoActual, MultipartFile nuevoArchivo) throws IOException {
+    private Documento crearNuevoDocumento(String cedula, Documento documentoActual, DocumentoRequest nuevoArchivo) throws IOException {
         // Obtener la versión actual del documento
         String nombreActual = documentoActual.getNombre();
         long versionActual = Long.parseLong(nombreActual.substring(nombreActual.lastIndexOf("_v") + 2));
@@ -551,8 +569,8 @@ public class InscripcionService {
         // Crear el nuevo documento con el nombre actualizado
         return repoDoc.save(Documento.builder()
                 .nombre(nuevoNombre)
-                .contenido(nuevoArchivo.getBytes())
-                .mime(nuevoArchivo.getContentType())
+                .contenido(Base64.getDecoder().decode(nuevoArchivo.getBase64()))
+                .mime(nuevoArchivo.getMime())
                 .tipoDoc(documentoActual.getTipoDoc())
                 .build());
     }
