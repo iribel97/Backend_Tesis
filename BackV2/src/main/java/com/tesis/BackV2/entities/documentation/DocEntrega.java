@@ -1,5 +1,7 @@
 package com.tesis.BackV2.entities.documentation;
 
+import com.tesis.BackV2.entities.Estudiante;
+import com.tesis.BackV2.entities.contenido.Entrega;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,14 +12,22 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocCedula {
+public class DocEntrega {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Lob @Basic(fetch = FetchType.LAZY)
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
     private byte[] contenido;
     private String nombre;
     private String mime;
+    private String tipoDoc;
+
+    /* ---- ATRIBUTOS RELACIONADOS ----- */
+    @ManyToOne
+    private Estudiante estudiante;
+    @ManyToOne
+    private Entrega entrega;
 }

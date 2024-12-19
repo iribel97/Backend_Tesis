@@ -1,5 +1,6 @@
 package com.tesis.BackV2.entities.documentation;
 
+import com.tesis.BackV2.entities.contenido.Tema;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocServBasicos {
+public class DocMaterialApoyo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +22,8 @@ public class DocServBasicos {
     private byte[] contenido;
     private String nombre;
     private String mime;
+    private String tipoDoc;
+
+    @ManyToOne
+    private Tema tema;
 }

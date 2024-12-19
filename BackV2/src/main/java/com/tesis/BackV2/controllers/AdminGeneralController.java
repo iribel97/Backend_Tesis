@@ -5,15 +5,19 @@ import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.config.auth.RegisterRequest;
 import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.Grado;
+import com.tesis.BackV2.entities.config.HorarioConfig;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.request.*;
 import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.cicloacademico.*;
+import com.tesis.BackV2.services.config.HorarioConfigServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/")
@@ -25,12 +29,13 @@ public class AdminGeneralController {
     private final AuthService authServ;
     private final CicloServ cicloServ;
     private final GradoServ gradoServ;
-    private final AulaServ aulaServ;
+    private final CursoServ cursoServ;
     private final MateriaServ materiaServ;
     private final DistributivoServ distributivoServ;
     private final HorarioServ horarioServ;
     private final SisCalifServ sisCalifServ;
     private final CalendarioAcademicoServ calendarioServ;
+    private final HorarioConfigServ horarioConfigServ;
 
     /* ---------------------------- GESTION DE USUARIOS ---------------------------- */
 
@@ -52,16 +57,34 @@ public class AdminGeneralController {
         return ResponseEntity.ok(authServ.register(registerRequest, Rol.ADMIN, EstadoUsu.Inactivo));
     }
 
+    // Registrar varios usuarios de tió administrador general
+    @PostMapping("registro/admins")
+    public ResponseEntity<ApiResponse<?>> registerAdmins(@RequestBody List<RegisterRequest> registerRequests) {
+        return ResponseEntity.ok(authServ.registerList(registerRequests, Rol.ADMIN, EstadoUsu.Inactivo));
+    }
+
     // Registrar administrador operacional
     @PostMapping("registro/adminOp")
     public ResponseEntity<ApiResponse<?>> registerAdminOp(@RequestBody RegisterRequest registerRequest) {
         return ResponseEntity.ok(authServ.register(registerRequest, Rol.AOPERACIONAL, EstadoUsu.Inactivo));
     }
 
+    // Registrar varios usuarios de tipo administrador operacional
+    @PostMapping("registro/adminOps")
+    public ResponseEntity<ApiResponse<?>> registerAdminOps(@RequestBody List<RegisterRequest> registerRequests) {
+        return ResponseEntity.ok(authServ.registerList(registerRequests, Rol.AOPERACIONAL, EstadoUsu.Inactivo));
+    }
+
     // Registar docente
     @PostMapping("registro/docente")
     public ResponseEntity<ApiResponse<?>> registerDocente(@RequestBody RegisterRequest registerRequest) {
         return ResponseEntity.ok(authServ.register(registerRequest, Rol.DOCENTE, EstadoUsu.Inactivo));
+    }
+
+    // Registrar varios usuarios de tipo docente
+    @PostMapping("registro/docentes")
+    public ResponseEntity<ApiResponse<?>> registerDocentes(@RequestBody List<RegisterRequest> registerRequests) {
+        return ResponseEntity.ok(authServ.registerList(registerRequests, Rol.DOCENTE, EstadoUsu.Inactivo));
     }
 
     // Editar estado usuarios
@@ -155,6 +178,12 @@ public class AdminGeneralController {
         return ResponseEntity.ok(materiaServ.crearMateria(request));
     }
 
+    // Crear varias materias
+    @PostMapping("materias")
+    public ResponseEntity<ApiResponse<?>> crearMaterias(@RequestBody List<MateriaRequest> requests) {
+        return ResponseEntity.ok(materiaServ.crearMaterias(requests));
+    }
+
     // Traer todas
     @GetMapping("materias")
     public ResponseEntity<?> getMaterias() {
@@ -186,6 +215,12 @@ public class AdminGeneralController {
         return ResponseEntity.ok(distributivoServ.crearDistributivo(request));
     }
 
+    // Crear varios distributivos
+    @PostMapping("distributivos")
+    public ResponseEntity<ApiResponse<?>> crearDistributivos(@RequestBody List<DistributivoRequest> requests) {
+        return ResponseEntity.ok(distributivoServ.registrarDistributivos(requests));
+    }
+
     // Traer todos
     @GetMapping("distributivos")
     public ResponseEntity<?> getDistributivos() {
@@ -196,6 +231,12 @@ public class AdminGeneralController {
     @GetMapping("distributivo/{id}")
     public ResponseEntity<?> getDistributivo(@PathVariable Long id) {
         return ResponseEntity.ok(distributivoServ.obtenerDistributivo(id));
+    }
+
+    // Traer por id del curso
+    @GetMapping("distributivo/curso/{idCurso}")
+    public ResponseEntity<?> getDistributivoByCurso(@PathVariable Long idCurso) {
+        return ResponseEntity.ok(distributivoServ.getDistributivoByCurso(idCurso));
     }
 
     // Traer por id del ciclo académico
@@ -217,10 +258,29 @@ public class AdminGeneralController {
     }
 
     /* ---------------------------- VISUALIZACIÓN DE HORARIOS ---------------------------- */
-    // Traer horarios por curso
-    @GetMapping("horario/curso/{id}")
-    public ResponseEntity<?> getHorariosByCurso(@PathVariable Long id) {
-        return ResponseEntity.ok(horarioServ.getHorariosByCurso(id));
+
+    // Crear la configuración del horario
+    @PostMapping("/horario/config")
+    public ResponseEntity<ApiResponse<?>> crearHorarioConfig(@RequestBody HorarioConfig request) {
+        return ResponseEntity.ok(horarioConfigServ.crearHorarioConfig(request));
+    }
+
+    // Editar
+    @PutMapping("/horario/config")
+    public ResponseEntity<ApiResponse<?>> editarHorarioConfig(@RequestBody HorarioConfig request) {
+        return ResponseEntity.ok(horarioConfigServ.editarHorarioConfig(request));
+    }
+
+    // Listar todos
+    @GetMapping("/horarios")
+    public ResponseEntity<?> horarios() {
+        return ResponseEntity.ok(horarioConfigServ.horarios());
+    }
+
+    // Eliminar
+    @DeleteMapping("/horario/config/{id}")
+    public ResponseEntity<ApiResponse<?>> eliminarHorarioConfig(@PathVariable Long id) {
+        return ResponseEntity.ok(horarioConfigServ.eliminarHorarioConfig(id));
     }
 
     /* ---------------------------- GESTIÓN SISTEMA CALIFICACIONES ---------------------------- */

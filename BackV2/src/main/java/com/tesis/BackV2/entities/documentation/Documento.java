@@ -10,7 +10,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocCertifNota {
+public class Documento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,5 +20,5 @@ public class DocCertifNota {
     private byte[] contenido;
     private String nombre;
     private String mime;
-
+    private String tipoDoc;
 }

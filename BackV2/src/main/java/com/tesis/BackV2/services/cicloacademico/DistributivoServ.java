@@ -2,7 +2,9 @@ package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.DistributivoDTO;
+import com.tesis.BackV2.entities.Curso;
 import com.tesis.BackV2.entities.Distributivo;
+import com.tesis.BackV2.entities.Materia;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
@@ -77,6 +79,19 @@ public class DistributivoServ {
                 .build();
     }
 
+    // Registrar varios distributivos
+    @Transactional
+    public ApiResponse<String> registrarDistributivos(List<DistributivoRequest> requests) {
+        for (DistributivoRequest request : requests) {
+            crearDistributivo(request);
+        }
+        return ApiResponse.<String>builder()
+                .error(false)
+                .mensaje("Distributivos registrados con éxito.")
+                .codigo(200)
+                .build();
+    }
+
     // Traer todos
     public List<DistributivoDTO> obtenerDistributivos() {
         return distributivoRepo.findAll().stream()
@@ -102,6 +117,36 @@ public class DistributivoServ {
         return distributivoRepo.findByCicloId(id).stream()
                 .map(this::convertirADTO)
                 .toList();
+    }
+
+    // Traer por curso
+    public List<DistributivoDTO> getDistributivoByCurso(Long id) {
+        return distributivoRepo.findByCursoId(id).stream()
+                .map(this::convertirADTO)
+                .toList();
+    }
+
+    // Traer por docente
+    public List<DistributivoDTO> getDistributivoByDocente(String cedula) {
+        return distributivoRepo.findByDocente_Usuario_Cedula(cedula).stream()
+                .map(this::convertirADTO)
+                .toList();
+    }
+
+    // Traer distributivo por materia y curso
+    public DistributivoDTO getDistributivoByCursoAndMateria(Long idDistributivo) {
+
+
+        Distributivo distributivo = distributivoRepo.findById(idDistributivo)
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud incorrecta")
+                        .codigo(400)
+                        .detalles("Distributivo no encontrado")
+                        .build()
+                ));
+
+        return convertirADTO(distributivo);
     }
 
     // Actualizar

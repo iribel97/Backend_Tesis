@@ -1,9 +1,7 @@
 package com.tesis.BackV2.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.tesis.BackV2.entities.config.InscripcionConfig;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -25,4 +23,7 @@ public class CicloAcademico {
     private int cantPeriodos;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private InscripcionConfig inscripConfig;
 }

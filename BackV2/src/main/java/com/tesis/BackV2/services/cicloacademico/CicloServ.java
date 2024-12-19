@@ -2,8 +2,12 @@ package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.entities.CicloAcademico;
+import com.tesis.BackV2.entities.Grado;
+import com.tesis.BackV2.entities.Promocion;
+import com.tesis.BackV2.entities.config.InscripcionConfig;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
+import com.tesis.BackV2.repositories.config.InscripcionConfigRepo;
 import com.tesis.BackV2.request.CicloARequest;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +20,12 @@ public class CicloServ {
     private CicloAcademicoRepo cicloRepo;
     @Autowired
     private DistributivoRepo distributivoRepo;
+    @Autowired
+    private InscripcionConfigRepo insConfigRepo;
+    @Autowired
+    private PromocionRepo promocionRepo;
+    @Autowired
+    private GradoRepo gradoRepo;
 
     // Creación
     @Transactional
@@ -41,9 +51,34 @@ public class CicloServ {
                 .cantPeriodos(request.getCantPeriodos())
                 .fechaInicio(request.getFechaInicio())
                 .fechaFin(request.getFechaFin())
+                .inscripConfig(insConfigRepo.save(InscripcionConfig.builder()
+                        .requierePruebas(request.isPruebaInscrip())
+                        .fechaConfiguracion(request.getFechaInicio().atStartOfDay())
+                        .build()))
                 .build();
 
         cicloRepo.save(ciclo);
+
+        // Crear Promoción
+        Promocion prom = Promocion.builder()
+                .cicloAcademico(ciclo)
+                .nombre("Promoción " + convertirARomano(promocionRepo.findAll().size() + 1))
+                .grado(gradoRepo.findTopByOrderByIdAsc() != null ? gradoRepo.findTopByOrderByIdAsc() : null)
+                .build();
+
+        promocionRepo.save(prom);
+
+        // Actualizar grados para las promociones existentes
+        List<Promocion> promociones = promocionRepo.findAll();
+        List<Grado> grados = gradoRepo.findAll();
+
+        int minTamano = Math.min(promociones.size(), grados.size());
+
+        for (int i = 0; i < minTamano; i++) {
+            promociones.get(promociones.size()-1-i).setGrado(grados.get(i));
+            promocionRepo.save(promociones.get(promociones.size()-1-i));
+        }
+
         return ApiResponse.<String>builder()
                 .error(false)
                 .mensaje("Ciclo académico creado")
@@ -110,5 +145,18 @@ public class CicloServ {
                 .codigo(200)
                 .detalles("El ciclo académico ha sido eliminado correctamente.")
                 .build();
+    }
+
+    private String convertirARomano(int numero) {
+
+        String[] miles = {"", "M", "MM", "MMM"};
+        String[] cientos = {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+        String[] decenas = {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+        String[] unidades = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+
+        return miles[numero / 1000] +
+                cientos[(numero % 1000) / 100] +
+                decenas[(numero % 100) / 10] +
+                unidades[numero % 10];
     }
 }
