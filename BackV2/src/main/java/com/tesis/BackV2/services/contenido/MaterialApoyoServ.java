@@ -3,11 +3,12 @@ package com.tesis.BackV2.services.contenido;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.entities.contenido.MaterialApoyo;
 import com.tesis.BackV2.entities.contenido.Tema;
+import com.tesis.BackV2.entities.documentation.DocMaterialApoyo;
 import com.tesis.BackV2.entities.documentation.Documento;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.contenido.MaterialApoyoRepo;
 import com.tesis.BackV2.repositories.contenido.TemaRepo;
-import com.tesis.BackV2.repositories.documentation.DocumentoRepo;
+import com.tesis.BackV2.repositories.documentation.DocMaterialApoyoRepo;
 import com.tesis.BackV2.request.contenido.MaterialApoyoRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 public class MaterialApoyoServ {
 
     private final MaterialApoyoRepo repo;
-    private final DocumentoRepo repoDoc;
+    private final DocMaterialApoyoRepo repoDoc;
     private final TemaRepo repoTema;
 
     // Crear material apoyo
@@ -44,7 +45,7 @@ public class MaterialApoyoServ {
                 .link(request.getLink())
                 .nombreLink("MaterialApoyo_"+tema.getTema())
                 .tema(tema)
-                .documento(guardarDoc(documento, tema.getTema()))
+                .documento(guardarDoc(documento, tema.getTema(), tema))
                 .build();
 
         return ApiResponse.<String>builder()
@@ -56,7 +57,7 @@ public class MaterialApoyoServ {
     }
 
     /* ----- METODOS PROPIOS ---- */
-    private Documento crearNuevoDocumento(String titulo, Documento documentoActual, MultipartFile nuevoArchivo) throws IOException {
+    private DocMaterialApoyo crearNuevoDocumento(String titulo, DocMaterialApoyo documentoActual, MultipartFile nuevoArchivo) throws IOException {
         // Obtener la versión actual del documento
         long versionActual = Long.parseLong(documentoActual.getNombre().substring(documentoActual.getNombre().lastIndexOf("_v") + 2));
 
@@ -67,7 +68,7 @@ public class MaterialApoyoServ {
         String nuevoNombre = documentoActual.getTipoDoc() + "_" + titulo + "_" + fechaTiempo + "_v" + (versionActual + 1);
 
         // Crear el nuevo documento con el nombre actualizado
-        return repoDoc.save(Documento.builder()
+        return repoDoc.save(DocMaterialApoyo.builder()
                 .nombre(nuevoNombre)
                 .contenido(nuevoArchivo.getBytes())
                 .mime(nuevoArchivo.getContentType())
@@ -75,16 +76,17 @@ public class MaterialApoyoServ {
                 .build());
     }
 
-    private Documento guardarDoc(MultipartFile file, String titulo) {
+    private DocMaterialApoyo guardarDoc(MultipartFile file, String titulo, Tema tema) {
         try {
             String timestamp = tiempo();
             String nombre = String.format("%s_%s_%s_v%d", "Material Apoyo", titulo, timestamp, 1);
 
-            Documento documento = Documento.builder()
+            DocMaterialApoyo documento = DocMaterialApoyo.builder()
                     .nombre(nombre)
                     .contenido(file.getBytes())
                     .mime(file.getContentType())
                     .tipoDoc("Material Apoyo")
+                    .tema(tema)
                     .build();
             return repoDoc.save(documento);
         } catch (IOException e) {

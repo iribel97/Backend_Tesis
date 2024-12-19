@@ -2,6 +2,7 @@ package com.tesis.BackV2.request;
 
 import com.tesis.BackV2.enums.EstadoInscripcion;
 import com.tesis.BackV2.enums.Genero;
+import com.tesis.BackV2.request.documentation.DocumentoRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,12 +33,18 @@ public class InscripcionRequest {
     private String correoPadre;
     private String telefonoPadre;
     private String ocupacionPadre;
+    private DocumentoRequest cedulaPadre;
 
     private String nombresMadre;
     private String apellidosMadre;
     private String correoMadre;
     private String telefonoMadre;
     private String ocupacionMadre;
+    private DocumentoRequest cedulaMadre;
+
+    private DocumentoRequest cedulaEstudiante;
+    private DocumentoRequest certificadoNotas;
+    private DocumentoRequest serviciosBasicos;
 
     /* ----------------- REPRESENTANTE ----------------- */
     private String representanteId;
