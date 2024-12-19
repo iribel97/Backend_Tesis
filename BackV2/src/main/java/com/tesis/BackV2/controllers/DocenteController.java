@@ -5,9 +5,11 @@ import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.request.DistributivoRequest;
+import com.tesis.BackV2.request.contenido.MaterialApoyoRequest;
 import com.tesis.BackV2.request.contenido.TemaRequest;
 import com.tesis.BackV2.request.contenido.UnidadRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.contenido.MaterialApoyoServ;
 import com.tesis.BackV2.services.contenido.TemaService;
 import com.tesis.BackV2.services.contenido.UnidadServ;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +29,7 @@ public class DocenteController {
     private final DistributivoServ disServ;
     private final UnidadServ uniServ;
     private final TemaService temaServ;
+    private final MaterialApoyoServ matServ;
 
     private final DocenteRepo repDocente;
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
@@ -113,6 +116,12 @@ public class DocenteController {
     @DeleteMapping("materia/contenido/tema/{idTema}")
     public ResponseEntity<?> eliminarTema(@PathVariable Long idTema){
         return ResponseEntity.ok(temaServ.eliminarTema(idTema));
+    }
+
+    // Agregar material de apoyo
+    @PostMapping("materia/contenido/material")
+    public ResponseEntity<?> agregarMaterialApoyo(@RequestBody MaterialApoyoRequest request){
+        return ResponseEntity.ok(matServ.crearMaterialApoyo(request));
     }
 
     /*  ---------------------------- Visualización de Horario  ---------------------------- */
