@@ -6,6 +6,7 @@ import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.request.DistributivoRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.contenido.MaterialApoyoServ;
 import com.tesis.BackV2.services.contenido.TemaService;
 import com.tesis.BackV2.services.contenido.UnidadServ;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ public class EstudianteController {
     private final DistributivoServ disServ;
     private final UnidadServ uniServ;
     private final TemaService temaServ;
+    private final MaterialApoyoServ matServ;
 
     private final JwtService jwtService;
 
@@ -67,6 +69,12 @@ public class EstudianteController {
     @GetMapping("materia/unidad/tema/{idTema}")
     public ResponseEntity<?> obtenerTema(@PathVariable Long idTema) {
         return ResponseEntity.ok(temaServ.obtenerTemaActivo(idTema));
+    }
+
+    // Visualizar Material de Apoyo de un tema
+    @GetMapping("materia/unidad/tema/material/{idTema}")
+    public ResponseEntity<?> obtenerMaterialApoyo(@PathVariable Long idTema) {
+        return ResponseEntity.ok(matServ.obtenerPorTemaActivo(idTema, true));
     }
 
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */

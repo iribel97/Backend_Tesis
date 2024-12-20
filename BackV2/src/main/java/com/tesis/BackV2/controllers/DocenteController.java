@@ -124,6 +124,24 @@ public class DocenteController {
         return ResponseEntity.ok(matServ.crearMaterialApoyo(request));
     }
 
+    // Editar material de apoyo
+    @PutMapping("materia/contenido/material")
+    public ResponseEntity<?> editarMaterialApoyo(@RequestBody MaterialApoyoRequest request){
+        return ResponseEntity.ok(matServ.editarMaterialApoyo(request));
+    }
+
+    // Eliminar material de apoyo
+    @DeleteMapping("materia/contenido/material/{idMaterial}")
+    public ResponseEntity<?> eliminarMaterialApoyo(@PathVariable Long idMaterial){
+        return ResponseEntity.ok(matServ.eliminarMaterialApoyo(idMaterial));
+    }
+
+    // Traer material de apoyo por tema
+    @GetMapping("materia/contenido/material/{idTema}")
+    public ResponseEntity<?> obtenerMaterialApoyoPorTema(@PathVariable Long idTema){
+        return ResponseEntity.ok(matServ.obtenerPorTema(idTema));
+    }
+
     /*  ---------------------------- Visualización de Horario  ---------------------------- */
 
 

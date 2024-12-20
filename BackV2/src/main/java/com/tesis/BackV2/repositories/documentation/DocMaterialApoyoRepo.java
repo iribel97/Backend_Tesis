@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DocMaterialApoyoRepo extends JpaRepository<DocMaterialApoyo, Long> {
+
+    // Contar por tema
+    Long countByTema_Id(long idTema);
 }

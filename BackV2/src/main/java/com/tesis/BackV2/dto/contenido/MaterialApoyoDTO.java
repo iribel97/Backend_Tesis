@@ -1,6 +1,6 @@
-package com.tesis.BackV2.request.contenido;
+package com.tesis.BackV2.dto.contenido;
 
-import com.tesis.BackV2.request.documentation.DocumentoRequest;
+import com.tesis.BackV2.dto.doc.DocumentoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MaterialApoyoRequest {
+public class MaterialApoyoDTO {
 
     private long id;
     private boolean activo;
     private String link;
-    private long idTema;
-    private DocumentoRequest documento;
+    private String nombreLink;
+    private DocumentoDTO documento;
 }
