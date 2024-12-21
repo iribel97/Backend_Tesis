@@ -5,8 +5,7 @@ import com.tesis.BackV2.dto.contenido.MaterialApoyoDTO;
 import com.tesis.BackV2.dto.doc.DocumentoDTO;
 import com.tesis.BackV2.entities.contenido.MaterialApoyo;
 import com.tesis.BackV2.entities.contenido.Tema;
-import com.tesis.BackV2.entities.documentation.DocMaterialApoyo;
-import com.tesis.BackV2.entities.documentation.Documento;
+import com.tesis.BackV2.entities.documentation.DocContMateria;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.contenido.MaterialApoyoRepo;
 import com.tesis.BackV2.repositories.contenido.TemaRepo;
@@ -16,11 +15,7 @@ import com.tesis.BackV2.request.documentation.DocumentoRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 
@@ -81,7 +76,7 @@ public class MaterialApoyoServ {
         repo.save(material);
 
         if (request.getDocumento() != null) {
-            DocMaterialApoyo doc = material.getDocumento();
+            DocContMateria doc = material.getDocumento();
             doc.setContenido(Base64.getDecoder().decode(request.getDocumento().getBase64()));
             doc.setMime(request.getDocumento().getMime());
             repoDoc.save(doc);
@@ -148,14 +143,13 @@ public class MaterialApoyoServ {
     }
 
     /* ----- METODOS PROPIOS ---- */
-    private DocMaterialApoyo guardarDoc(DocumentoRequest file, String titulo, Tema tema) {
+    private DocContMateria guardarDoc(DocumentoRequest file, String titulo, Tema tema) {
         try {
-            DocMaterialApoyo documento = DocMaterialApoyo.builder()
+            DocContMateria documento = DocContMateria.builder()
                     .nombre(titulo)
                     .contenido(Base64.getDecoder().decode(file.getBase64()))
                     .mime(file.getMime())
                     .tipoDoc("Material Apoyo")
-                    .tema(tema)
                     .build();
             return repoDoc.save(documento);
         } catch (RuntimeException e) {
@@ -178,7 +172,7 @@ public class MaterialApoyoServ {
                 .build();
     }
 
-    private DocumentoDTO convertirDoc (DocMaterialApoyo doc) {
+    private DocumentoDTO convertirDoc (DocContMateria doc) {
         return DocumentoDTO.builder()
                 .id(doc.getId())
                 .nombre(doc.getNombre())

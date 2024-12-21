@@ -3,6 +3,7 @@ package com.tesis.BackV2.services.cicloacademico;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.CalendAcademDTO;
 import com.tesis.BackV2.entities.CalendarioAcademico;
+import com.tesis.BackV2.entities.CicloAcademico;
 import com.tesis.BackV2.entities.SistemaCalificacion;
 import com.tesis.BackV2.enums.TipoNivel;
 import com.tesis.BackV2.exceptions.ApiException;
@@ -35,11 +36,19 @@ public class CalendarioAcademicoServ {
         calendarioExiste(request);
         validarFechaCalendario(request);
 
+        CicloAcademico ciclo = cicloAcademicoRepo.findById(request.getCicloId()).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud inválida")
+                .codigo(404)
+                .detalles("El ciclo académico especificado no existe.")
+                .build()
+        ));
+
         CalendarioAcademico calendario = CalendarioAcademico.builder()
                 .descripcion(request.getDescripcion())
                 .fechaInicio(request.getFechaInicio())
                 .fechaFin(request.getFechaFin())
-                .ciclo(cicloAcademicoRepo.findById(request.getCicloId()).get())
+                .ciclo(ciclo)
                 .build();
 
         calendarioAcademicoRepo.save(calendario);
@@ -236,28 +245,35 @@ public class CalendarioAcademicoServ {
         }
     }
 
-    // Validar que la fecha a ingresar esté entre la fecha de inicio y fin de un ciclo académico
     public void validarFechaCalendario(CalendarioAcademicoRequest request) {
-        var ciclo = cicloAcademicoRepo.findById(request.getCicloId());
+        // Validar que el ciclo exista
+        var ciclo = cicloAcademicoRepo.findById(request.getCicloId())
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(400)
+                        .detalles("No se encontró el ciclo académico especificado.")
+                        .build()));
 
-        if (request.getFechaInicio().isBefore(ciclo.get().getFechaInicio()) || request.getFechaInicio().isAfter(ciclo.get().getFechaFin())) {
+        // Validar fecha de inicio
+        if (request.getFechaInicio() == null || request.getFechaInicio().isBefore(ciclo.getFechaInicio()) || request.getFechaInicio().isAfter(ciclo.getFechaFin())) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
                     .mensaje("Solicitud inválida")
                     .codigo(400)
                     .detalles("La fecha de inicio del calendario académico no está dentro del rango del ciclo académico.")
-                    .build()
-            );
+                    .build());
         }
 
-        if (request.getFechaFin().isBefore(ciclo.get().getFechaInicio()) || request.getFechaFin().isAfter(ciclo.get().getFechaFin())) {
+        // Validar fecha de fin
+        if (request.getFechaFin() == null || request.getFechaFin().isBefore(ciclo.getFechaInicio()) || request.getFechaFin().isAfter(ciclo.getFechaFin())) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
                     .mensaje("Solicitud inválida")
                     .codigo(400)
                     .detalles("La fecha de fin del calendario académico no está dentro del rango del ciclo académico.")
-                    .build()
-            );
+                    .build());
         }
     }
+
 }

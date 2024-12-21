@@ -1,5 +1,6 @@
 package com.tesis.BackV2.entities.documentation;
 
+import com.tesis.BackV2.entities.contenido.Asignacion;
 import com.tesis.BackV2.entities.contenido.Tema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocMaterialApoyo {
+public class DocContMateria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,5 +26,5 @@ public class DocMaterialApoyo {
     private String tipoDoc;
 
     @ManyToOne
-    private Tema tema;
+    private Asignacion asignacion;
 }
