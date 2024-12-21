@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class DocumentoDTO {
     private long id;
     private String nombre;
+    private String base64;
     private String mime;
 }

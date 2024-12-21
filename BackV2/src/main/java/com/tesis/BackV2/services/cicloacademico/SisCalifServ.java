@@ -7,6 +7,7 @@ import com.tesis.BackV2.entities.CicloAcademico;
 import com.tesis.BackV2.entities.SistemaCalificacion;
 import com.tesis.BackV2.entities.embedded.Calificacion;
 import com.tesis.BackV2.enums.TipoNivel;
+import com.tesis.BackV2.enums.TipoSistCalif;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.CalendarioAcademicoRepo;
 import com.tesis.BackV2.repositories.CicloAcademicoRepo;
@@ -17,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,14 +30,12 @@ public class SisCalifServ {
     private CicloAcademicoRepo ciclorepo;
     @Autowired
     private CalendarioAcademicoRepo calendariorepo;
-    @Autowired
-    private SistCalifRepo sistCalifRepo;
 
     // Crear
     @Transactional
     public ApiResponse<String> crearSisCalif(SisCalfRequest request) {
         int lvl1 = 0, lvl2 = 0, lvl3 = 0, lvl4 = 0;
-        String nivelaAnt = "";
+        long cant1, cant2, cant3;
         Calificacion id = new Calificacion();
 
         // Traer el ciclo
@@ -51,7 +47,26 @@ public class SisCalifServ {
         // Traer el numero de registros
         long registros = repo.countSistemasByCicloId(ciclo.getId()) + 1;
 
+
+        // Map para contar los elementos de cada nivel con tipo 'Porcentual'
+        Map<TipoNivel, Long> countPorcentualByNivel = new HashMap<>();
+
+        // Primero, contar cuántos elementos de tipo 'Porcentual' hay para cada nivel
+        for(CalfRequest calf : request.getSistemaCalificacion()) {
+            if(!calf.getNivel().equals(TipoNivel.Cuarto)) {
+                if (calf.getTipo().equals(TipoSistCalif.Porcentual)) {
+                    countPorcentualByNivel.put(calf.getNivel(), countPorcentualByNivel.getOrDefault(calf.getNivel(), 0L) + 1);
+                }
+            }
+        }
+
+        cant1 = countPorcentualByNivel.getOrDefault(TipoNivel.Primero, 0L);
+        cant2 = countPorcentualByNivel.getOrDefault(TipoNivel.Segundo, 0L);
+        cant3 = countPorcentualByNivel.getOrDefault(TipoNivel.Tercero, 0L);
+
+
         for(CalfRequest calf : request.getSistemaCalificacion()){
+            double peso = 0;
             // Instanciar el sistema de calificacion
             SistemaCalificacion sistema = new SistemaCalificacion();
             // Asignar el id
@@ -59,19 +74,23 @@ public class SisCalifServ {
                    case Primero:
                        lvl1++;
                        lvl2 = lvl3 = lvl4 = 0;
+                       peso = (double) 100 / cant1;
                        break;
                    case Segundo:
                        lvl2++;
                        lvl3 = lvl4 = 0;
+                       peso = (double) 100 / ((double) cant2 /cant1);
                        break;
                    case Tercero:
                        lvl3++;
                        lvl4 = 0;
+                       peso = (double) 100 / ((double) cant3 /cant2);
                        break;
                    case Cuarto:
                        lvl4++;
                        break;
             }
+
             id.setRegistro(registros);
             id.setLvl1(lvl1);
             id.setLvl2(lvl2);
@@ -80,11 +99,15 @@ public class SisCalifServ {
 
             sistema.setId(id);
             sistema.setCiclo(ciclo);
-            sistema.setTipo(calf.getTipo());
             sistema.setDescripcion(calf.getDescripcion());
-            sistema.setPeso(calf.getPeso());
-            sistema.setFechaInicio(calf.getFechaInicio());
-            sistema.setFechaFin(calf.getFechaFin());
+            if (!calf.getNivel().equals(TipoNivel.Cuarto)) {
+                sistema.setTipo(calf.getTipo());
+                sistema.setPeso(String.valueOf(peso));
+                sistema.setFechaInicio(calf.getFechaInicio());
+                sistema.setFechaFin(calf.getFechaFin());
+            }
+            sistema.setBase(calf.getBase());
+
 
             repo.save(sistema);
         }
@@ -187,7 +210,7 @@ public class SisCalifServ {
 
     // Traer por ciclo
     public List<SistCalfDTO> traerPorCiclo(Long cicloId){
-        List<SistemaCalificacion> sistemas = sistCalifRepo.findByCicloId(cicloId);
+        List<SistemaCalificacion> sistemas = repo.findByCicloId(cicloId);
 
         if (sistemas.isEmpty()) {
             throw new ApiException(ApiResponse.builder()

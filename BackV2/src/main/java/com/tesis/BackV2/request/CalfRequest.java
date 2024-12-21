@@ -19,6 +19,7 @@ public class CalfRequest {
     private String descripcion;
     private String peso;
     private TipoSistCalif tipo;
+    private String base;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
 }

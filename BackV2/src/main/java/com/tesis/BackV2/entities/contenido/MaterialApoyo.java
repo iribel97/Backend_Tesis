@@ -1,7 +1,6 @@
 package com.tesis.BackV2.entities.contenido;
 
-import com.tesis.BackV2.entities.documentation.DocMaterialApoyo;
-import com.tesis.BackV2.entities.documentation.Documento;
+import com.tesis.BackV2.entities.documentation.DocContMateria;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +23,7 @@ public class MaterialApoyo {
 
     /* ------ ATRIBUTOS RELACIONADOS ------ */
     @OneToOne
-    private DocMaterialApoyo documento;
+    private DocContMateria documento;
     @ManyToOne
     private Tema tema;
 }
