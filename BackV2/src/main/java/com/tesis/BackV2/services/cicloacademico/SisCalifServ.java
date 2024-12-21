@@ -2,8 +2,8 @@ package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.SistCalfDTO;
-import com.tesis.BackV2.entities.CalendarioAcademico;
 import com.tesis.BackV2.entities.CicloAcademico;
+import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.SistemaCalificacion;
 import com.tesis.BackV2.entities.embedded.Calificacion;
 import com.tesis.BackV2.enums.TipoNivel;
@@ -11,6 +11,7 @@ import com.tesis.BackV2.enums.TipoSistCalif;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.CalendarioAcademicoRepo;
 import com.tesis.BackV2.repositories.CicloAcademicoRepo;
+import com.tesis.BackV2.repositories.DistributivoRepo;
 import com.tesis.BackV2.repositories.SistCalifRepo;
 import com.tesis.BackV2.request.CalfRequest;
 import com.tesis.BackV2.request.SisCalfRequest;
@@ -28,6 +29,8 @@ public class SisCalifServ {
     private SistCalifRepo repo;
     @Autowired
     private CicloAcademicoRepo ciclorepo;
+    @Autowired
+    private DistributivoRepo distRepo;
     @Autowired
     private CalendarioAcademicoRepo calendariorepo;
 
@@ -137,7 +140,6 @@ public class SisCalifServ {
             );
         }
 
-
         for (SistemaCalificacion sistema : sistemas) {
             int lvl1 = 0, lvl2 = 0, lvl3 = 0, lvl4 = 0;
             // Actualizar el sistema de calificacion
@@ -223,8 +225,8 @@ public class SisCalifServ {
         }
 
         return sistemas.stream().map(sistema -> SistCalfDTO.builder()
-                .ciclo(sistema.getCiclo().getNombre())
                 .nivel(niveles(sistema))
+                .califID(sistema.getId())
                 .peso(sistema.getPeso())
                 .tipo(sistema.getTipo())
                 .fechaInicio(sistema.getFechaInicio())
@@ -232,6 +234,65 @@ public class SisCalifServ {
                 .build()
         ).collect(Collectors.toList());
 
+    }
+
+    //Traer para Docente
+    public List<SistCalfDTO> traerPorCicloDocente(Long id){
+
+        Distributivo distributivo = distRepo.findById(id).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud inválida")
+                .codigo(404)
+                .detalles("El distributivo especificado no existe.")
+                .build()
+        ));
+
+        List<SistemaCalificacion> sistemas = repo.findByCicloIdAndIdRegistro(distributivo.getCiclo().getId(), distributivo.getMateria().getRegistroCalificacion());
+        String detalleLvl1 = "", detalleLvl2 = "", detalleLvl3 = "";
+
+        if (sistemas.isEmpty()) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(404)
+                    .detalles("No se encontraron sistemas de calificación para el ciclo especificado.")
+                    .build()
+            );
+        }
+
+        List<SistCalfDTO> dto = new ArrayList<>();
+
+        for ( SistemaCalificacion sis : sistemas) {
+            TipoNivel nivel = niveles(sis);
+
+            switch (nivel) {
+                case Primero -> {
+                    detalleLvl1 = sis.getDescripcion();
+                }
+                case Segundo -> {
+                    detalleLvl2 = sis.getDescripcion();
+                }
+                case Tercero -> {
+                    detalleLvl3 = sis.getDescripcion();
+                    dto.add(SistCalfDTO.builder()
+                            .nivel(nivel)
+                            .descripcion(detalleLvl1 + " - " + detalleLvl2 + " - " + sis.getDescripcion())
+                            .califID(sis.getId())
+                            .base(sis.getBase())
+                            .build());
+                }
+                case Cuarto -> {
+                    dto.add(SistCalfDTO.builder()
+                            .nivel(nivel)
+                            .descripcion(detalleLvl1 + " - " + detalleLvl2 + " - " + detalleLvl3 + " - " + sis.getDescripcion())
+                            .califID(sis.getId())
+                            .base(sis.getBase())
+                            .build());
+                }
+            }
+        }
+
+        return dto;
     }
 
     /* ---------------------- METODOS PROPIOS DEL SERVICIO ---------------------------------- */

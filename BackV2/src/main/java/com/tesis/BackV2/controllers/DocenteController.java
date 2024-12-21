@@ -4,17 +4,16 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
-import com.tesis.BackV2.request.DistributivoRequest;
 import com.tesis.BackV2.request.contenido.MaterialApoyoRequest;
 import com.tesis.BackV2.request.contenido.TemaRequest;
 import com.tesis.BackV2.request.contenido.UnidadRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
 import com.tesis.BackV2.services.contenido.MaterialApoyoServ;
-import com.tesis.BackV2.services.contenido.TemaService;
+import com.tesis.BackV2.services.contenido.TemaServ;
 import com.tesis.BackV2.services.contenido.UnidadServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +27,9 @@ public class DocenteController {
 
     private final DistributivoServ disServ;
     private final UnidadServ uniServ;
-    private final TemaService temaServ;
+    private final TemaServ temaServ;
     private final MaterialApoyoServ matServ;
+    private final SisCalifServ sisCalifServ;
 
     private final DocenteRepo repDocente;
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
@@ -140,6 +140,12 @@ public class DocenteController {
     @GetMapping("materia/contenido/material/{idTema}")
     public ResponseEntity<?> obtenerMaterialApoyoPorTema(@PathVariable Long idTema){
         return ResponseEntity.ok(matServ.obtenerPorTema(idTema));
+    }
+
+    // Visualizar sistema calificaciones para asignatura
+    @GetMapping("materia/calificaciones/{idDistributivo}")
+    public ResponseEntity<?> obtenerSistemaCalificaciones(@PathVariable Long idDistributivo){
+        return ResponseEntity.ok(sisCalifServ.traerPorCicloDocente(idDistributivo));
     }
 
     /*  ---------------------------- Visualización de Horario  ---------------------------- */
