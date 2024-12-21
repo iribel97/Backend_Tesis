@@ -3,7 +3,6 @@ package com.tesis.BackV2.services.contenido;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.contenido.TemaDTO;
 import com.tesis.BackV2.entities.contenido.Tema;
-import com.tesis.BackV2.entities.contenido.Unidad;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.contenido.TemaRepo;
 import com.tesis.BackV2.repositories.contenido.UnidadRepo;
@@ -16,7 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class TemaService {
+public class TemaServ {
 
     private final TemaRepo repo;
     private final UnidadRepo repoUni;

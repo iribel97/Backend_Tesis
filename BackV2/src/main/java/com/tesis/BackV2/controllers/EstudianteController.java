@@ -4,10 +4,9 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.repositories.EstudianteRepo;
-import com.tesis.BackV2.request.DistributivoRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
 import com.tesis.BackV2.services.contenido.MaterialApoyoServ;
-import com.tesis.BackV2.services.contenido.TemaService;
+import com.tesis.BackV2.services.contenido.TemaServ;
 import com.tesis.BackV2.services.contenido.UnidadServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class EstudianteController {
 
     private final DistributivoServ disServ;
     private final UnidadServ uniServ;
-    private final TemaService temaServ;
+    private final TemaServ temaServ;
     private final MaterialApoyoServ matServ;
 
     private final JwtService jwtService;
