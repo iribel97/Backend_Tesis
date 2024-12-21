@@ -1,8 +1,10 @@
 package com.tesis.BackV2.controllers;
 
 import com.tesis.BackV2.config.jwt.JwtService;
+import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.entities.Usuario;
+import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.UsuarioRepo;
 import com.tesis.BackV2.services.UsuarioServ;
@@ -22,6 +24,13 @@ public class GeneralController {
     private final JwtService jwtService;
     private final UsuarioRepo usuarioRepo;
     private final EstudianteRepo estudianteRepo;
+    private final UsuarioServ service;
+
+    // Traer usuario por cedula
+    @GetMapping("usuario/{cedula}")
+    public ResponseEntity<UsuarioDTO> buscarUsuario(@PathVariable String cedula) throws MiExcepcion {
+        return ResponseEntity.ok(service.buscarUsuario(cedula));
+    }
 
 
     /*  ---------------------------- Visualización de Horario  ---------------------------- */
