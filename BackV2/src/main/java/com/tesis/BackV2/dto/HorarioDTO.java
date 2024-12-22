@@ -1,5 +1,7 @@
 package com.tesis.BackV2.dto;
 
+import com.tesis.BackV2.dto.horarioConfig.DiaDTO;
+import com.tesis.BackV2.dto.horarioConfig.HoraDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,13 +14,12 @@ import lombok.NoArgsConstructor;
 public class HorarioDTO {
 
     private Long id;
-    private String diaSemana;
-    private String horaInicio;
-    private String horaFin;
+    private HoraDTO horario;
+    private DiaDTO lunes;
+    private DiaDTO martes;
+    private DiaDTO miercoles;
+    private DiaDTO jueves;
+    private DiaDTO viernes;
 
-    private String ciclo;
-    private String curso;
-    private String materia;
-    private String docente;
 
 }

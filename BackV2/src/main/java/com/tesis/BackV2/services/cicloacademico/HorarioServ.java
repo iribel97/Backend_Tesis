@@ -2,6 +2,8 @@ package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.HorarioDTO;
+import com.tesis.BackV2.dto.horarioConfig.DiaDTO;
+import com.tesis.BackV2.dto.horarioConfig.HoraDTO;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Horario;
 import com.tesis.BackV2.entities.config.HorarioConfig;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -239,20 +242,70 @@ public class HorarioServ {
 
     // Traer horarios por curso
     public List<HorarioDTO> getHorariosByCurso(long id) {
-        return horarioRepo.findByDistributivoCursoId(id)
-                .stream()
-                .map(horario -> HorarioDTO.builder()
-                        .id(horario.getId())
-                        .diaSemana(horario.getDiaSemana().name())
-                        .ciclo(horario.getDistributivo().getCiclo().getNombre())
-                        .horaInicio(String.valueOf(horario.getHorario().getHoraInicio()))
-                        .horaFin(String.valueOf(horario.getHorario().getHoraFin()))
-                        .curso(horario.getDistributivo().getCurso().getGrado().getNombre() + " " + horario.getDistributivo().getCurso().getParalelo())
-                        .materia(horario.getDistributivo().getMateria().getNombre())
-                        .docente(horario.getDistributivo().getDocente().getUsuario().getNombres() + " " + horario.getDistributivo().getDocente().getUsuario().getApellidos())
-                        .build()
-                )
-                .toList();
+        List<Horario> horario = horarioRepo.findByDistributivoCursoId(id);
+        List<HorarioDTO> dto = new ArrayList<>();
+        List<HorarioConfig> config = horarioConfigRepo.findAll();
+
+        for (HorarioConfig h : config) {
+            DiaDTO lunes = null, martes = null, miercoles = null, jueves = null, viernes = null;
+
+            HoraDTO hora = HoraDTO.builder()
+                    .horaInicio(String.valueOf(h.getHoraInicio()))
+                    .horaFin(String.valueOf(h.getHoraFin()))
+                    .build();
+
+            for (Horario hor : horario) {
+
+                if (h.getId() == hor.getHorario().getId()) {
+
+                    switch (hor.getDiaSemana()) {
+                        case Lunes:
+                            lunes = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .docente(hor.getDistributivo().getDocente().getUsuario().getApellidos() + " " + hor.getDistributivo().getDocente().getUsuario().getNombres())
+                                    .build();
+                            break;
+                        case Martes:
+                            martes = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .docente(hor.getDistributivo().getDocente().getUsuario().getApellidos() + " " + hor.getDistributivo().getDocente().getUsuario().getNombres())
+                                    .build();
+                            break;
+                        case Miercoles:
+                            miercoles = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .docente(hor.getDistributivo().getDocente().getUsuario().getApellidos() + " " + hor.getDistributivo().getDocente().getUsuario().getNombres())
+                                    .build();
+                            break;
+                        case Jueves:
+                            jueves = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .docente(hor.getDistributivo().getDocente().getUsuario().getApellidos() + " " + hor.getDistributivo().getDocente().getUsuario().getNombres())
+                                    .build();
+                            break;
+                        case Viernes:
+                            viernes = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .docente(hor.getDistributivo().getDocente().getUsuario().getApellidos() + " " + hor.getDistributivo().getDocente().getUsuario().getNombres())
+                                    .build();
+                            break;
+                    }
+
+                }
+            }
+
+            dto.add(HorarioDTO.builder()
+                    .id(h.getId())
+                    .horario(hora)
+                    .lunes(lunes)
+                    .martes(martes)
+                    .miercoles(miercoles)
+                    .jueves(jueves)
+                    .viernes(viernes)
+                    .build());
+        }
+
+        return dto;
     }
 
     private boolean validarDistributivoHoras(HorarioRequest request, long idHorario) {

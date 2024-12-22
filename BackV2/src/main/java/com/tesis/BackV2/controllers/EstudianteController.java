@@ -32,12 +32,10 @@ public class EstudianteController {
     // Traer Materia por curso del Estudiante
     @GetMapping("materias")
     public ResponseEntity<?> listarMaterias(HttpServletRequest request) {
-
         Estudiante estudiante = validarEstudiante(request);
         if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
 
         return ResponseEntity.ok(disServ.getDistributivoByCurso(estudiante.getMatricula().getCurso().getId()));
-
     }
 
     // Traer una Materia que cursa un estudiante

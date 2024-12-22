@@ -4,11 +4,13 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
+import com.tesis.BackV2.request.contenido.AsignacionRequest;
 import com.tesis.BackV2.request.contenido.MaterialApoyoRequest;
 import com.tesis.BackV2.request.contenido.TemaRequest;
 import com.tesis.BackV2.request.contenido.UnidadRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
 import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
+import com.tesis.BackV2.services.contenido.AsignacionServ;
 import com.tesis.BackV2.services.contenido.MaterialApoyoServ;
 import com.tesis.BackV2.services.contenido.TemaServ;
 import com.tesis.BackV2.services.contenido.UnidadServ;
@@ -30,6 +32,7 @@ public class DocenteController {
     private final TemaServ temaServ;
     private final MaterialApoyoServ matServ;
     private final SisCalifServ sisCalifServ;
+    private final AsignacionServ asigServ;
 
     private final DocenteRepo repDocente;
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
@@ -146,6 +149,12 @@ public class DocenteController {
     @GetMapping("materia/calificaciones/{idDistributivo}")
     public ResponseEntity<?> obtenerSistemaCalificaciones(@PathVariable Long idDistributivo){
         return ResponseEntity.ok(sisCalifServ.traerPorCicloDocente(idDistributivo));
+    }
+
+    // Crear asignación
+    @PostMapping("materia/asignacion")
+    public ResponseEntity<?> crearAsignacion(@RequestBody AsignacionRequest request){
+        return ResponseEntity.ok(asigServ.crearAsignacion(request));
     }
 
     /*  ---------------------------- Visualización de Horario  ---------------------------- */
