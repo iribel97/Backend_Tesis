@@ -2,14 +2,16 @@ package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.SistCalfDTO;
-import com.tesis.BackV2.entities.CalendarioAcademico;
 import com.tesis.BackV2.entities.CicloAcademico;
+import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.SistemaCalificacion;
 import com.tesis.BackV2.entities.embedded.Calificacion;
 import com.tesis.BackV2.enums.TipoNivel;
+import com.tesis.BackV2.enums.TipoSistCalif;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.CalendarioAcademicoRepo;
 import com.tesis.BackV2.repositories.CicloAcademicoRepo;
+import com.tesis.BackV2.repositories.DistributivoRepo;
 import com.tesis.BackV2.repositories.SistCalifRepo;
 import com.tesis.BackV2.request.CalfRequest;
 import com.tesis.BackV2.request.SisCalfRequest;
@@ -17,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,15 +30,15 @@ public class SisCalifServ {
     @Autowired
     private CicloAcademicoRepo ciclorepo;
     @Autowired
-    private CalendarioAcademicoRepo calendariorepo;
+    private DistributivoRepo distRepo;
     @Autowired
-    private SistCalifRepo sistCalifRepo;
+    private CalendarioAcademicoRepo calendariorepo;
 
     // Crear
     @Transactional
     public ApiResponse<String> crearSisCalif(SisCalfRequest request) {
         int lvl1 = 0, lvl2 = 0, lvl3 = 0, lvl4 = 0;
-        String nivelaAnt = "";
+        long cant1, cant2, cant3;
         Calificacion id = new Calificacion();
 
         // Traer el ciclo
@@ -51,7 +50,26 @@ public class SisCalifServ {
         // Traer el numero de registros
         long registros = repo.countSistemasByCicloId(ciclo.getId()) + 1;
 
+
+        // Map para contar los elementos de cada nivel con tipo 'Porcentual'
+        Map<TipoNivel, Long> countPorcentualByNivel = new HashMap<>();
+
+        // Primero, contar cuántos elementos de tipo 'Porcentual' hay para cada nivel
+        for(CalfRequest calf : request.getSistemaCalificacion()) {
+            if(!calf.getNivel().equals(TipoNivel.Cuarto)) {
+                if (calf.getTipo().equals(TipoSistCalif.Porcentual)) {
+                    countPorcentualByNivel.put(calf.getNivel(), countPorcentualByNivel.getOrDefault(calf.getNivel(), 0L) + 1);
+                }
+            }
+        }
+
+        cant1 = countPorcentualByNivel.getOrDefault(TipoNivel.Primero, 0L);
+        cant2 = countPorcentualByNivel.getOrDefault(TipoNivel.Segundo, 0L);
+        cant3 = countPorcentualByNivel.getOrDefault(TipoNivel.Tercero, 0L);
+
+
         for(CalfRequest calf : request.getSistemaCalificacion()){
+            double peso = 0;
             // Instanciar el sistema de calificacion
             SistemaCalificacion sistema = new SistemaCalificacion();
             // Asignar el id
@@ -59,19 +77,23 @@ public class SisCalifServ {
                    case Primero:
                        lvl1++;
                        lvl2 = lvl3 = lvl4 = 0;
+                       peso = (double) 100 / cant1;
                        break;
                    case Segundo:
                        lvl2++;
                        lvl3 = lvl4 = 0;
+                       peso = (double) 100 / ((double) cant2 /cant1);
                        break;
                    case Tercero:
                        lvl3++;
                        lvl4 = 0;
+                       peso = (double) 100 / ((double) cant3 /cant2);
                        break;
                    case Cuarto:
                        lvl4++;
                        break;
             }
+
             id.setRegistro(registros);
             id.setLvl1(lvl1);
             id.setLvl2(lvl2);
@@ -80,11 +102,15 @@ public class SisCalifServ {
 
             sistema.setId(id);
             sistema.setCiclo(ciclo);
-            sistema.setTipo(calf.getTipo());
             sistema.setDescripcion(calf.getDescripcion());
-            sistema.setPeso(calf.getPeso());
-            sistema.setFechaInicio(calf.getFechaInicio());
-            sistema.setFechaFin(calf.getFechaFin());
+            if (!calf.getNivel().equals(TipoNivel.Cuarto)) {
+                sistema.setTipo(calf.getTipo());
+                sistema.setPeso(String.valueOf(peso));
+                sistema.setFechaInicio(calf.getFechaInicio());
+                sistema.setFechaFin(calf.getFechaFin());
+            }
+            sistema.setBase(calf.getBase());
+
 
             repo.save(sistema);
         }
@@ -113,7 +139,6 @@ public class SisCalifServ {
                     .build()
             );
         }
-
 
         for (SistemaCalificacion sistema : sistemas) {
             int lvl1 = 0, lvl2 = 0, lvl3 = 0, lvl4 = 0;
@@ -187,7 +212,7 @@ public class SisCalifServ {
 
     // Traer por ciclo
     public List<SistCalfDTO> traerPorCiclo(Long cicloId){
-        List<SistemaCalificacion> sistemas = sistCalifRepo.findByCicloId(cicloId);
+        List<SistemaCalificacion> sistemas = repo.findByCicloId(cicloId);
 
         if (sistemas.isEmpty()) {
             throw new ApiException(ApiResponse.builder()
@@ -200,8 +225,8 @@ public class SisCalifServ {
         }
 
         return sistemas.stream().map(sistema -> SistCalfDTO.builder()
-                .ciclo(sistema.getCiclo().getNombre())
                 .nivel(niveles(sistema))
+                .califID(sistema.getId())
                 .peso(sistema.getPeso())
                 .tipo(sistema.getTipo())
                 .fechaInicio(sistema.getFechaInicio())
@@ -209,6 +234,65 @@ public class SisCalifServ {
                 .build()
         ).collect(Collectors.toList());
 
+    }
+
+    //Traer para Docente
+    public List<SistCalfDTO> traerPorCicloDocente(Long id){
+
+        Distributivo distributivo = distRepo.findById(id).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .mensaje("Solicitud inválida")
+                .codigo(404)
+                .detalles("El distributivo especificado no existe.")
+                .build()
+        ));
+
+        List<SistemaCalificacion> sistemas = repo.findByCicloIdAndIdRegistro(distributivo.getCiclo().getId(), distributivo.getMateria().getRegistroCalificacion());
+        String detalleLvl1 = "", detalleLvl2 = "", detalleLvl3 = "";
+
+        if (sistemas.isEmpty()) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud inválida")
+                    .codigo(404)
+                    .detalles("No se encontraron sistemas de calificación para el ciclo especificado.")
+                    .build()
+            );
+        }
+
+        List<SistCalfDTO> dto = new ArrayList<>();
+
+        for ( SistemaCalificacion sis : sistemas) {
+            TipoNivel nivel = niveles(sis);
+
+            switch (nivel) {
+                case Primero -> {
+                    detalleLvl1 = sis.getDescripcion();
+                }
+                case Segundo -> {
+                    detalleLvl2 = sis.getDescripcion();
+                }
+                case Tercero -> {
+                    detalleLvl3 = sis.getDescripcion();
+                    dto.add(SistCalfDTO.builder()
+                            .nivel(nivel)
+                            .descripcion(detalleLvl1 + " - " + detalleLvl2 + " - " + sis.getDescripcion())
+                            .califID(sis.getId())
+                            .base(sis.getBase())
+                            .build());
+                }
+                case Cuarto -> {
+                    dto.add(SistCalfDTO.builder()
+                            .nivel(nivel)
+                            .descripcion(detalleLvl1 + " - " + detalleLvl2 + " - " + detalleLvl3 + " - " + sis.getDescripcion())
+                            .califID(sis.getId())
+                            .base(sis.getBase())
+                            .build());
+                }
+            }
+        }
+
+        return dto;
     }
 
     /* ---------------------- METODOS PROPIOS DEL SERVICIO ---------------------------------- */

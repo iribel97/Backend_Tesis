@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MaterialApoyoRequest {
 
+    private long id;
     private boolean activo;
     private String link;
     private long idTema;

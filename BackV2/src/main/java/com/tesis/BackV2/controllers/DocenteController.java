@@ -4,17 +4,18 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
-import com.tesis.BackV2.request.DistributivoRequest;
+import com.tesis.BackV2.request.contenido.AsignacionRequest;
 import com.tesis.BackV2.request.contenido.MaterialApoyoRequest;
 import com.tesis.BackV2.request.contenido.TemaRequest;
 import com.tesis.BackV2.request.contenido.UnidadRequest;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
+import com.tesis.BackV2.services.contenido.AsignacionServ;
 import com.tesis.BackV2.services.contenido.MaterialApoyoServ;
-import com.tesis.BackV2.services.contenido.TemaService;
+import com.tesis.BackV2.services.contenido.TemaServ;
 import com.tesis.BackV2.services.contenido.UnidadServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +29,10 @@ public class DocenteController {
 
     private final DistributivoServ disServ;
     private final UnidadServ uniServ;
-    private final TemaService temaServ;
+    private final TemaServ temaServ;
     private final MaterialApoyoServ matServ;
+    private final SisCalifServ sisCalifServ;
+    private final AsignacionServ asigServ;
 
     private final DocenteRepo repDocente;
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
@@ -122,6 +125,54 @@ public class DocenteController {
     @PostMapping("materia/contenido/material")
     public ResponseEntity<?> agregarMaterialApoyo(@RequestBody MaterialApoyoRequest request){
         return ResponseEntity.ok(matServ.crearMaterialApoyo(request));
+    }
+
+    // Editar material de apoyo
+    @PutMapping("materia/contenido/material")
+    public ResponseEntity<?> editarMaterialApoyo(@RequestBody MaterialApoyoRequest request){
+        return ResponseEntity.ok(matServ.editarMaterialApoyo(request));
+    }
+
+    // Eliminar material de apoyo
+    @DeleteMapping("materia/contenido/material/{idMaterial}")
+    public ResponseEntity<?> eliminarMaterialApoyo(@PathVariable Long idMaterial){
+        return ResponseEntity.ok(matServ.eliminarMaterialApoyo(idMaterial));
+    }
+
+    // Traer material de apoyo por tema
+    @GetMapping("materia/contenido/material/{idTema}")
+    public ResponseEntity<?> obtenerMaterialApoyoPorTema(@PathVariable Long idTema){
+        return ResponseEntity.ok(matServ.obtenerPorTema(idTema));
+    }
+
+    // Visualizar sistema calificaciones para asignatura
+    @GetMapping("materia/calificaciones/{idDistributivo}")
+    public ResponseEntity<?> obtenerSistemaCalificaciones(@PathVariable Long idDistributivo){
+        return ResponseEntity.ok(sisCalifServ.traerPorCicloDocente(idDistributivo));
+    }
+
+    // Crear asignación
+    @PostMapping("materia/asignacion")
+    public ResponseEntity<?> crearAsignacion(@RequestBody AsignacionRequest request){
+        return ResponseEntity.ok(asigServ.crearAsignacion(request));
+    }
+
+    // Editar asignación
+    @PutMapping("materia/asignacion")
+    public ResponseEntity<?> editarAsignacion(@RequestBody AsignacionRequest request){
+        return ResponseEntity.ok(asigServ.editarAsignacion(request));
+    }
+
+    // traer asignaciones por tema
+    @GetMapping("materia/asignaciones/{idTema}")
+    public ResponseEntity<?> traerAsignacionesPorTema(@PathVariable Long idTema){
+        return ResponseEntity.ok(asigServ.traerPorTema(idTema));
+    }
+
+    // ocultar asignación
+    @PutMapping("materia/asignacion/ocultar/{idAsignacion}")
+    public ResponseEntity<?> ocultarAsignacion(@PathVariable Long idAsignacion){
+        return ResponseEntity.ok(asigServ.ocultarAsignacion(idAsignacion));
     }
 
     /*  ---------------------------- Visualización de Horario  ---------------------------- */

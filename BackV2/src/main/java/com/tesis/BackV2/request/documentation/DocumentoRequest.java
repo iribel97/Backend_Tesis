@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DocumentoRequest {
 
+    private long id;
+    private String nombre;
     private String base64;
     private String mime;
 

@@ -45,12 +45,6 @@ public class AdminGeneralController {
         return ResponseEntity.ok(service.getUsuarios());
     }
 
-    // Traer usuario por cedula
-    @GetMapping("usuario/{cedula}")
-    public ResponseEntity<UsuarioDTO> buscarUsuario(@PathVariable String cedula) throws MiExcepcion {
-        return ResponseEntity.ok(service.buscarUsuario(cedula));
-    }
-
     // Registrar administrador general
     @PostMapping("registro/admin")
     public ResponseEntity<ApiResponse<?>> registerAdmin(@RequestBody RegisterRequest registerRequest) {
