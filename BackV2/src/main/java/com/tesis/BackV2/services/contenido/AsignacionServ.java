@@ -1,6 +1,8 @@
 package com.tesis.BackV2.services.contenido;
 
 import com.tesis.BackV2.config.ApiResponse;
+import com.tesis.BackV2.dto.contenido.AsignacionDTO;
+import com.tesis.BackV2.dto.doc.DocumentoDTO;
 import com.tesis.BackV2.entities.SistemaCalificacion;
 import com.tesis.BackV2.entities.contenido.Asignacion;
 import com.tesis.BackV2.entities.contenido.Tema;
@@ -125,6 +127,21 @@ public class AsignacionServ {
                 .build();
     }
 
+    // traer asignaciones por tema
+    public List<AsignacionDTO> traerPorTema (long idTema) {
+        return repo.findByTema_Id(idTema).stream()
+                .map(this::convertirDTO)
+                .collect(Collectors.toList());
+    }
+
+    // traer asignaciones por tema y activas
+    public List<AsignacionDTO> traerPorTemaActivo (long idTema, boolean activo) {
+        return repo.findByTema_IdAndActivo(idTema, activo).stream()
+                .map(this::convertirDTO)
+                .collect(Collectors.toList());
+    }
+
+
     /* ---- METODOS PROPIOS DEL SERVICIO ---- */
     private void validarDatos(AsignacionRequest request) {
         // Traer el tema
@@ -142,5 +159,32 @@ public class AsignacionServ {
                 .mensaje("Solicitud inválida")
                 .detalles("El sistema de calificación no ha sido encontrado")
                 .build()));
+    }
+
+    private AsignacionDTO convertirDTO (Asignacion request) {
+        return AsignacionDTO.builder()
+                .id(request.getId())
+                .activo(request.isActivo())
+                .nombre(request.getNombre())
+                .descripcion(request.getDescripcion())
+                .fechaInicio(String.valueOf(request.getFechaInicio()))
+                .horaInicio(String.valueOf(request.getHoraInicio()))
+                .fechaFin(String.valueOf(request.getFechaFin()))
+                .horaFin(String.valueOf(request.getHoraFin()))
+                .base(request.getCalif().getBase())
+                .documentos(docMatRepo.findByAsignacion_Id(request.getId()).stream()
+                        .map(this::convertirDocDTO)
+                        .collect(Collectors.toList()))
+                .build();
+
+    }
+
+    private DocumentoDTO convertirDocDTO (DocContMateria request) {
+        return DocumentoDTO.builder()
+                .id(request.getId())
+                .nombre(request.getNombre())
+                .mime(request.getMime())
+                .base64(Base64.getEncoder().encodeToString(request.getContenido()))
+                .build();
     }
 }

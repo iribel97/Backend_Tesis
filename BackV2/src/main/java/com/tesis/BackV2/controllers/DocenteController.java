@@ -157,6 +157,18 @@ public class DocenteController {
         return ResponseEntity.ok(asigServ.crearAsignacion(request));
     }
 
+    // Editar asignación
+    @PutMapping("materia/asignacion")
+    public ResponseEntity<?> editarAsignacion(@RequestBody AsignacionRequest request){
+        return ResponseEntity.ok(asigServ.editarAsignacion(request));
+    }
+
+    // traer asignaciones por tema
+    @GetMapping("materia/asignaciones/{idTema}")
+    public ResponseEntity<?> traerAsignacionesPorTema(@PathVariable Long idTema){
+        return ResponseEntity.ok(asigServ.traerPorTema(idTema));
+    }
+
     /*  ---------------------------- Visualización de Horario  ---------------------------- */
 
 
