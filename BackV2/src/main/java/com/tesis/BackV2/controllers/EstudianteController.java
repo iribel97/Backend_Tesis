@@ -5,6 +5,7 @@ import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
+import com.tesis.BackV2.services.contenido.AsignacionServ;
 import com.tesis.BackV2.services.contenido.MaterialApoyoServ;
 import com.tesis.BackV2.services.contenido.TemaServ;
 import com.tesis.BackV2.services.contenido.UnidadServ;
@@ -23,6 +24,7 @@ public class EstudianteController {
     private final UnidadServ uniServ;
     private final TemaServ temaServ;
     private final MaterialApoyoServ matServ;
+    private final AsignacionServ asigServ;
 
     private final JwtService jwtService;
 
@@ -32,12 +34,10 @@ public class EstudianteController {
     // Traer Materia por curso del Estudiante
     @GetMapping("materias")
     public ResponseEntity<?> listarMaterias(HttpServletRequest request) {
-
         Estudiante estudiante = validarEstudiante(request);
         if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
 
         return ResponseEntity.ok(disServ.getDistributivoByCurso(estudiante.getMatricula().getCurso().getId()));
-
     }
 
     // Traer una Materia que cursa un estudiante
@@ -74,6 +74,12 @@ public class EstudianteController {
     @GetMapping("materia/unidad/tema/material/{idTema}")
     public ResponseEntity<?> obtenerMaterialApoyo(@PathVariable Long idTema) {
         return ResponseEntity.ok(matServ.obtenerPorTemaActivo(idTema, true));
+    }
+
+    // Visualizar Asignaciones de un tema activo
+    @GetMapping("materia/unidad/tema/asignaciones/{idTema}")
+    public ResponseEntity<?> listarAsignacionesActivas(@PathVariable Long idTema) {
+        return ResponseEntity.ok(asigServ.traerPorTemaActivo(idTema, true));
     }
 
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */
