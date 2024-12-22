@@ -141,6 +141,28 @@ public class AsignacionServ {
                 .collect(Collectors.toList());
     }
 
+    // Ocultar asignación
+    @Transactional
+    public ApiResponse<String> ocultarAsignacion (long idAsignacion) {
+        Asignacion asignacion = repo.findById(idAsignacion).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                .error(true)
+                .codigo(400)
+                .mensaje("Solicitud inválida")
+                .detalles("La asignación con id " + idAsignacion + " no ha sido encontrada")
+                .build()));
+
+        asignacion.setActivo(false);
+
+        repo.save(asignacion);
+
+        return ApiResponse.<String>builder()
+                .error(false)
+                .codigo(200)
+                .mensaje("Asignación eliminada")
+                .detalles("La asignación ha sido eliminada exitosamente")
+                .build();
+    }
+
 
     /* ---- METODOS PROPIOS DEL SERVICIO ---- */
     private void validarDatos(AsignacionRequest request) {

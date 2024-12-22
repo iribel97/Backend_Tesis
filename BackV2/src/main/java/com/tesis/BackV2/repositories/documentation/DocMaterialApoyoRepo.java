@@ -11,4 +11,6 @@ public interface DocMaterialApoyoRepo extends JpaRepository<DocContMateria, Long
 
     // Listar por asignación
     List<DocContMateria> findByAsignacion_Id(Long idAsignacion);
+
+    void deleteByAsignacion_Id(long idAsignacion);
 }

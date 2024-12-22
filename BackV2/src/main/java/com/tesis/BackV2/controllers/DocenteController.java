@@ -169,6 +169,12 @@ public class DocenteController {
         return ResponseEntity.ok(asigServ.traerPorTema(idTema));
     }
 
+    // ocultar asignación
+    @PutMapping("materia/asignacion/ocultar/{idAsignacion}")
+    public ResponseEntity<?> ocultarAsignacion(@PathVariable Long idAsignacion){
+        return ResponseEntity.ok(asigServ.ocultarAsignacion(idAsignacion));
+    }
+
     /*  ---------------------------- Visualización de Horario  ---------------------------- */
 
 
