@@ -225,12 +225,10 @@ public class AuthService {
                     .build()
             );
         }
-        Matricula matricula = matrRep.findTopByInscripcionCedulaOrderByIdDesc(request.getCedula());
         Estudiante estudiante = Estudiante.builder()
                 .usuario(usuario)
                 .ingreso(LocalDate.now())
                 .representante(representante)
-                .matricula(matricula)
                 .promocion(promRep.findTopByGradoNombreOrderByIdDesc(request.getGrado().getNombre()))
                 .build();
         estRep.save(estudiante);

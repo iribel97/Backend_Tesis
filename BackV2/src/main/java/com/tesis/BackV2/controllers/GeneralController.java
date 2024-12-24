@@ -6,6 +6,7 @@ import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.entities.Usuario;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.repositories.EstudianteRepo;
+import com.tesis.BackV2.repositories.MatriculaRepo;
 import com.tesis.BackV2.repositories.UsuarioRepo;
 import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.cicloacademico.HorarioServ;
@@ -24,6 +25,7 @@ public class GeneralController {
     private final JwtService jwtService;
     private final UsuarioRepo usuarioRepo;
     private final EstudianteRepo estudianteRepo;
+    private final MatriculaRepo matrRepo;
     private final UsuarioServ service;
 
     // Traer usuario por cedula
@@ -44,7 +46,7 @@ public class GeneralController {
         Estudiante estudiante = estudianteRepo.findByUsuarioCedula(userCedula);
 
         if (estudiante != null) {
-            return ResponseEntity.ok(horarioServ.getHorariosByCurso(estudiante.getMatricula().getCurso().getId()));
+            return ResponseEntity.ok(horarioServ.getHorariosByCurso(matrRepo.findTopByEstudianteIdOrderByIdDesc(estudiante.getId()).getCurso().getId()));
         }
 
         return ResponseEntity.ok(horarioServ.getHorariosByCurso(idCurso));

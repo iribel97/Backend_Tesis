@@ -4,16 +4,10 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
-import com.tesis.BackV2.request.contenido.AsignacionRequest;
-import com.tesis.BackV2.request.contenido.MaterialApoyoRequest;
-import com.tesis.BackV2.request.contenido.TemaRequest;
-import com.tesis.BackV2.request.contenido.UnidadRequest;
+import com.tesis.BackV2.request.contenido.*;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
 import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
-import com.tesis.BackV2.services.contenido.AsignacionServ;
-import com.tesis.BackV2.services.contenido.MaterialApoyoServ;
-import com.tesis.BackV2.services.contenido.TemaServ;
-import com.tesis.BackV2.services.contenido.UnidadServ;
+import com.tesis.BackV2.services.contenido.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +27,7 @@ public class DocenteController {
     private final MaterialApoyoServ matServ;
     private final SisCalifServ sisCalifServ;
     private final AsignacionServ asigServ;
+    private final EntregaServ entServ;
 
     private final DocenteRepo repDocente;
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
@@ -175,7 +170,23 @@ public class DocenteController {
         return ResponseEntity.ok(asigServ.ocultarAsignacion(idAsignacion));
     }
 
-    /*  ---------------------------- Visualización de Horario  ---------------------------- */
+    // mostrar entregas
+    @GetMapping("/entregas/{idAsignacion}")
+    public ResponseEntity<?> traerEntregasPorAsignacion(@PathVariable Long idAsignacion){
+        return ResponseEntity.ok(entServ.traerPorAsignacion(idAsignacion));
+    }
+
+    // Listar entrega
+    @GetMapping("/entrega/{idEntrega}")
+    public ResponseEntity<?> traerEntregaPorId(@PathVariable Long idEntrega){
+        return ResponseEntity.ok(entServ.traerPorId(idEntrega));
+    }
+
+    // calificar entrega
+    @PutMapping("/entrega/calificar")
+    public ResponseEntity<?> calificarEntrega(@RequestBody NotaRequest nota){
+        return ResponseEntity.ok(entServ.calificarEntrega(nota));
+    }
 
 
     /* ---------------------------- Métodos Privados ---------------------------- */
