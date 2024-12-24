@@ -15,6 +15,9 @@ public interface MatriculaRepo extends JpaRepository<Matricula, Long> {
     // ultimo registro de una inscripcion
     Matricula findTopByInscripcionCedulaOrderByIdDesc(String cedula);
 
+    // Traer la última amtricula de un estudiante
+    Matricula findTopByEstudianteIdOrderByIdDesc(long id);
+
     boolean existsByInscripcionAndCiclo(Inscripcion inscripcion, CicloAcademico topByOrderByIdDesc);
 
     boolean existsByInscripcionAndCicloAndIdNot(Inscripcion inscripcion, CicloAcademico topByOrderByIdDesc, Long id);
@@ -23,4 +26,7 @@ public interface MatriculaRepo extends JpaRepository<Matricula, Long> {
     List<Matricula> findByEstado(EstadoMatricula estado);
 
     List<Matricula> findByInscripcion_Representante_Usuario_Cedula(String inscripcionRepresentanteUsuarioCedula);
+
+    // Listar estudiantes por el último ciclo académico y por curso
+    List<Matricula> findByCicloAndCurso_Id(CicloAcademico ciclo, Long idCurso);
 }

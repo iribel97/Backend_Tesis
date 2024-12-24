@@ -3,13 +3,21 @@ package com.tesis.BackV2.services.contenido;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.contenido.AsignacionDTO;
 import com.tesis.BackV2.dto.doc.DocumentoDTO;
+import com.tesis.BackV2.entities.Estudiante;
+import com.tesis.BackV2.entities.Matricula;
 import com.tesis.BackV2.entities.SistemaCalificacion;
 import com.tesis.BackV2.entities.contenido.Asignacion;
+import com.tesis.BackV2.entities.contenido.Entrega;
 import com.tesis.BackV2.entities.contenido.Tema;
 import com.tesis.BackV2.entities.documentation.DocContMateria;
+import com.tesis.BackV2.enums.EstadoEntrega;
 import com.tesis.BackV2.exceptions.ApiException;
+import com.tesis.BackV2.repositories.CicloAcademicoRepo;
+import com.tesis.BackV2.repositories.EstudianteRepo;
+import com.tesis.BackV2.repositories.MatriculaRepo;
 import com.tesis.BackV2.repositories.SistCalifRepo;
 import com.tesis.BackV2.repositories.contenido.AsignacionRepo;
+import com.tesis.BackV2.repositories.contenido.EntregaRepo;
 import com.tesis.BackV2.repositories.contenido.TemaRepo;
 import com.tesis.BackV2.repositories.documentation.DocMaterialApoyoRepo;
 import com.tesis.BackV2.request.contenido.AsignacionRequest;
@@ -18,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +39,10 @@ public class AsignacionServ {
     private final SistCalifRepo sistCalifRepo;
     private final TemaRepo temaRepo;
     private final DocMaterialApoyoRepo docMatRepo;
+    private final EntregaRepo entregaRepo;
+    private final EstudianteRepo estRepo;
+    private final MatriculaRepo matRepo;
+    private final CicloAcademicoRepo cicloRepo;
 
 
     // Crear asignación
@@ -55,6 +68,18 @@ public class AsignacionServ {
 
         Asignacion asignacionGuardada = repo.save(asignacion);
 
+        // crear asignaciones para los estudiantes vacia
+        List<Estudiante> students = estudiantes(tema.getUnidad().getDistributivo().getCurso().getId());
+        students.forEach(estudiante -> {
+            entregaRepo.save(Entrega.builder()
+                    .activo(asignacionGuardada.isActivo())
+                    .estado(EstadoEntrega.Pendiente)
+                    .asignacion(asignacionGuardada)
+                    .estudiante(estudiante)
+                    .build());
+        });
+
+
         // Guardar los documentos asociados
         if (request.getDocumentos() != null && !request.getDocumentos().isEmpty()) {
             List<DocContMateria> documentos = request.getDocumentos().stream()
@@ -69,9 +94,7 @@ public class AsignacionServ {
                         return docMatRepo.save(documento);
                     })
                     .toList();
-
         }
-
         return ApiResponse.<String>builder()
                 .error(false)
                 .codigo(200)
@@ -209,4 +232,18 @@ public class AsignacionServ {
                 .base64(Base64.getEncoder().encodeToString(request.getContenido()))
                 .build();
     }
+
+    // Crear los registros para la entrega
+    private List<Estudiante> estudiantes (Long idCurso) {
+        List<Estudiante> estudents = new ArrayList<>();
+
+        List<Matricula> matriculas = matRepo.findByCicloAndCurso_Id(cicloRepo.findTopByOrderByIdDesc(), idCurso);
+
+        matriculas.forEach(matricula -> {
+            estudents.add(estRepo.findById(matricula.getEstudiante().getId()).get());
+        });
+
+        return estudents;
+    }
+
 }
