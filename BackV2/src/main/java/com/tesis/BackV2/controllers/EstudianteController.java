@@ -87,26 +87,26 @@ public class EstudianteController {
     }
 
     // Agregar entrega a una asignación
-    @PostMapping("/asignacion/entrega")
+    @PutMapping("asignacion/entrega")
     public ResponseEntity<ApiResponse<?>> agregarEntrega(@RequestBody EntregaRequest request) {
         return ResponseEntity.ok(entServ.editarEntrega(request));
     }
 
     // Eliminar entrega de una asignación
-    @PutMapping("/asignacion/entrega/{idEntrega}")
+    @PutMapping("asignacion/entrega/{idEntrega}")
     public ResponseEntity<ApiResponse<?>> eliminarEntrega(@PathVariable Long idEntrega) {
         return ResponseEntity.ok(entServ.eliminarEntrega(idEntrega));
     }
 
     // Visualizar entregas de una asignación
-    @GetMapping("/asignacion/entregas/{idAsignacion}/{estudianteId}")
+    @GetMapping("asignacion/entregas/{idAsignacion}/{estudianteId}")
     public ResponseEntity<?> listarEntregas(@PathVariable Long idAsignacion, @PathVariable String estudianteId) {
         Estudiante estudiante = repEst.findByUsuarioCedula(estudianteId);
         return ResponseEntity.ok(entServ.traerPorAsignacionYEstudiante(idAsignacion, estudiante.getId()));
     }
 
     // Visualizar una entrega
-    @GetMapping("/asignacion/entrega/{idEntrega}")
+    @GetMapping("asignacion/entrega/{idEntrega}")
     public ResponseEntity<EntregaDTO> obtenerEntrega(@PathVariable Long idEntrega) {
         return ResponseEntity.ok(entServ.traerPorId(idEntrega));
     }
