@@ -3,17 +3,21 @@ package com.tesis.BackV2.services.contenido;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.contenido.EntregaDTO;
 import com.tesis.BackV2.dto.doc.DocumentoDTO;
+import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.contenido.Entrega;
 import com.tesis.BackV2.entities.documentation.DocEntrega;
 import com.tesis.BackV2.enums.EstadoEntrega;
 import com.tesis.BackV2.exceptions.ApiException;
+import com.tesis.BackV2.infra.MensajeHtml;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.contenido.EntregaRepo;
 import com.tesis.BackV2.repositories.documentation.DocEntregaRepo;
 import com.tesis.BackV2.request.contenido.EntregaRequest;
 import com.tesis.BackV2.request.contenido.NotaRequest;
 import com.tesis.BackV2.request.documentation.DocumentoRequest;
+import com.tesis.BackV2.services.CorreoServ;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +27,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EntregaServ {
+
+    @Autowired
+    private CorreoServ emailService;
+
+    private final MensajeHtml mensaje = new MensajeHtml();
 
     private final EntregaRepo repo;
     private final DocEntregaRepo docEntregaRepo;
@@ -39,25 +48,44 @@ public class EntregaServ {
                 .build()));
 
         entrega.setContenido(request.getContenido());
-        entrega.setEstado(!request.getContenido().isEmpty() ? EstadoEntrega.Entregado : EstadoEntrega.Pendiente);
+        if (!request.getContenido().isEmpty()) {
+            // Evaluar si la fecha que entrega es mayor a la fecha de fin de la asignación
+            if (request.getFechaEntrega().isAfter(entrega.getAsignacion().getFechaFin())) {
+                Representante representante = entrega.getEstudiante().getRepresentante();
+
+                entrega.setEstado(EstadoEntrega.Retrasado);
+
+                emailService.enviarCorreo( representante.getUsuario().getEmail(),
+                        "Entrega retrasada",
+                        mensaje.mensajeEntregaTardeAsignacion( representante.getUsuario().getApellidos() + " " + representante.getUsuario().getNombres(),
+                                entrega.getEstudiante().getUsuario().getApellidos() + " " + entrega.getEstudiante().getUsuario().getNombres(),
+                                entrega.getAsignacion().getNombre(),
+                                String.valueOf(entrega.getAsignacion().getFechaFin()),
+                                String.valueOf(request.getFechaEntrega()) )
+                );
+            } else {
+                entrega.setEstado(EstadoEntrega.Entregado);
+            }
+        }
         entrega.setFechaEntrega(request.getFechaEntrega());
         entrega.setHoraEntrega(request.getHoraEntrega());
 
         Entrega entregaGuardada = repo.save(entrega);
 
-        // Agregar documento de entrega
-        for (DocumentoRequest docRec : request.getDocumentos()) {
-            docEntregaRepo.save (
-                    DocEntrega.builder()
-                            .nombre(docRec.getNombre())
-                            .mime(docRec.getMime())
-                            .entrega(entregaGuardada)
-                            .estudiante(entregaGuardada.getEstudiante())
-                            .contenido(Base64.getDecoder().decode(docRec.getBase64()))
-                            .build()
-            );
+        if ( request.getDocumentos() != null) {
+            // Agregar documento de entrega
+            for (DocumentoRequest docRec : request.getDocumentos()) {
+                docEntregaRepo.save(
+                        DocEntrega.builder()
+                                .nombre(docRec.getNombre())
+                                .mime(docRec.getMime())
+                                .entrega(entregaGuardada)
+                                .estudiante(entregaGuardada.getEstudiante())
+                                .contenido(Base64.getDecoder().decode(docRec.getBase64()))
+                                .build()
+                );
+            }
         }
-
         return ApiResponse.<String> builder()
                 .error(false)
                 .codigo(200)
