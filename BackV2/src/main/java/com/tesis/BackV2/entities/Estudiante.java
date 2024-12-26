@@ -32,6 +32,4 @@ public class Estudiante {
     @ManyToOne
     private Representante representante;
 
-    @ManyToOne
-    private Matricula matricula;
 }

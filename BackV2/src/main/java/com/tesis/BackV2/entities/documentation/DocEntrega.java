@@ -23,7 +23,6 @@ public class DocEntrega {
     private byte[] contenido;
     private String nombre;
     private String mime;
-    private String tipoDoc;
 
     /* ---- ATRIBUTOS RELACIONADOS ----- */
     @ManyToOne

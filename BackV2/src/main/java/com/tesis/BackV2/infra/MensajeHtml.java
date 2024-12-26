@@ -611,4 +611,90 @@ public class MensajeHtml {
                 "</body>\n" +
                 "</html>\n";
     }
+
+    public String mensajeEntregaTardeAsignacion(String nombreRepresentante, String nombreEstudiante, String nombreTarea, String fechaEntrega, String fechaEntregaTarde) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "  <meta charset=\"UTF-8\">\n" +
+                "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "  <title>Entrega Tardía</title>\n" +
+                "  <style>\n" +
+                "    body {\n" +
+                "      font-family: Arial, sans-serif;\n" +
+                "      background-color: #f4f4f4;\n" +
+                "      margin: 0;\n" +
+                "      padding: 0;\n" +
+                "    }\n" +
+                "    .email-container {\n" +
+                "      max-width: 600px;\n" +
+                "      margin: 30px auto;\n" +
+                "      background-color: #ffffff;\n" +
+                "      border-radius: 10px;\n" +
+                "      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\n" +
+                "      overflow: hidden;\n" +
+                "      border: 1px solid #e6e6e6;\n" +
+                "    }\n" +
+                "    .header {\n" +
+                "      background-color: #d9534f;\n" +
+                "      color: #ffffff;\n" +
+                "      padding: 20px;\n" +
+                "      text-align: center;\n" +
+                "    }\n" +
+                "    .header h1 {\n" +
+                "      margin: 0;\n" +
+                "      font-size: 24px;\n" +
+                "    }\n" +
+                "    .content {\n" +
+                "      padding: 20px;\n" +
+                "      color: #333333;\n" +
+                "      line-height: 1.6;\n" +
+                "    }\n" +
+                "    .content p {\n" +
+                "      margin: 0 0 10px;\n" +
+                "    }\n" +
+                "    .content .highlight {\n" +
+                "      background-color: #ffeeba;\n" +
+                "      padding: 10px;\n" +
+                "      border-radius: 5px;\n" +
+                "      color: #856404;\n" +
+                "      font-weight: bold;\n" +
+                "    }\n" +
+                "    .footer {\n" +
+                "      background-color: #f8f9fa;\n" +
+                "      text-align: center;\n" +
+                "      padding: 15px;\n" +
+                "      font-size: 12px;\n" +
+                "      color: #6c757d;\n" +
+                "    }\n" +
+                "    .footer a {\n" +
+                "      color: #d9534f;\n" +
+                "      text-decoration: none;\n" +
+                "    }\n" +
+                "  </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "  <div class=\"email-container\">\n" +
+                "    <div class=\"header\">\n" +
+                "      <h1>Entrega Tardía de Tarea</h1>\n" +
+                "    </div>\n" +
+                "    <div class=\"content\">\n" +
+                "      <p>Estimado/a <strong>"+nombreRepresentante+"</strong>,</p>\n" +
+                "      <p>Le informamos que su representado/a <strong>"+nombreEstudiante+"</strong> ha entregado la siguiente tarea fuera del tiempo establecido:</p>\n" +
+                "      <div class=\"highlight\">\n" +
+                "        <p><strong>Tarea:</strong> "+nombreTarea+"</p>\n" +
+                "        <p><strong>Fecha de Entrega Programada:</strong> "+fechaEntrega+"</p>\n" +
+                "        <p><strong>Fecha de Entrega Real:</strong> "+fechaEntregaTarde+"</p>\n" +
+                "      </div>\n" +
+                "      <p>Le recordamos la importancia de cumplir con los plazos establecidos para mantener un buen desempeño académico.</p>\n" +
+                "      <p>Si tiene alguna consulta, no dude en comunicarse con nosotros.</p>\n" +
+                "    </div>\n" +
+                "    <div class=\"footer\">\n" +
+                "      <p>Este es un mensaje automático, por favor no responda a este correo.</p>\n" +
+                "      <p>Para más información, visite nuestro <a href=\"#\">sitio web</a>.</p>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</body>\n" +
+                "</html>\n";
+    }
 }

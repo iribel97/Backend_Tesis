@@ -49,6 +49,9 @@ public class MatriculaService {
         Inscripcion inscripcion = validarInscripcion(request.getCedulaEstudiante());
         validarInscripcionAceptada(inscripcion);
 
+        // traer estudiante
+        Estudiante estudiante = estRep.findByUsuarioCedula(inscripcion.getCedula());
+
         // Crear instancia de matricula
         Matricula matricula = Matricula.builder()
                 .fechaMatricula(LocalDate.now())
@@ -56,6 +59,7 @@ public class MatriculaService {
                 .inscripcion(inscripcion)
                 .grado(gradoRep.findByNombre(request.getGrado()))
                 .ciclo(ciclo)
+                .estudiante(estudiante)
                 .build();
 
         // Comprobar que la maricula existe en dicho ciclo
@@ -90,6 +94,7 @@ public class MatriculaService {
 
         matricula.setGrado(gradoRep.findByNombre(request.getGrado()));
         matricula.setInscripcion(inscripcion);
+        matricula.setEstudiante(estRep.findByUsuarioCedula(inscripcion.getCedula()));
 
         repo.save(matricula);
 
@@ -109,8 +114,6 @@ public class MatriculaService {
         Matricula matricula = validarMatricula(id);
 
         Estudiante estudiante = estRep.findByUsuarioCedula(matricula.getInscripcion().getCedula());
-        estudiante.setMatricula(null);
-        estRep.save(estudiante);
 
         Curso curso = matricula.getCurso();
         curso.setEstudiantesAsignados(curso.getEstudiantesAsignados() - 1);
@@ -118,6 +121,8 @@ public class MatriculaService {
 
         Usuario usu = estudiante.getUsuario();
         usu.setEstado(EstadoUsu.Suspendido);
+
+        usuRep.save(usu);
 
         // Eliminar Matricula
         repo.delete(matricula);
@@ -174,7 +179,6 @@ public class MatriculaService {
             Usuario estudiante = traerEstudiante(matricula.getInscripcion().getCedula());
 
             Estudiante est = estRep.findByUsuarioCedula(estudiante.getCedula());
-            est.setMatricula(matricula);
             estRep.save(est);
 
             matricula.setCurso(curso);

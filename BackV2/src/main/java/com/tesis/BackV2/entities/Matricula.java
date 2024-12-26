@@ -32,4 +32,6 @@ public class Matricula {
     private Grado grado;
     @ManyToOne(fetch = FetchType.LAZY)
     private CicloAcademico ciclo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Estudiante estudiante;
 }
