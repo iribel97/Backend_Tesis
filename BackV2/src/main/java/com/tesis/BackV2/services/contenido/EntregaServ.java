@@ -3,6 +3,7 @@ package com.tesis.BackV2.services.contenido;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.contenido.EntregaDTO;
 import com.tesis.BackV2.dto.doc.DocumentoDTO;
+import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.entities.contenido.Entrega;
 import com.tesis.BackV2.entities.documentation.DocEntrega;
 import com.tesis.BackV2.enums.EstadoEntrega;
@@ -48,13 +49,24 @@ public class EntregaServ {
 
         entrega.setContenido(request.getContenido());
         if (!request.getContenido().isEmpty()) {
-            // Evaluar si la fecha que entrega se encuentra entre las fechas de la asignación
-            if (entrega.getAsignacion().getFechaInicio().isAfter(request.getFechaEntrega()) || entrega.getAsignacion().getFechaFin().isBefore(request.getFechaEntrega())) {
-               entrega.setEstado(EstadoEntrega.Retrasado);
-               emailService.enviarCorreo(entrega.getEstudiante().getUsuario().getEmail(), "Entrega retrasada", "mensaje");
+            // Evaluar si la fecha que entrega es mayor a la fecha de fin de la asignación
+            if (request.getFechaEntrega().isAfter(entrega.getAsignacion().getFechaFin())) {
+                Representante representante = entrega.getEstudiante().getRepresentante();
+
+                entrega.setEstado(EstadoEntrega.Retrasado);
+
+                emailService.enviarCorreo( representante.getUsuario().getEmail(),
+                        "Entrega retrasada",
+                        mensaje.mensajeEntregaTardeAsignacion( representante.getUsuario().getApellidos() + " " + representante.getUsuario().getNombres(),
+                                entrega.getEstudiante().getUsuario().getApellidos() + " " + entrega.getEstudiante().getUsuario().getNombres(),
+                                entrega.getAsignacion().getNombre(),
+                                String.valueOf(entrega.getAsignacion().getFechaFin()),
+                                String.valueOf(request.getFechaEntrega()) )
+                );
+            } else {
+                entrega.setEstado(EstadoEntrega.Entregado);
             }
         }
-        entrega.setEstado(!request.getContenido().isEmpty() ? EstadoEntrega.Entregado : EstadoEntrega.Pendiente);
         entrega.setFechaEntrega(request.getFechaEntrega());
         entrega.setHoraEntrega(request.getHoraEntrega());
 
