@@ -188,6 +188,7 @@ public class AsignacionServ {
 
 
     /* ---- METODOS PROPIOS DEL SERVICIO ---- */
+    // Validar atributos
     private void validarDatos(AsignacionRequest request) {
         // Traer el tema
         temaRepo.findById(request.getIdTema()).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
@@ -206,6 +207,7 @@ public class AsignacionServ {
                 .build()));
     }
 
+    // Convertir a DTO la asignación para enviarla
     private AsignacionDTO convertirDTO (Asignacion request) {
         return AsignacionDTO.builder()
                 .id(request.getId())
@@ -224,6 +226,7 @@ public class AsignacionServ {
 
     }
 
+    // Convertir a DTO el documento
     private DocumentoDTO convertirDocDTO (DocContMateria request) {
         return DocumentoDTO.builder()
                 .id(request.getId())

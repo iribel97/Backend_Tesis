@@ -23,6 +23,7 @@ public class SistemaCalificacion {
     private String peso;
     @Enumerated(EnumType.STRING)
     private TipoSistCalif tipo;
+    private String maximo;
     private String base;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
