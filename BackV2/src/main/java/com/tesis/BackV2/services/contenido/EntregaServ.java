@@ -144,19 +144,40 @@ public class EntregaServ {
     // Calificar
     @Transactional
     public ApiResponse<String> calificarEntrega(NotaRequest request) {
-        Entrega entrega = repo.findById(request.getIdEntrega()).orElseThrow(() -> new ApiException(ApiResponse.builder()
-                .error(true)
-                .codigo(400)
-                .mensaje("Solicitud incorrecta")
-                .detalles("La entrega no ha sido encontrada")
-                .build()));
+        // Validar y obtener entrega
+        Entrega entrega = repo.findById(request.getIdEntrega())
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .codigo(400)
+                        .mensaje("Solicitud incorrecta")
+                        .detalles("La entrega no ha sido encontrada")
+                        .build()));
+
+        // Validar nota
+        if (request.getNota() == null) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .codigo(400)
+                    .mensaje("Nota no proporcionada")
+                    .detalles("La nota de la entrega no puede ser nula")
+                    .build());
+        }
 
         entrega.setNota(request.getNota());
+
+        // Verificar si la nota es menor a la base
+        if (Float.valueOf(request.getNota()) < Float.valueOf(entrega.getAsignacion().getCalif().getBase())) {
+            enviarCorreoNotaBaja(entrega, request.getNota());
+        }
+
+        // Cambiar estado de la entrega
         entrega.setEstado(EstadoEntrega.Calificado);
 
+        // Guardar la entrega actualizada
         repo.save(entrega);
 
-        return ApiResponse.<String> builder()
+        // Respuesta de éxito
+        return ApiResponse.<String>builder()
                 .error(false)
                 .codigo(200)
                 .mensaje("Entrega calificada")
@@ -207,5 +228,36 @@ public class EntregaServ {
                 .mime(doc.getMime())
                 .base64(Base64.getEncoder().encodeToString(doc.getContenido()))
                 .build();
+    }
+
+    private void enviarCorreoNotaBaja(Entrega entrega, String nota) {
+        Representante representante = entrega.getEstudiante().getRepresentante();
+        if (representante != null && representante.getUsuario() != null) {
+            String email = representante.getUsuario().getEmail();
+            if (email != null && !email.isEmpty()) {
+                try {
+                    emailService.enviarCorreo(
+                            email,
+                            "Entrega calificada",
+                            mensaje.mensajeBajaNotaEntrega(
+                                    entrega.getEstudiante().getUsuario().getApellidos() + " " +
+                                            entrega.getEstudiante().getUsuario().getNombres(),
+                                    entrega.getAsignacion().getTema().getUnidad().getDistributivo().getMateria().getNombre(),
+                                    entrega.getAsignacion().getNombre(),
+                                    nota,
+                                    String.valueOf(entrega.getAsignacion().getCalif().getBase())
+                            )
+                    );
+                } catch (Exception e) {
+                    // Manejo del error de envío de correo
+                    throw new ApiException(ApiResponse.builder()
+                            .error(true)
+                            .codigo(500)
+                            .mensaje("Solicitud invalida")
+                            .detalles("No se ha podido enviar el correo al representante")
+                            .build());
+                }
+            }
+        }
     }
 }
