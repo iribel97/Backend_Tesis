@@ -5,14 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TemaDTO {
 
-        private long id;
+        private long idTema;
         private boolean activo;
-        private String tema;
-        private String detalle;
+        private String nombreTema;
+        private String descripcion;
+        private List<MaterialApoyoDTO> materiales;
+        private List<AsignacionesDTO> asignaciones;
 }

@@ -87,7 +87,6 @@ public class AsignacionServ {
                         DocContMateria documento = DocContMateria.builder()
                                 .nombre(doc.getNombre())
                                 .mime(doc.getMime())
-                                .tipoDoc("Asignación")
                                 .contenido(Base64.getDecoder().decode(doc.getBase64()))
                                 .asignacion(asignacionGuardada)
                                 .build();
@@ -132,7 +131,6 @@ public class AsignacionServ {
                         DocContMateria documento = DocContMateria.builder()
                                 .nombre(doc.getNombre())
                                 .mime(doc.getMime())
-                                .tipoDoc("Asignación")
                                 .contenido(Base64.getDecoder().decode(doc.getBase64()))
                                 .asignacion(asignacionGuardada)
                                 .build();

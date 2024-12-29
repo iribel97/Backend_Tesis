@@ -157,10 +157,10 @@ public class TemaServ {
 
     private TemaDTO convertirADTO(Tema tema){
         return TemaDTO.builder()
-                .id(tema.getId())
+                .idTema(tema.getId())
                 .activo(tema.isActivo())
-                .tema(tema.getTema())
-                .detalle(tema.getDetalle())
+                .nombreTema(tema.getTema())
+                .descripcion(tema.getDetalle())
                 .build();
     }
 
