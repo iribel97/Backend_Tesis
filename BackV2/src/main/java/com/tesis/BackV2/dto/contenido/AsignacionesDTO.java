@@ -6,15 +6,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MaterialApoyoDTO {
+public class AsignacionesDTO {
 
-    private long idMaterial;
+    private long idAsignacion;
     private boolean activo;
-    private String link;
-    private String nombreLink;
-    private DocumentoDTO documento;
+    private String nombre;
+    private String descripcion;
+    private String fechaFin;
+    private String horaFin;
+    private List<DocumentoDTO> documentos;
 }

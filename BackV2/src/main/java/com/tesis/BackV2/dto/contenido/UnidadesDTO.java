@@ -1,20 +1,19 @@
 package com.tesis.BackV2.dto.contenido;
 
-import com.tesis.BackV2.dto.doc.DocumentoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MaterialApoyoDTO {
-
-    private long idMaterial;
+public class UnidadesDTO {
+    private long idUnidad;
     private boolean activo;
-    private String link;
-    private String nombreLink;
-    private DocumentoDTO documento;
+    private String nombre;
+    private List<TemaDTO> contenido;
 }

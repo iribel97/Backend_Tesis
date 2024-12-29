@@ -7,6 +7,7 @@ import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.MatriculaRepo;
 import com.tesis.BackV2.request.contenido.EntregaRequest;
+import com.tesis.BackV2.services.ContenidoServ;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
 import com.tesis.BackV2.services.contenido.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,11 +24,8 @@ import java.util.List;
 public class EstudianteController {
 
     private final DistributivoServ disServ;
-    private final UnidadServ uniServ;
-    private final TemaServ temaServ;
-    private final MaterialApoyoServ matServ;
-    private final AsignacionServ asigServ;
     private final EntregaServ entServ;
+    private final ContenidoServ contServ;
 
     private final JwtService jwtService;
 
@@ -44,47 +42,12 @@ public class EstudianteController {
         return ResponseEntity.ok(disServ.getDistributivoByCurso(matrRepo.findTopByEstudianteIdOrderByIdDesc(estudiante.getId()).getCurso().getId()));
     }
 
-    // Traer una Materia que cursa un estudiante
+    // visualizar contenido de materia activo
     @GetMapping("materia/{idDistributivo}")
     public ResponseEntity<?> obtenerMateria(@PathVariable Long idDistributivo) {
-        return ResponseEntity.ok(disServ.obtenerDistributivo(idDistributivo));
+        return ResponseEntity.ok(contServ.contenidoMateria(idDistributivo));
     }
 
-    // Visualizar Unidades de una Materia activa
-    @GetMapping("materia/unidades/{idDistributivo}")
-    public ResponseEntity<?> listarUnidadesActivas(@PathVariable Long idDistributivo) {
-        return ResponseEntity.ok(uniServ.obtenerUnidadesActivas(idDistributivo));
-    }
-
-    // Visualizar una unidad
-    @GetMapping("materia/unidad/{idUnidad}")
-    public ResponseEntity<?> obtenerUnidad(@PathVariable Long idUnidad) {
-        return ResponseEntity.ok(uniServ.obtenerUnidadActiva(idUnidad));
-    }
-
-    // Visualizar Temas de una Unidad activa
-    @GetMapping("materia/unidad/temas/{idUnidad}")
-    public ResponseEntity<?> listarTemasActivos(@PathVariable Long idUnidad) {
-        return ResponseEntity.ok(temaServ.obtenerTemasActivos(idUnidad));
-    }
-
-    // Visualizar un tema
-    @GetMapping("materia/unidad/tema/{idTema}")
-    public ResponseEntity<?> obtenerTema(@PathVariable Long idTema) {
-        return ResponseEntity.ok(temaServ.obtenerTemaActivo(idTema));
-    }
-
-    // Visualizar Material de Apoyo de un tema
-    @GetMapping("materia/unidad/tema/material/{idTema}")
-    public ResponseEntity<?> obtenerMaterialApoyo(@PathVariable Long idTema) {
-        return ResponseEntity.ok(matServ.obtenerPorTemaActivo(idTema, true));
-    }
-
-    // Visualizar Asignaciones de un tema activo
-    @GetMapping("materia/unidad/tema/asignaciones/{idTema}")
-    public ResponseEntity<?> listarAsignacionesActivas(@PathVariable Long idTema) {
-        return ResponseEntity.ok(asigServ.traerPorTemaActivo(idTema, true));
-    }
 
     // Agregar entrega a una asignación
     @PutMapping("asignacion/entrega")

@@ -50,7 +50,6 @@ public class SisCalifServ {
         // Traer el numero de registros
         long registros = repo.countSistemasByCicloId(ciclo.getId()) + 1;
 
-
         // Map para contar los elementos de cada nivel con tipo 'Porcentual'
         Map<TipoNivel, Long> countPorcentualByNivel = new HashMap<>();
 
@@ -66,7 +65,6 @@ public class SisCalifServ {
         cant1 = countPorcentualByNivel.getOrDefault(TipoNivel.Primero, 0L);
         cant2 = countPorcentualByNivel.getOrDefault(TipoNivel.Segundo, 0L);
         cant3 = countPorcentualByNivel.getOrDefault(TipoNivel.Tercero, 0L);
-
 
         for(CalfRequest calf : request.getSistemaCalificacion()){
             double peso = 0;
@@ -110,7 +108,7 @@ public class SisCalifServ {
                 sistema.setFechaFin(calf.getFechaFin());
             }
             sistema.setBase(calf.getBase());
-
+            sistema.setMaximo(calf.getMaximo());
 
             repo.save(sistema);
         }
@@ -168,12 +166,11 @@ public class SisCalifServ {
                     sistema.setPeso(calf.getPeso());
                     sistema.setFechaInicio(calf.getFechaInicio());
                     sistema.setFechaFin(calf.getFechaFin());
+                    sistema.setBase(calf.getBase());
+                    sistema.setMaximo(calf.getMaximo());
                     repo.save(sistema);
-
                 }
-
             }
-
         }
 
         return ApiResponse.<String>builder()
@@ -233,7 +230,6 @@ public class SisCalifServ {
                 .fechaFin(sistema.getFechaFin())
                 .build()
         ).collect(Collectors.toList());
-
     }
 
     //Traer para Docente
@@ -279,6 +275,7 @@ public class SisCalifServ {
                             .descripcion(detalleLvl1 + " - " + detalleLvl2 + " - " + sis.getDescripcion())
                             .califID(sis.getId())
                             .base(sis.getBase())
+                            .maximo(sis.getMaximo())
                             .build());
                 }
                 case Cuarto -> {
@@ -287,6 +284,7 @@ public class SisCalifServ {
                             .descripcion(detalleLvl1 + " - " + detalleLvl2 + " - " + detalleLvl3 + " - " + sis.getDescripcion())
                             .califID(sis.getId())
                             .base(sis.getBase())
+                            .maximo(sis.getMaximo())
                             .build());
                 }
             }
@@ -339,28 +337,6 @@ public class SisCalifServ {
                     .build()
             );
         }
-    }
-
-    // Validar el peso por nivel
-    private boolean validarPesoNivel(List<CalfRequest> request) {
-        double sumaPorcentual = 0, sumaNumerico = 0;
-
-        for (CalfRequest calf : request) {
-            if (calf.getNivel() == TipoNivel.Primero) {
-                switch (calf.getTipo()) {
-                    case Porcentual -> sumaPorcentual += Double.parseDouble(calf.getPeso());
-                    case Numerico -> sumaNumerico += Double.parseDouble(calf.getPeso());
-                    case Cualitativo -> {
-                        return true; // Cualitativo no requiere validación
-                    }
-                }
-            }
-        }
-
-        // Ajustar escala para pesos numéricos si es necesario
-        sumaNumerico = sumaNumerico >= 10 ? sumaNumerico * 100 : sumaNumerico;
-
-        return sumaPorcentual == 100 || sumaNumerico == 100;
     }
 
 }

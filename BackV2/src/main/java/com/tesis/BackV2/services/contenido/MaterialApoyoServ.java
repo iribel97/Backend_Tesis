@@ -149,7 +149,6 @@ public class MaterialApoyoServ {
                     .nombre(titulo)
                     .contenido(Base64.getDecoder().decode(file.getBase64()))
                     .mime(file.getMime())
-                    .tipoDoc("Material Apoyo")
                     .build();
             return repoDoc.save(documento);
         } catch (RuntimeException e) {
@@ -164,7 +163,7 @@ public class MaterialApoyoServ {
 
     private MaterialApoyoDTO convertirDTO (MaterialApoyo material) {
         return MaterialApoyoDTO.builder()
-                .id(material.getId())
+                .idMaterial(material.getId())
                 .activo(material.isActivo())
                 .link(material.getLink())
                 .nombreLink(material.getNombreLink())
