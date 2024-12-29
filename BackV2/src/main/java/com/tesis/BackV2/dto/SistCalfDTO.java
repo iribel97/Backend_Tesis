@@ -22,6 +22,7 @@ public class SistCalfDTO {
     private String peso;
     private TipoSistCalif tipo;
     private String base;
+    private String maximo;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
 }

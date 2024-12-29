@@ -697,4 +697,104 @@ public class MensajeHtml {
                 "</body>\n" +
                 "</html>\n";
     }
+
+    public String mensajeBajaNotaEntrega(String nombreEstudiante, String nombreMateria, String nombreEvaluacion, String nota, String notaMinima) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <title>Notificación de Baja Nota</title>\n" +
+                "    <style>\n" +
+                "        body {\n" +
+                "            font-family: Arial, sans-serif;\n" +
+                "            background-color: #f9f9f9;\n" +
+                "            margin: 0;\n" +
+                "            padding: 0;\n" +
+                "        }\n" +
+                "\n" +
+                "        .email-container {\n" +
+                "            max-width: 600px;\n" +
+                "            margin: 20px auto;\n" +
+                "            background-color: #ffffff;\n" +
+                "            border-radius: 8px;\n" +
+                "            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\n" +
+                "            overflow: hidden;\n" +
+                "        }\n" +
+                "\n" +
+                "        .header {\n" +
+                "            background-color: #ff4d4d;\n" +
+                "            color: #ffffff;\n" +
+                "            text-align: center;\n" +
+                "            padding: 20px;\n" +
+                "        }\n" +
+                "\n" +
+                "        .header h1 {\n" +
+                "            margin: 0;\n" +
+                "            font-size: 24px;\n" +
+                "        }\n" +
+                "\n" +
+                "        .content {\n" +
+                "            padding: 20px;\n" +
+                "            color: #333333;\n" +
+                "            line-height: 1.6;\n" +
+                "        }\n" +
+                "\n" +
+                "        .content p {\n" +
+                "            margin: 10px 0;\n" +
+                "        }\n" +
+                "\n" +
+                "        .highlight {\n" +
+                "            background-color: #ffe6e6;\n" +
+                "            border-left: 4px solid #ff4d4d;\n" +
+                "            padding: 10px;\n" +
+                "            margin: 20px 0;\n" +
+                "            border-radius: 4px;\n" +
+                "        }\n" +
+                "\n" +
+                "        .footer {\n" +
+                "            background-color: #f1f1f1;\n" +
+                "            color: #555555;\n" +
+                "            text-align: center;\n" +
+                "            padding: 15px;\n" +
+                "            font-size: 14px;\n" +
+                "        }\n" +
+                "\n" +
+                "        .footer a {\n" +
+                "            color: #ff4d4d;\n" +
+                "            text-decoration: none;\n" +
+                "        }\n" +
+                "    </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "    <div class=\"email-container\">\n" +
+                "        <div class=\"header\">\n" +
+                "            <h1>Notificación de Baja Nota</h1>\n" +
+                "        </div>\n" +
+                "\n" +
+                "        <div class=\"content\">\n" +
+                "            <p>Estimado/a representante:</p>\n" +
+                "\n" +
+                "            <p>Le informamos que el estudiante <strong>"+nombreEstudiante+"</strong> ha obtenido una calificación baja en una de sus evaluaciones recientes. Detalles de la evaluación:</p>\n" +
+                "\n" +
+                "            <div class=\"highlight\">\n" +
+                "                <p><strong>Materia:</strong> "+nombreMateria+"</p>\n" +
+                "                <p><strong>Nombre de la Asignación:</strong> "+nombreEvaluacion+"</p>\n" +
+                "                <p><strong>Calificación Obtenida:</strong> "+nota+"</p>\n" +
+                "                <p><strong>Calificación Mínima Aprobatoria:</strong> "+notaMinima+"</p>\n" +
+                "            </div>\n" +
+                "\n" +
+                "            <p>Es importante apoyar al estudiante para mejorar su desempeño académico. Si tiene alguna duda o desea coordinar una reunión, no dude en contactarnos.</p>\n" +
+                "\n" +
+                "            <p>Atentamente,</p>\n" +
+                "            <p><strong>[Nombre de la Institución]</strong></p>\n" +
+                "        </div>\n" +
+                "\n" +
+                "        <div class=\"footer\">\n" +
+                "            <p>Este es un correo generado automáticamente. Si tiene preguntas, <a href=\"mailto:soporte@institucion.com\">contáctenos aquí</a>.</p>\n" +
+                "        </div>\n" +
+                "    </div>\n" +
+                "</body>\n" +
+                "</html>\n";
+    }
 }
