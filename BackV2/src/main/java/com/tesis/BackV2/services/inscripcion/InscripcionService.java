@@ -4,6 +4,7 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.dto.InscripcionDTO;
 import com.tesis.BackV2.dto.doc.DocumentoDTO;
+import com.tesis.BackV2.entities.Curso;
 import com.tesis.BackV2.entities.Inscripcion;
 import com.tesis.BackV2.entities.Matricula;
 import com.tesis.BackV2.entities.documentation.Documento;
@@ -375,6 +376,20 @@ public class InscripcionService {
     }
 
     private void crearMatricula(Inscripcion inscripcion, String paralelo) {
+        Curso curso = repoCurso.findByParaleloAndGradoNombre(paralelo, inscripcion.getGrado().getNombre());
+
+        if (curso.getEstudiantesAsignados() > curso.getMaxEstudiantes()) {
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .codigo(400)
+                    .mensaje("Solicitud invalida")
+                    .detalles("El curso ya alcanzó el límite de estudiantes")
+                    .build());
+        }
+
+        curso.setEstudiantesAsignados(curso.getEstudiantesAsignados() + 1);
+        repoCurso.save(curso);
+
         repoMatricula.save(Matricula.builder()
                 .inscripcion(inscripcion)
                 .estado(EstadoMatricula.Matriculado)
@@ -553,6 +568,19 @@ public class InscripcionService {
     private void matricularEstudiante(Inscripcion inscripcion, String aula) {
         crearMatricula(inscripcion, aula);
         authService.registerEstudiante(inscripcion.getCedula(), Rol.ESTUDIANTE, EstadoUsu.Inactivo);
+
+        // Enviar correo de confirmación de matrícula
+        String destinatario = inscripcion.getRepresentante().getUsuario().getEmail();
+        String asunto = "Inscripción completada con éxito";
+        String mensajeCorreo = this.mensaje.mensajeAprobacionIns(
+                inscripcion.getRepresentante().getUsuario().getApellidos() + " " + inscripcion.getRepresentante().getUsuario().getNombres(),
+                inscripcion.getNombres() + " " + inscripcion.getApellidos(),
+                inscripcion.getGrado().getNombre() + " " + aula,
+                String.valueOf(inscripcion.getCilo().getFechaInicio())
+        );
+
+        emailService.enviarCorreo(destinatario, asunto, mensajeCorreo);
+
     }
 
     private Documento crearNuevoDocumento(String cedula, Documento documentoActual, DocumentoRequest nuevoArchivo) throws IOException {

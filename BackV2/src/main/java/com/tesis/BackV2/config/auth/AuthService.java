@@ -231,7 +231,12 @@ public class AuthService {
                 .representante(representante)
                 .promocion(promRep.findTopByGradoNombreOrderByIdDesc(request.getGrado().getNombre()))
                 .build();
-        estRep.save(estudiante);
+
+        Matricula matricula = matrRep.findTopByInscripcionCedulaOrderByIdDesc(request.getCedula());
+        matricula.setEstudiante(estRep.save(estudiante));
+
+        matrRep.save(matricula);
+
     }
 
     private void crearYGuardarRepresentante(RegisterRequest request, Usuario usuario) {
