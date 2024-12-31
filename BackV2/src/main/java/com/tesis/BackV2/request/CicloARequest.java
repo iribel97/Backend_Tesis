@@ -19,4 +19,5 @@ public class CicloARequest {
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private boolean pruebaInscrip;
+    private boolean activo;
 }

@@ -23,6 +23,7 @@ public class CicloAcademico {
     private int cantPeriodos;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
+    private boolean activo;
 
     @OneToOne(fetch = FetchType.LAZY)
     private InscripcionConfig inscripConfig;

@@ -17,4 +17,6 @@ public class AsistenciaRequest {
         private Long id;
         private EstadoAsistencia estado;
         private LocalDate fecha;
+        private long horarioID;
+        private String cedulaEstudiante;
 }
