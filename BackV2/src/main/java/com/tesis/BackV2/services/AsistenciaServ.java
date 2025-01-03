@@ -58,7 +58,7 @@ public class AsistenciaServ {
         validarRequest(request);
 
         Asistencia asistencia = repo.findById(request.getId()).orElseThrow(() ->
-                new ApiException(ApiResponse.<String> builder()
+                new ApiException(ApiResponse.<String>builder()
                         .error(true)
                         .codigo(400)
                         .mensaje("Error de validación")
@@ -69,7 +69,7 @@ public class AsistenciaServ {
         asistencia.setFecha(request.getFecha());
         asistencia.setEstudiante(repoEst.findByUsuarioCedula(request.getCedulaEstudiante()));
         asistencia.setHorario(repoHor.findById(request.getHorarioID()).orElseThrow(() ->
-                new ApiException(ApiResponse.<String> builder()
+                new ApiException(ApiResponse.<String>builder()
                         .error(true)
                         .codigo(400)
                         .mensaje("Error de validación")
@@ -78,7 +78,7 @@ public class AsistenciaServ {
 
         repo.save(asistencia);
 
-        return ApiResponse.<String> builder()
+        return ApiResponse.<String>builder()
                 .error(false)
                 .codigo(200)
                 .mensaje("Solicitud exitosa")
