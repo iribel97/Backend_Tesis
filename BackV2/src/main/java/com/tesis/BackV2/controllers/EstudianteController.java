@@ -26,6 +26,7 @@ public class EstudianteController {
     private final DistributivoServ disServ;
     private final EntregaServ entServ;
     private final ContenidoServ contServ;
+    private final AsignacionServ asigServ;
 
     private final JwtService jwtService;
 
@@ -46,6 +47,12 @@ public class EstudianteController {
     @GetMapping("materia/{idDistributivo}")
     public ResponseEntity<?> obtenerMateria(@PathVariable Long idDistributivo) {
         return ResponseEntity.ok(contServ.contenidoMateria(idDistributivo));
+    }
+
+    // visuqalizar asignacion
+    @GetMapping("asignacion/{idAsignacion}")
+    public ResponseEntity<?> obtenerAsignacion(@PathVariable Long idAsignacion) {
+        return ResponseEntity.ok(asigServ.traerPorId(idAsignacion));
     }
 
 

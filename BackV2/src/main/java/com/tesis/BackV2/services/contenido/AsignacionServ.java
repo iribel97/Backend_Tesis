@@ -162,6 +162,16 @@ public class AsignacionServ {
                 .collect(Collectors.toList());
     }
 
+    // traer asignacion por id
+    public AsignacionDTO traerPorId (long idAsignacion) {
+        return convertirDTO(repo.findById(idAsignacion).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                .error(true)
+                .codigo(400)
+                .mensaje("Solicitud inválida")
+                .detalles("La asignación con id " + idAsignacion + " no ha sido encontrada")
+                .build())));
+    }
+
     // Ocultar asignación
     @Transactional
     public ApiResponse<String> ocultarAsignacion (long idAsignacion) {
