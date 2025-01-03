@@ -68,11 +68,24 @@ public class ContenidoServ {
         List<AgendaDTO> angendas = new ArrayList<>();
 
         for (Horario horario : horarios) {
-            angendas.add(AgendaDTO.builder()
-                    .dia(horario.getDiaSemana())
-                    .horaInicio(String.valueOf(horario.getHorario().getHoraInicio()))
-                    .horaFin(String.valueOf(horario.getHorario().getHoraFin()))
-                    .build());
+            if ( angendas.isEmpty() ) {
+                angendas.add(AgendaDTO.builder()
+                        .dia(horario.getDiaSemana())
+                        .horaInicio(String.valueOf(horario.getHorario().getHoraInicio()))
+                        .horaFin(String.valueOf(horario.getHorario().getHoraFin()))
+                        .build());
+            } else {
+                for (AgendaDTO agenda : angendas) {
+                    if (agenda.getDia().equals(horario.getDiaSemana())) {
+                        agenda.setHoraFin(String.valueOf(horario.getHorario().getHoraFin()));
+                    }
+                }
+                angendas.add(AgendaDTO.builder()
+                        .dia(horario.getDiaSemana())
+                        .horaInicio(String.valueOf(horario.getHorario().getHoraInicio()))
+                        .horaFin(String.valueOf(horario.getHorario().getHoraFin()))
+                        .build());
+            }
         }
 
         return angendas;
