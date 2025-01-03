@@ -226,7 +226,7 @@ public class AsignacionServ {
                 .horaInicio(String.valueOf(request.getHoraInicio()))
                 .fechaFin(String.valueOf(request.getFechaFin()))
                 .horaFin(String.valueOf(request.getHoraFin()))
-                .base(request.getCalif().getBase())
+                .notaMax(request.getCalif().getMaximo())
                 .documentos(docMatRepo.findByAsignacion_Id(request.getId()).stream()
                         .map(this::convertirDocDTO)
                         .collect(Collectors.toList()))
