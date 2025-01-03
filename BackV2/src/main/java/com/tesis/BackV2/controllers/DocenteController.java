@@ -5,6 +5,7 @@ import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.request.contenido.*;
+import com.tesis.BackV2.services.ContenidoServ;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
 import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
 import com.tesis.BackV2.services.contenido.*;
@@ -21,13 +22,9 @@ public class DocenteController {
 
     private final JwtService jwtService;
 
+    private final ContenidoServ contServ;
     private final DistributivoServ disServ;
-    private final UnidadServ uniServ;
-    private final TemaServ temaServ;
-    private final MaterialApoyoServ matServ;
     private final SisCalifServ sisCalifServ;
-    private final AsignacionServ asigServ;
-    private final EntregaServ entServ;
 
     private final DocenteRepo repDocente;
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
@@ -59,85 +56,55 @@ public class DocenteController {
     // Agregar contenido a un distributivo
     @PostMapping("materia/contenido/unidad")
     public ResponseEntity<?> agregarUnidad (@RequestBody UnidadRequest request){
-        return ResponseEntity.ok(uniServ.crearUnidad(request));
-    }
-
-    // Traer unidades de un distributivo
-    @GetMapping("materia/contenido/unidades/{idDistributivo}")
-    public ResponseEntity<?> obtenerUnidades(@PathVariable Long idDistributivo){
-        return ResponseEntity.ok(uniServ.obtenerUnidades(idDistributivo));
-    }
-
-    // Traer una unidad
-    @GetMapping("materia/contenido/unidad/{idUnidad}")
-    public ResponseEntity<?> obtenerUnidad(@PathVariable Long idUnidad){
-        return ResponseEntity.ok(uniServ.obtenerUnidad(idUnidad));
+        return ResponseEntity.ok(contServ.crearUnidad(request));
     }
 
     // Actualizar una unidad
     @PutMapping("materia/contenido/unidad")
     public ResponseEntity<?> actualizarUnidad(@RequestBody UnidadRequest request){
-        return ResponseEntity.ok(uniServ.editarUnidad(request));
+        return ResponseEntity.ok(contServ.editarUnidad(request));
     }
 
     // Eliminar una unidad
     @DeleteMapping("materia/contenido/unidad/{idUnidad}")
     public ResponseEntity<?> eliminarUnidad(@PathVariable Long idUnidad){
-        return ResponseEntity.ok(uniServ.eliminarUnidad(idUnidad));
+        return ResponseEntity.ok(contServ.eliminarUnidad(idUnidad));
     }
 
     // Agregar tema a la unidad
     @PostMapping("materia/contenido/tema")
     public ResponseEntity<?> agregarTema (@RequestBody TemaRequest request){
-        return ResponseEntity.ok(temaServ.crearTema(request));
-    }
-
-    // Traer temas de una unidad
-    @GetMapping("materia/contenido/temas/{idUnidad}")
-    public ResponseEntity<?> obtenerTemas(@PathVariable Long idUnidad){
-        return ResponseEntity.ok(temaServ.obtenerTemas(idUnidad));
-    }
-
-    // Traer un tema
-    @GetMapping("materia/contenido/tema/{idTema}")
-    public ResponseEntity<?> obtenerTema(@PathVariable Long idTema){
-        return ResponseEntity.ok(temaServ.obtenerTema(idTema));
+        return ResponseEntity.ok(contServ.crearTema(request));
     }
 
     // Actualizar un tema
     @PutMapping("materia/contenido/tema")
     public ResponseEntity<?> actualizarTema(@RequestBody TemaRequest request){
-        return ResponseEntity.ok(temaServ.editarTema(request));
+        return ResponseEntity.ok(contServ.editarTema(request));
     }
 
     // Eliminar un tema
     @DeleteMapping("materia/contenido/tema/{idTema}")
     public ResponseEntity<?> eliminarTema(@PathVariable Long idTema){
-        return ResponseEntity.ok(temaServ.eliminarTema(idTema));
+        return ResponseEntity.ok(contServ.eliminarTema(idTema));
     }
 
     // Agregar material de apoyo
     @PostMapping("materia/contenido/material")
     public ResponseEntity<?> agregarMaterialApoyo(@RequestBody MaterialApoyoRequest request){
-        return ResponseEntity.ok(matServ.crearMaterialApoyo(request));
+        return ResponseEntity.ok(contServ.crearMaterialApoyo(request));
     }
 
     // Editar material de apoyo
     @PutMapping("materia/contenido/material")
     public ResponseEntity<?> editarMaterialApoyo(@RequestBody MaterialApoyoRequest request){
-        return ResponseEntity.ok(matServ.editarMaterialApoyo(request));
+        return ResponseEntity.ok(contServ.editarMaterialApoyo(request));
     }
 
     // Eliminar material de apoyo
     @DeleteMapping("materia/contenido/material/{idMaterial}")
     public ResponseEntity<?> eliminarMaterialApoyo(@PathVariable Long idMaterial){
-        return ResponseEntity.ok(matServ.eliminarMaterialApoyo(idMaterial));
-    }
-
-    // Traer material de apoyo por tema
-    @GetMapping("materia/contenido/material/{idTema}")
-    public ResponseEntity<?> obtenerMaterialApoyoPorTema(@PathVariable Long idTema){
-        return ResponseEntity.ok(matServ.obtenerPorTema(idTema));
+        return ResponseEntity.ok(contServ.eliminarMaterialApoyo(idMaterial));
     }
 
     // Visualizar sistema calificaciones para asignatura
@@ -149,43 +116,26 @@ public class DocenteController {
     // Crear asignación
     @PostMapping("materia/asignacion")
     public ResponseEntity<?> crearAsignacion(@RequestBody AsignacionRequest request){
-        return ResponseEntity.ok(asigServ.crearAsignacion(request));
+        return ResponseEntity.ok(contServ.crearAsignacion(request));
     }
 
     // Editar asignación
     @PutMapping("materia/asignacion")
     public ResponseEntity<?> editarAsignacion(@RequestBody AsignacionRequest request){
-        return ResponseEntity.ok(asigServ.editarAsignacion(request));
+        return ResponseEntity.ok(contServ.editarAsignacion(request));
     }
 
-    // traer asignaciones por tema
-    @GetMapping("materia/asignaciones/{idTema}")
-    public ResponseEntity<?> traerAsignacionesPorTema(@PathVariable Long idTema){
-        return ResponseEntity.ok(asigServ.traerPorTema(idTema));
-    }
 
     // ocultar asignación
     @PutMapping("materia/asignacion/ocultar/{idAsignacion}")
     public ResponseEntity<?> ocultarAsignacion(@PathVariable Long idAsignacion){
-        return ResponseEntity.ok(asigServ.ocultarAsignacion(idAsignacion));
-    }
-
-    // mostrar entregas
-    @GetMapping("/entregas/{idAsignacion}")
-    public ResponseEntity<?> traerEntregasPorAsignacion(@PathVariable Long idAsignacion){
-        return ResponseEntity.ok(entServ.traerPorAsignacion(idAsignacion));
-    }
-
-    // Listar entrega
-    @GetMapping("/entrega/{idEntrega}")
-    public ResponseEntity<?> traerEntregaPorId(@PathVariable Long idEntrega){
-        return ResponseEntity.ok(entServ.traerPorId(idEntrega));
+        return ResponseEntity.ok(contServ.ocultarAsignacion(idAsignacion));
     }
 
     // calificar entrega
     @PutMapping("/entrega/calificar")
     public ResponseEntity<?> calificarEntrega(@RequestBody NotaRequest nota){
-        return ResponseEntity.ok(entServ.calificarEntrega(nota));
+        return ResponseEntity.ok(contServ.calificarEntrega(nota));
     }
 
 

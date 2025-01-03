@@ -24,9 +24,7 @@ import java.util.List;
 public class EstudianteController {
 
     private final DistributivoServ disServ;
-    private final EntregaServ entServ;
     private final ContenidoServ contServ;
-    private final AsignacionServ asigServ;
 
     private final JwtService jwtService;
 
@@ -55,33 +53,27 @@ public class EstudianteController {
         Estudiante estudiante = validarEstudiante(request);
         if (estudiante == null) return buildErrorResponse("Solicitud Inválida por usuario no encontrado", 404);
 
-        return ResponseEntity.ok(asigServ.traerPorId(idAsignacion, estudiante.getId()));
+        return ResponseEntity.ok(contServ.traerPorId(idAsignacion, estudiante.getId()));
     }
 
 
     // Agregar entrega a una asignación
     @PutMapping("asignacion/entrega")
     public ResponseEntity<ApiResponse<?>> agregarEntrega(@RequestBody EntregaRequest request) {
-        return ResponseEntity.ok(entServ.editarEntrega(request));
+        return ResponseEntity.ok(contServ.editarEntrega(request));
     }
 
     // Eliminar entrega de una asignación
     @PutMapping("asignacion/entrega/{idEntrega}")
     public ResponseEntity<ApiResponse<?>> eliminarEntrega(@PathVariable Long idEntrega) {
-        return ResponseEntity.ok(entServ.eliminarEntrega(idEntrega));
+        return ResponseEntity.ok(contServ.eliminarEntrega(idEntrega));
     }
 
     // Visualizar entregas de una asignación
     @GetMapping("asignacion/entregas/{idAsignacion}/{estudianteId}")
     public ResponseEntity<?> listarEntregas(@PathVariable Long idAsignacion, @PathVariable String estudianteId) {
         Estudiante estudiante = repEst.findByUsuarioCedula(estudianteId);
-        return ResponseEntity.ok(entServ.traerPorAsignacionYEstudiante(idAsignacion, estudiante.getId()));
-    }
-
-    // Visualizar una entrega
-    @GetMapping("asignacion/entrega/{idEntrega}")
-    public ResponseEntity<EntregaDTO> obtenerEntrega(@PathVariable Long idEntrega) {
-        return ResponseEntity.ok(entServ.traerPorId(idEntrega));
+        return ResponseEntity.ok(contServ.traerPorAsignacionYEstudiante(idAsignacion, estudiante.getId()));
     }
 
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */
