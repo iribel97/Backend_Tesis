@@ -51,8 +51,11 @@ public class EstudianteController {
 
     // visuqalizar asignacion
     @GetMapping("asignacion/{idAsignacion}")
-    public ResponseEntity<?> obtenerAsignacion(@PathVariable Long idAsignacion) {
-        return ResponseEntity.ok(asigServ.traerPorId(idAsignacion));
+    public ResponseEntity<?> obtenerAsignacion(@PathVariable Long idAsignacion, HttpServletRequest request) {
+        Estudiante estudiante = validarEstudiante(request);
+        if (estudiante == null) return buildErrorResponse("Solicitud Inválida por usuario no encontrado", 404);
+
+        return ResponseEntity.ok(asigServ.traerPorId(idAsignacion, estudiante.getId()));
     }
 
 

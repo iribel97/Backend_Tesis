@@ -201,9 +201,8 @@ public class EntregaServ {
     }
 
     // Traer entregas por asignación y estudiante
-    public List<EntregaDTO> traerPorAsignacionYEstudiante(Long idAsignacion, long idEstudiante) {
-        return repo.findByAsignacion_IdAndEstudiante_Id(idAsignacion, idEstudiante).stream().map(this::convertirDTO).toList();
-    }
+    public EntregaDTO traerPorAsignacionYEstudiante(Long idAsignacion, long idEstudiante) {
+        return convertirDTO(repo.findByAsignacion_IdAndEstudiante_Id(idAsignacion, idEstudiante));}
 
 
     /* ---- MÉTODOS PROPIOS ---- */

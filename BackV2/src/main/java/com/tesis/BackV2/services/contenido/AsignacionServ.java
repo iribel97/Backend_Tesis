@@ -21,8 +21,8 @@ import com.tesis.BackV2.repositories.contenido.EntregaRepo;
 import com.tesis.BackV2.repositories.contenido.TemaRepo;
 import com.tesis.BackV2.repositories.documentation.DocMaterialApoyoRepo;
 import com.tesis.BackV2.request.contenido.AsignacionRequest;
-import com.tesis.BackV2.request.documentation.DocumentoRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +43,9 @@ public class AsignacionServ {
     private final EstudianteRepo estRepo;
     private final MatriculaRepo matRepo;
     private final CicloAcademicoRepo cicloRepo;
+
+    @Autowired
+    private EntregaServ entregaServ;
 
 
     // Crear asignación
@@ -151,25 +154,25 @@ public class AsignacionServ {
     // traer asignaciones por tema
     public List<AsignacionDTO> traerPorTema (long idTema) {
         return repo.findByTema_Id(idTema).stream()
-                .map(this::convertirDTO)
+                .map(this::convertirDTODocente)
                 .collect(Collectors.toList());
     }
 
     // traer asignaciones por tema y activas
     public List<AsignacionDTO> traerPorTemaActivo (long idTema, boolean activo) {
         return repo.findByTema_IdAndActivo(idTema, activo).stream()
-                .map(this::convertirDTO)
+                .map(this::convertirDTODocente)
                 .collect(Collectors.toList());
     }
 
     // traer asignacion por id
-    public AsignacionDTO traerPorId (long idAsignacion) {
-        return convertirDTO(repo.findById(idAsignacion).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+    public AsignacionDTO traerPorId (long idAsignacion, Long idEst) {
+        return convertirDTOEstudiante(repo.findById(idAsignacion).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
                 .error(true)
                 .codigo(400)
                 .mensaje("Solicitud inválida")
                 .detalles("La asignación con id " + idAsignacion + " no ha sido encontrada")
-                .build())));
+                .build())), idEst);
     }
 
     // Ocultar asignación
@@ -216,7 +219,7 @@ public class AsignacionServ {
     }
 
     // Convertir a DTO la asignación para enviarla
-    private AsignacionDTO convertirDTO (Asignacion request) {
+    private AsignacionDTO convertirDTODocente(Asignacion request) {
         return AsignacionDTO.builder()
                 .id(request.getId())
                 .activo(request.isActivo())
@@ -232,6 +235,25 @@ public class AsignacionServ {
                         .collect(Collectors.toList()))
                 .build();
 
+    }
+
+    // convertir a DTO para un estudiante
+    private AsignacionDTO convertirDTOEstudiante(Asignacion request, Long idEst) {
+        return AsignacionDTO.builder()
+                .id(request.getId())
+                .activo(request.isActivo())
+                .nombre(request.getNombre())
+                .descripcion(request.getDescripcion())
+                .fechaInicio(String.valueOf(request.getFechaInicio()))
+                .horaInicio(String.valueOf(request.getHoraInicio()))
+                .fechaFin(String.valueOf(request.getFechaFin()))
+                .horaFin(String.valueOf(request.getHoraFin()))
+                .notaMax(request.getCalif().getMaximo())
+                .documentos(docMatRepo.findByAsignacion_Id(request.getId()).stream()
+                        .map(this::convertirDocDTO)
+                        .collect(Collectors.toList()))
+                .entregaEst(entregaServ.traerPorAsignacionYEstudiante(request.getId(), idEst))
+                .build();
     }
 
     // Convertir a DTO el documento
