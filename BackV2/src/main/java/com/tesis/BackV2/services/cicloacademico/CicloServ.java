@@ -9,6 +9,8 @@ import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.repositories.config.InscripcionConfigRepo;
 import com.tesis.BackV2.request.CicloARequest;
+
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +57,7 @@ public class CicloServ {
                         .requierePruebas(request.isPruebaInscrip())
                         .fechaConfiguracion(request.getFechaInicio().atStartOfDay())
                         .build()))
+                .activo(false)
                 .build();
 
         cicloRepo.save(ciclo);
@@ -109,10 +112,32 @@ public class CicloServ {
                         .build()
                 ));
 
+        // Validar si se está activando el ciclo
+        if (request.isActivo()) {
+            // Buscar el ciclo actualmente activo
+            CicloAcademico cicloActivo = cicloRepo.findByActivoTrue();
+
+            if (request.getId() != cicloActivo.getId()) {
+                // Verificar que las fechas no estén dentro del rango del ciclo activo
+                if (!LocalDate.now().isAfter(cicloActivo.getFechaFin())) {
+                    throw new ApiException(ApiResponse.builder()
+                            .error(true)
+                            .mensaje("Solicitud invalida")
+                            .codigo(400)
+                            .detalles("No se puede activar un nuevo ciclo académico dentro del rango del ciclo activo actual.")
+                            .build());
+                }
+                // Desactivar el ciclo actualmente activo
+                cicloActivo.setActivo(false);
+                cicloRepo.save(cicloActivo);
+            }
+        }
+
         ciclo.setNombre(request.getNombre());
         ciclo.setCantPeriodos(request.getCantPeriodos());
         ciclo.setFechaInicio(request.getFechaInicio());
         ciclo.setFechaFin(request.getFechaFin());
+        ciclo.setActivo(ciclo.isActivo() || request.isActivo());
 
         cicloRepo.save(ciclo);
         return ApiResponse.<String>builder()

@@ -1,9 +1,11 @@
 package com.tesis.BackV2.controllers;
 
+import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.entities.Usuario;
+import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.MatriculaRepo;
@@ -32,6 +34,25 @@ public class GeneralController {
     @GetMapping("usuario/{cedula}")
     public ResponseEntity<UsuarioDTO> buscarUsuario(@PathVariable String cedula) throws MiExcepcion {
         return ResponseEntity.ok(service.buscarUsuario(cedula));
+    }
+
+    // Traer info del usuario autenticado
+    @GetMapping("usuario")
+    public ResponseEntity<UsuarioDTO> entregarUsuAuth(HttpServletRequest request){
+        String token = extractTokenFromRequest(request);
+        // Extraer el nombre de usuario (o cualquier dato que guardes en el token)
+        String userCedula = jwtService.extractUsername(token);
+
+        try {
+            return ResponseEntity.ok(service.buscarUsuario(userCedula));
+        } catch (MiExcepcion e) {
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .codigo(400)
+                    .mensaje("Error de validación")
+                    .detalles("Usuario no encontrado")
+                    .build());
+        }
     }
 
 

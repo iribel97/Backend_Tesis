@@ -9,4 +9,7 @@ public interface CicloAcademicoRepo extends JpaRepository<CicloAcademico, Long> 
 
     // Devolver el último registro
     CicloAcademico findTopByOrderByIdDesc();
+
+    // Devolver el ciclo académico que tenga "activo" en true
+    CicloAcademico findByActivoTrue();
 }
