@@ -65,22 +65,21 @@ public class ContenidoServ {
     // Agenda DTO
     private List<AgendaDTO> getAgendaByDocente(long idDis) {
         List<Horario> horarios = repoHor.findByDistributivo_Id(idDis);
-        List<AgendaDTO> angendas = new ArrayList<>();
+        List<AgendaDTO> agendas = new ArrayList<>();
 
         for (Horario horario : horarios) {
-            if ( angendas.isEmpty() ) {
-                angendas.add(AgendaDTO.builder()
-                        .dia(horario.getDiaSemana())
-                        .horaInicio(String.valueOf(horario.getHorario().getHoraInicio()))
-                        .horaFin(String.valueOf(horario.getHorario().getHoraFin()))
-                        .build());
+            // Busca si ya existe un registro para el día
+            AgendaDTO agendaExistente = agendas.stream()
+                    .filter(agenda -> agenda.getDia().equals(horario.getDiaSemana()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (agendaExistente != null) {
+                // Si ya existe, actualiza la hora fin
+                agendaExistente.setHoraFin(String.valueOf(horario.getHorario().getHoraFin()));
             } else {
-                for (AgendaDTO agenda : angendas) {
-                    if (agenda.getDia().equals(horario.getDiaSemana())) {
-                        agenda.setHoraFin(String.valueOf(horario.getHorario().getHoraFin()));
-                    }
-                }
-                angendas.add(AgendaDTO.builder()
+                // Si no existe, agrega un nuevo registro
+                agendas.add(AgendaDTO.builder()
                         .dia(horario.getDiaSemana())
                         .horaInicio(String.valueOf(horario.getHorario().getHoraInicio()))
                         .horaFin(String.valueOf(horario.getHorario().getHoraFin()))
@@ -88,8 +87,9 @@ public class ContenidoServ {
             }
         }
 
-        return angendas;
+        return agendas;
     }
+
 
     // Unidades de una materia
     private List<UnidadesDTO> getUnidadesByMateriaActiva(long idDis) {
