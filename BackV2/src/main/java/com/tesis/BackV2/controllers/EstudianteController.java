@@ -2,14 +2,12 @@ package com.tesis.BackV2.controllers;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
-import com.tesis.BackV2.dto.contenido.EntregaDTO;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.MatriculaRepo;
 import com.tesis.BackV2.request.contenido.EntregaRequest;
 import com.tesis.BackV2.services.ContenidoServ;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
-import com.tesis.BackV2.services.contenido.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

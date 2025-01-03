@@ -8,7 +8,6 @@ import com.tesis.BackV2.request.contenido.*;
 import com.tesis.BackV2.services.ContenidoServ;
 import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
 import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
-import com.tesis.BackV2.services.contenido.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
