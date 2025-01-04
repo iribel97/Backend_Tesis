@@ -712,8 +712,8 @@ public class ContenidoServ {
                 .contenido(entrega.getContenido())
                 .nota(entrega.getNota() != null ? entrega.getNota() : "")
                 .estado(String.valueOf(entrega.getEstado()))
-                .fechaEntrega(String.valueOf(entrega.getFechaEntrega()))
-                .horaEntrega(String.valueOf(entrega.getHoraEntrega()))
+                .fechaEntrega(String.valueOf(entrega.getFechaEntrega()).isEmpty() ? "" : String.valueOf(entrega.getFechaEntrega()))
+                .horaEntrega(String.valueOf(entrega.getHoraEntrega()).isEmpty() ? "" : String.valueOf(entrega.getHoraEntrega()))
                 .nombresEstudiante(entrega.getEstudiante().getUsuario().getNombres() + " " + entrega.getEstudiante().getUsuario().getApellidos())
                 .documentos(docEntrega.stream().map(this::convertirDocDTO).toList())
                 .build();
