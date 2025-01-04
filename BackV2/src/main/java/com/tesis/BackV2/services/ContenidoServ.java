@@ -587,7 +587,7 @@ public class ContenidoServ {
                 .detalles("La entrega no ha sido encontrada")
                 .build()));
 
-        if ( request.getContenido().isEmpty() && request.getDocumentos() == null) {
+        if ( request.getContenido().equalsIgnoreCase("") && request.getDocumentos() == null) {
             throw new ApiException(ApiResponse.builder()
                     .error(true)
                     .codigo(400)
