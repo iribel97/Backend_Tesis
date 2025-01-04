@@ -710,7 +710,7 @@ public class ContenidoServ {
         return EntregaDTO.builder()
                 .id(entrega.getId())
                 .contenido(entrega.getContenido())
-                .nota(entrega.getNota() != null ? entrega.getNota() : String.valueOf(0))
+                .nota(entrega.getNota() != null ? entrega.getNota() : "")
                 .estado(String.valueOf(entrega.getEstado()))
                 .fechaEntrega(String.valueOf(entrega.getFechaEntrega()))
                 .horaEntrega(String.valueOf(entrega.getHoraEntrega()))
