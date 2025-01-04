@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -589,7 +591,7 @@ public class ContenidoServ {
             if (request.getFechaEntrega().isAfter(entrega.getAsignacion().getFechaFin())) {
                 Representante representante = entrega.getEstudiante().getRepresentante();
 
-                entrega.setEstado(EstadoEntrega.Retrasado);
+                entrega.setEstado(EstadoEntrega.Atrasado);
 
                 emailService.enviarCorreo( representante.getUsuario().getEmail(),
                         "Entrega retrasada",
@@ -604,8 +606,8 @@ public class ContenidoServ {
             }
         }
         entrega.setContenido(request.getContenido());
-        entrega.setFechaEntrega(request.getFechaEntrega());
-        entrega.setHoraEntrega(request.getHoraEntrega());
+        entrega.setFechaEntrega(LocalDate.now());
+        entrega.setHoraEntrega(LocalTime.now());
 
         Entrega entregaGuardada = repoEnt.save(entrega);
 
