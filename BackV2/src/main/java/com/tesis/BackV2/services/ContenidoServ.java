@@ -586,6 +586,16 @@ public class ContenidoServ {
                 .mensaje("Solicitud incorrecta")
                 .detalles("La entrega no ha sido encontrada")
                 .build()));
+
+        if ( request.getContenido().isEmpty() && request.getDocumentos() == null) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .codigo(400)
+                    .mensaje("Solicitud incorrecta")
+                    .detalles("Se han registrado campos vacios")
+                    .build());
+        }
+
         if (!request.getContenido().isEmpty()) {
             // Evaluar si la fecha que entrega es mayor a la fecha de fin de la asignación
             if (LocalDate.now().isAfter(entrega.getAsignacion().getFechaFin())) {
