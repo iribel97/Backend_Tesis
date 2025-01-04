@@ -588,7 +588,7 @@ public class ContenidoServ {
                 .build()));
         if (!request.getContenido().isEmpty()) {
             // Evaluar si la fecha que entrega es mayor a la fecha de fin de la asignación
-            if (request.getFechaEntrega().isAfter(entrega.getAsignacion().getFechaFin())) {
+            if (LocalDate.now().isAfter(entrega.getAsignacion().getFechaFin())) {
                 Representante representante = entrega.getEstudiante().getRepresentante();
 
                 entrega.setEstado(EstadoEntrega.Atrasado);
