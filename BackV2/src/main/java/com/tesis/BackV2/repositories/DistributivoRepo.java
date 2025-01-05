@@ -28,4 +28,6 @@ public interface DistributivoRepo extends JpaRepository<Distributivo, Long> {
     boolean existsByMateriaId(Long id);
 
     boolean existsByCursoIdAndMateriaId(Long aulaId, Long materiaId);
+
+    boolean existsByDocenteId(long id);
 }

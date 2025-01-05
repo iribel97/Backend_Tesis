@@ -797,4 +797,101 @@ public class MensajeHtml {
                 "</body>\n" +
                 "</html>\n";
     }
+
+    public String mensajeAprobacionIns(String nombreRepresentante, String nombreEstudiante, String gradoCurso, String fechaInicioClases) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <style>\n" +
+                "        body {\n" +
+                "            font-family: Arial, sans-serif;\n" +
+                "            margin: 0;\n" +
+                "            padding: 0;\n" +
+                "            background-color: #f7f7f7;\n" +
+                "            color: #333;\n" +
+                "        }\n" +
+                "\n" +
+                "        .email-container {\n" +
+                "            max-width: 600px;\n" +
+                "            margin: 20px auto;\n" +
+                "            background-color: #ffffff;\n" +
+                "            border-radius: 8px;\n" +
+                "            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n" +
+                "            overflow: hidden;\n" +
+                "        }\n" +
+                "\n" +
+                "        .email-header {\n" +
+                "            background-color: #4CAF50;\n" +
+                "            color: #ffffff;\n" +
+                "            padding: 20px;\n" +
+                "            text-align: center;\n" +
+                "        }\n" +
+                "\n" +
+                "        .email-header h1 {\n" +
+                "            margin: 0;\n" +
+                "            font-size: 24px;\n" +
+                "        }\n" +
+                "\n" +
+                "        .email-body {\n" +
+                "            padding: 20px;\n" +
+                "        }\n" +
+                "\n" +
+                "        .email-body p {\n" +
+                "            margin: 15px 0;\n" +
+                "            line-height: 1.6;\n" +
+                "        }\n" +
+                "\n" +
+                "        .email-body .highlight {\n" +
+                "            background-color: #e7f7e7;\n" +
+                "            padding: 10px;\n" +
+                "            border-left: 4px solid #4CAF50;\n" +
+                "            margin: 20px 0;\n" +
+                "        }\n" +
+                "\n" +
+                "        .email-footer {\n" +
+                "            background-color: #f1f1f1;\n" +
+                "            color: #666;\n" +
+                "            text-align: center;\n" +
+                "            padding: 15px;\n" +
+                "            font-size: 14px;\n" +
+                "        }\n" +
+                "\n" +
+                "        .email-footer a {\n" +
+                "            color: #4CAF50;\n" +
+                "            text-decoration: none;\n" +
+                "        }\n" +
+                "    </style>\n" +
+                "</head>\n" +
+                "\n" +
+                "<body>\n" +
+                "    <div class=\"email-container\">\n" +
+                "        <div class=\"email-header\">\n" +
+                "            <h1>¡Inscripción Aceptada!</h1>\n" +
+                "        </div>\n" +
+                "        <div class=\"email-body\">\n" +
+                "            <p>Estimado/a <strong>"+nombreRepresentante+"</strong>,</p>\n" +
+                "            <p>Nos complace informarle que su representado/a, <strong>"+nombreEstudiante+"</strong>, ha sido inscrito\n" +
+                "                y matriculado exitosamente.</p>\n" +
+                "            <div class=\"highlight\">\n" +
+                "                <h3>Información de Matrícula:</h3>\n" +
+                "        <p><span>Grado/Curso:</span> "+gradoCurso+"</p>\n" +
+                "        <p><span>Inicio de Clases:</span> "+fechaInicioClases+"</p>\n" +
+                "            </div>\n" +
+                "            <p>Estamos emocionados de dar la bienvenida a su representado/a y agradecemos la confianza depositada en\n" +
+                "                nuestra institución.</p>\n" +
+                "            <p>Si tiene alguna consulta, no dude en comunicarse con nosotros.</p>\n" +
+                "        </div>\n" +
+                "        <div class=\"email-footer\">\n" +
+                "            <p>&copy; [Año de la Institución] [Nombre de la Institución]. Todos los derechos reservados.</p>\n" +
+                "            <p><a href=\"mailto:contacto@institucion.com\">contacto@institucion.com</a> | Teléfono: [Número de Teléfono]\n" +
+                "            </p>\n" +
+                "        </div>\n" +
+                "    </div>\n" +
+                "</body>\n" +
+                "\n" +
+                "</html>";
+    }
 }
