@@ -91,13 +91,6 @@ public class EstudianteController {
         return ResponseEntity.ok(contServ.eliminarEntrega(idEntrega));
     }
 
-    // Visualizar entregas de una asignación
-    @GetMapping("asignacion/entregas/{idAsignacion}/{estudianteId}")
-    public ResponseEntity<?> listarEntregas(@PathVariable Long idAsignacion, @PathVariable String estudianteId) {
-        Estudiante estudiante = repEst.findByUsuarioCedula(estudianteId);
-        return ResponseEntity.ok(contServ.traerPorAsignacionYEstudiante(idAsignacion, estudiante.getId()));
-    }
-
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */
 
     /*  ---------------------------- Visualización de Compañeros  ---------------------------- */

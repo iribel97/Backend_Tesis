@@ -19,4 +19,6 @@ public class AsistenciaRequest {
         private LocalDate fecha;
         private long horarioID;
         private String cedulaEstudiante;
+        private String observaciones;
+
 }

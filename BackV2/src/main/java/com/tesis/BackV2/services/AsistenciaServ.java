@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AsistenciaServ {
@@ -24,24 +26,27 @@ public class AsistenciaServ {
 
     // registrar Asistencia
     @Transactional
-    public ApiResponse<String> registrarAsistencia(AsistenciaRequest request) {
+    public ApiResponse<String> registrarAsistencia(AsistenciaRequest request, List<AsistenciaRequest> requests) {
 
-        validarRequest(request);
+        for (AsistenciaRequest asistenciaRequest : requests) {
+            validarRequest(asistenciaRequest);
 
-        Asistencia asistencia = Asistencia.builder()
-                .estado(request.getEstado())
-                .fecha(request.getFecha())
-                .estudiante(repoEst.findByUsuarioCedula(request.getCedulaEstudiante()))
-                .horario(repoHor.findById(request.getHorarioID()).orElseThrow(() ->
-                        new ApiException(ApiResponse.<String> builder()
-                                .error(true)
-                                .codigo(400)
-                                .mensaje("Error de validación")
-                                .detalles("El horario no existe")
-                                .build())))
-                .build();
+            repo.save(Asistencia.builder()
+                    .estado(asistenciaRequest.getEstado())
+                    .fecha(asistenciaRequest.getFecha())
+                    .observaciones(asistenciaRequest.getObservaciones())
+                    .estudiante(repoEst.findByUsuarioCedula(request.getCedulaEstudiante()))
+                    .horario(repoHor.findById(request.getHorarioID()).orElseThrow(() ->
+                            new ApiException(ApiResponse.<String> builder()
+                                    .error(true)
+                                    .codigo(400)
+                                    .mensaje("Error de validación")
+                                    .detalles("El horario no existe")
+                                    .build())))
+                    .build());
+        }
 
-        repo.save(asistencia);
+
 
         return ApiResponse.<String> builder()
                 .error(false)
