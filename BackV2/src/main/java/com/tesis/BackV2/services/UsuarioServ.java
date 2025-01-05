@@ -38,6 +38,8 @@ public class UsuarioServ {
     private RepresentanteRepo repoR;
     @Autowired
     private DistributivoRepo repoDist;
+    @Autowired
+    private CursoRepo repoC;
 
     /* ----- CRUD DE LA ENTIDAD USUARIO ----- */
 
@@ -234,7 +236,7 @@ public class UsuarioServ {
         validarEstado(String.valueOf(usuario.getEstado()));
 
         if (usuario.getRol().equals(Rol.DOCENTE)) {
-            if (repoDist.existsByDocenteId(repoD.findByUsuarioCedula(cedula).getId())) {
+            if (repoDist.existsByDocenteId(repoD.findByUsuarioCedula(cedula).getId()) && repoC.existsByTutorId(repoD.findByUsuarioCedula(cedula).getId())) {
                 throw new ApiException(
                         ApiResponse.builder()
                                 .error(true)
