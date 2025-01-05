@@ -13,14 +13,12 @@ import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.exceptions.MiExcepcion;
-import com.tesis.BackV2.repositories.DocenteRepo;
-import com.tesis.BackV2.repositories.EstudianteRepo;
-import com.tesis.BackV2.repositories.RepresentanteRepo;
-import com.tesis.BackV2.repositories.UsuarioRepo;
+import com.tesis.BackV2.repositories.*;
 
 import com.tesis.BackV2.request.UsuarioEditRequest;
 import com.tesis.BackV2.request.UsuarioRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +36,8 @@ public class UsuarioServ {
     private EstudianteRepo repoE;
     @Autowired
     private RepresentanteRepo repoR;
+    @Autowired
+    private DistributivoRepo repoDist;
 
     /* ----- CRUD DE LA ENTIDAD USUARIO ----- */
 
@@ -232,6 +232,21 @@ public class UsuarioServ {
         ));
 
         validarEstado(String.valueOf(usuario.getEstado()));
+
+        if (usuario.getRol().equals(Rol.DOCENTE)) {
+            if (repoDist.existsByDocenteId(repoD.findByUsuarioCedula(cedula).getId())) {
+                throw new ApiException(
+                        ApiResponse.builder()
+                                .error(true)
+                                .mensaje("Error de validación")
+                                .codigo(400)
+                                .detalles("El usuario cuenta con datos relacionados")
+                                .build()
+                );
+            } else {
+                repoD.delete(repoD.findByUsuarioCedula(cedula));
+            }
+        }
 
         repoU.delete(usuario);
 
