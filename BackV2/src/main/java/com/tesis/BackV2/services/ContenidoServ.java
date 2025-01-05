@@ -658,6 +658,10 @@ public class ContenidoServ {
         entrega.setContenido(null);
         entrega.setEstado(EstadoEntrega.Pendiente);
 
+        // eliminar documentos
+        List<DocEntrega> docs = repoDocEnt.findByEntrega(entrega);
+        repoDocEnt.deleteAll(docs);
+
         repoEnt.save(entrega);
 
         return ApiResponse.<String> builder()
