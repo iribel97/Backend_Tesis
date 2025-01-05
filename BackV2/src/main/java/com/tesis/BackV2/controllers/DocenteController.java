@@ -48,8 +48,10 @@ public class DocenteController {
 
     // Traer una Materia que imparte un docente
     @GetMapping("materia/{idDistributivo}")
-    public ResponseEntity<?> obtenerMateria(@PathVariable Long idDistributivo) {
-        return ResponseEntity.ok(disServ.obtenerDistributivo(idDistributivo));
+    public ResponseEntity<?> obtenerMateria(@PathVariable Long idDistributivo, HttpServletRequest request) {
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(contServ.contenidoMateriaDocente(idDistributivo, docente.getUsuario().getCedula()));
     }
 
     // Agregar contenido a un distributivo
@@ -64,12 +66,6 @@ public class DocenteController {
         return ResponseEntity.ok(contServ.editarUnidad(request));
     }
 
-    // Eliminar una unidad
-    @DeleteMapping("materia/contenido/unidad/{idUnidad}")
-    public ResponseEntity<?> eliminarUnidad(@PathVariable Long idUnidad){
-        return ResponseEntity.ok(contServ.eliminarUnidad(idUnidad));
-    }
-
     // Agregar tema a la unidad
     @PostMapping("materia/contenido/tema")
     public ResponseEntity<?> agregarTema (@RequestBody TemaRequest request){
@@ -80,12 +76,6 @@ public class DocenteController {
     @PutMapping("materia/contenido/tema")
     public ResponseEntity<?> actualizarTema(@RequestBody TemaRequest request){
         return ResponseEntity.ok(contServ.editarTema(request));
-    }
-
-    // Eliminar un tema
-    @DeleteMapping("materia/contenido/tema/{idTema}")
-    public ResponseEntity<?> eliminarTema(@PathVariable Long idTema){
-        return ResponseEntity.ok(contServ.eliminarTema(idTema));
     }
 
     // Agregar material de apoyo
@@ -128,7 +118,13 @@ public class DocenteController {
     // ocultar asignación
     @PutMapping("materia/asignacion/ocultar/{idAsignacion}")
     public ResponseEntity<?> ocultarAsignacion(@PathVariable Long idAsignacion){
-        return ResponseEntity.ok(contServ.ocultarAsignacion(idAsignacion));
+        return ResponseEntity.ok(contServ.cambiarVisualizacionAsig(idAsignacion, false));
+    }
+
+    // mostrar asignación
+    @PutMapping("materia/asignacion/mostrar/{idAsignacion}")
+    public ResponseEntity<?> mostrarAsignacion(@PathVariable Long idAsignacion){
+        return ResponseEntity.ok(contServ.cambiarVisualizacionAsig(idAsignacion, true));
     }
 
     // calificar entrega

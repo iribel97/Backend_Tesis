@@ -327,6 +327,15 @@ public class ContenidoServ {
                         .detalles("El material de apoyo no ha sido encontrado")
                         .build()));
 
+        if ( !request.getLink().isEmpty() && request.getDocumento() != null) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .codigo(400)
+                    .mensaje("Solicitud invalida")
+                    .detalles("Solo debe de ingresar un tipo de material")
+                    .build());
+        }
+
         material.setActivo(request.isActivo());
 
         if ( !material.getLink().isEmpty() ) {
@@ -496,7 +505,7 @@ public class ContenidoServ {
     }
 
     @Transactional
-    public ApiResponse<String> ocultarAsignacion (long idAsignacion) {
+    public ApiResponse<String> cambiarVisualizacionAsig(long idAsignacion, boolean activo) {
         Asignacion asignacion = repoAsig.findById(idAsignacion).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
                 .error(true)
                 .codigo(400)
@@ -508,14 +517,23 @@ public class ContenidoServ {
 
         repoAsig.save(asignacion);
 
-        return ApiResponse.<String>builder()
-                .error(false)
-                .codigo(200)
-                .mensaje("Asignación eliminada")
-                .detalles("La asignación ha sido eliminada exitosamente")
-                .build();
-    }
+        if (activo){
+            return ApiResponse.<String>builder()
+                    .error(false)
+                    .codigo(200)
+                    .mensaje("Asignación activada")
+                    .detalles("La asignación ha sido activada exitosamente")
+                    .build();
+        } else {
+            return ApiResponse.<String>builder()
+                    .error(false)
+                    .codigo(200)
+                    .mensaje("Asignación desactivada")
+                    .detalles("La asignación ha sido desactivada exitosamente")
+                    .build();
+        }
 
+    }
     // traer asignacion por id
     public AsignacionDTO traerPorId (long idAsignacion, Long idEst) {
         return convertirAsigDTOEstudiante(repoAsig.findById(idAsignacion).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
@@ -776,6 +794,31 @@ public class ContenidoServ {
         }
     }
 
+    public ContenidoDTO contenidoMateriaDocente (Long idDistributivo, String cedulaDocente) {
+
+        // Validar que exista por id y docente
+        Distributivo distributivo = repoDis.findByIdAndDocente_Usuario_Cedula(idDistributivo, cedulaDocente);
+
+        if (distributivo == null) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .codigo(400)
+                    .mensaje("Solicitud incorrecta")
+                    .detalles("Distributivo no encontrado")
+                    .build());
+        }
+
+        return ContenidoDTO.builder()
+                .idDistributivo(distributivo.getId())
+                .nombreMateria(distributivo.getMateria().getNombre())
+                .docenteNombres(distributivo.getDocente().getUsuario().getNombres())
+                .docenteApellidos(distributivo.getDocente().getUsuario().getApellidos())
+                .horarios(getAgendaByDocente(distributivo.getId()))
+                .unidades(getUnidadesByMateria(distributivo.getId()))
+                .build();
+
+    }
+
     public ContenidoDTO contenidoMateria (Long idDistributivo) {
         // Validar que el id exista
         Distributivo distributivo = repoDis.findById(idDistributivo).orElseThrow(() -> new ApiException(ApiResponse.builder()
@@ -827,6 +870,88 @@ public class ContenidoServ {
         return agendas;
     }
 
+    /* ---- DOCENTE ---- */
+    // unidades de un distributivo
+    private List<UnidadesDTO> getUnidadesByMateria(long idDis) {
+        List<Unidad> unidades = repo.findByDistributivo_Id(idDis);
+
+        List<UnidadesDTO> uniDTO = new ArrayList<>();
+        for (Unidad unidad : unidades) {
+            uniDTO.add(UnidadesDTO.builder()
+                    .idUnidad(unidad.getId())
+                    .nombre(unidad.getTitulo())
+                    .activo(unidad.isActivo())
+                    .contenido(getTemasByUnidad(unidad.getId()))
+                    .build());
+        }
+
+        return uniDTO;
+    }
+
+    // traer temas por unidad
+    private List<TemaDTO> getTemasByUnidad(long idUnidad) {
+        List<Tema> temas = repoTem.findByUnidadId(idUnidad);
+
+        List<TemaDTO> temaDTO = new ArrayList<>();
+        for (Tema tema : temas) {
+            temaDTO.add(TemaDTO.builder()
+                    .idTema(tema.getId())
+                    .activo(tema.isActivo())
+                    .nombreTema(tema.getTema())
+                    .descripcion(tema.getDetalle())
+                    .materiales(getMaterialByTema(tema.getId()))
+                    .asignaciones(getAsignacionesByTema(tema.getId()))
+                    .build());
+        }
+
+        return temaDTO;
+    }
+
+    // traer materiales por tema
+    private List<MaterialApoyoDTO> getMaterialByTema(long idTema) {
+        List<MaterialApoyo> materiales = repoMatAp.findByTema_Id(idTema);
+
+        return getMaterialApoyoDTOS(materiales);
+    }
+
+    private List<MaterialApoyoDTO> getMaterialApoyoDTOS(List<MaterialApoyo> materiales) {
+        List<MaterialApoyoDTO> matDTO = new ArrayList<>();
+        for (MaterialApoyo material : materiales) {
+            matDTO.add(MaterialApoyoDTO.builder()
+                    .idMaterial(material.getId())
+                    .activo(material.isActivo())
+                    .link(material.getLink())
+                    .nombreLink(material.getNombreLink())
+                    .documento(material.getDocumento() != null ? convertirDoc(material.getDocumento()) : null)
+                    .build());
+        }
+
+        return matDTO;
+    }
+
+    // traer asignaciones por tema
+    private List<AsignacionesDTO> getAsignacionesByTema(long idTema) {
+        List<Asignacion> asignaciones = repoAsig.findByTema_Id(idTema);
+
+        return getAsignacionesDTOS(asignaciones);
+    }
+
+    private List<AsignacionesDTO> getAsignacionesDTOS(List<Asignacion> asignaciones) {
+        List<AsignacionesDTO> asigDTO = new ArrayList<>();
+        for (Asignacion asignacion : asignaciones) {
+            asigDTO.add(AsignacionesDTO.builder()
+                    .idAsignacion(asignacion.getId())
+                    .activo(asignacion.isActivo())
+                    .nombre(asignacion.getNombre())
+                    .descripcion(asignacion.getDescripcion())
+                    .fechaFin(String.valueOf(asignacion.getFechaFin()))
+                    .horaFin(String.valueOf(asignacion.getHoraFin()))
+                    .build());
+        }
+
+        return asigDTO;
+    }
+
     /*  ---- ESTUDIANTE ---- */
     // Unidades activas de una materia
     private List<UnidadesDTO> getUnidadesByMateriaActiva(long idDis) {
@@ -868,18 +993,7 @@ public class ContenidoServ {
     private List<MaterialApoyoDTO> getMaterialByTemaActivo(long idTema) {
         List<MaterialApoyo> materiales = repoMatAp.findByTema_IdAndActivo(idTema, true);
 
-        List<MaterialApoyoDTO> matDTO = new ArrayList<>();
-        for (MaterialApoyo material : materiales) {
-            matDTO.add(MaterialApoyoDTO.builder()
-                    .idMaterial(material.getId())
-                    .activo(material.isActivo())
-                    .link(material.getLink())
-                    .nombreLink(material.getNombreLink())
-                    .documento(material.getDocumento() != null ? convertirDoc(material.getDocumento()) : null)
-                    .build());
-        }
-
-        return matDTO;
+        return getMaterialApoyoDTOS(materiales);
     }
 
     private DocumentoDTO convertirDoc (DocContMateria doc) {
@@ -895,22 +1009,7 @@ public class ContenidoServ {
     private List<AsignacionesDTO> getAsignacionesByTemaActivo(long idTema) {
         List<Asignacion> asignaciones = repoAsig.findByTema_IdAndActivo(idTema, true);
 
-        List<AsignacionesDTO> asigDTO = new ArrayList<>();
-        for (Asignacion asignacion : asignaciones) {
-            asigDTO.add(AsignacionesDTO.builder()
-                    .idAsignacion(asignacion.getId())
-                    .activo(asignacion.isActivo())
-                    .nombre(asignacion.getNombre())
-                    .descripcion(asignacion.getDescripcion())
-                    .fechaFin(String.valueOf(asignacion.getFechaFin()))
-                    .horaFin(String.valueOf(asignacion.getHoraFin()))
-                    .documentos(repoDoc.findByAsignacion_Id(asignacion.getId()).stream()
-                            .map(this::convertirDoc)
-                            .toList())
-                    .build());
-        }
-
-        return asigDTO;
+        return getAsignacionesDTOS(asignaciones);
     }
 
 

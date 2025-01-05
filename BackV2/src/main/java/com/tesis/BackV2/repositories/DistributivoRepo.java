@@ -30,4 +30,6 @@ public interface DistributivoRepo extends JpaRepository<Distributivo, Long> {
     boolean existsByCursoIdAndMateriaId(Long aulaId, Long materiaId);
 
     boolean existsByDocenteId(long id);
+
+    Distributivo findByIdAndDocente_Usuario_Cedula(Long idDistributivo, String cedulaDocente);
 }

@@ -128,7 +128,21 @@ public class DistributivoServ {
 
     // Traer por docente
     public List<DistributivoDTO> getDistributivoByDocente(String cedula) {
-        return distributivoRepo.findByDocente_Usuario_Cedula(cedula).stream()
+
+        List<Distributivo> distributivos = distributivoRepo.findByDocente_Usuario_Cedula(cedula);
+
+        // Verificar si el docente tiene materias y cursos asignados
+        if ( distributivos == null) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("No cuenta con materias y cursos asignados")
+                    .build()
+            );
+        }
+
+        return distributivos.stream()
                 .map(this::convertirADTO)
                 .toList();
     }
