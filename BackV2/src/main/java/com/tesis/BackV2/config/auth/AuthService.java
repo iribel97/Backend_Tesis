@@ -266,13 +266,39 @@ public class AuthService {
     // -------------------------------------------------------------------------------------
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getCedula(), request.getPassword()));
-        UserDetails user= usuRep.findByCedula(request.getCedula());
+        try {
+            // Autenticar credenciales
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getCedula(), request.getPassword()));
+        } catch (Exception e) {
+            // Lanza excepción personalizada si las credenciales son incorrectas
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Credenciales incorrectas.")
+                    .codigo(401) // Código de error para autenticación fallida
+                    .detalles("Por favor, verifica tu cédula y contraseña.")
+                    .build());
+        }
+
+        // Buscar usuario
+        UserDetails user = usuRep.findByCedula(request.getCedula());
+        if (user == null) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Usuario no encontrado.")
+                    .codigo(404) // Código de error para usuario no encontrado
+                    .detalles("El usuario con la cédula proporcionada no existe.")
+                    .build());
+        }
+
+        // Generar token
         String token = jwtService.generateToken(user);
+
         return AuthResponse.builder()
                 .token(token)
                 .estadoUsuario(String.valueOf(usuRep.findByCedula(request.getCedula()).getEstado()))
+                .rolUsuario(String.valueOf(usuRep.findByCedula(request.getCedula()).getRol()))
                 .build();
     }
+
 
 }

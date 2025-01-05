@@ -22,7 +22,8 @@ public class AsignacionDTO {
     private String horaInicio;
     private String fechaFin;
     private String horaFin;
-    private String base;
+    private String notaMax;
     private String tiempoFaltante;
     private List<DocumentoDTO> documentos;
+    private EntregaDTO entregaEst;
 }
