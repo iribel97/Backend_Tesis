@@ -62,7 +62,7 @@ public class GradoServ {
                     .build()
             );
         }
-        return gradoRepo.findByNombre(nombre);
+        return grado;
     }
 
     // Acualizar

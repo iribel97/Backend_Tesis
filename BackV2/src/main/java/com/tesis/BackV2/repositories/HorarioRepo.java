@@ -18,4 +18,5 @@ public interface HorarioRepo extends JpaRepository<Horario, Long> {
     // Traer horarios por id del distributivo
     List<Horario> findByDistributivo_Id(long id);
 
+    List<Horario> findByDistributivoId(Long id);
 }

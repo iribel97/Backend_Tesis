@@ -19,6 +19,4 @@ public class MateriaDTO {
     private String area;
     private int horasSemanales;
     private String nombreGrado;
-    private List<CalfRequest> sistemaCalificacion;
-
 }

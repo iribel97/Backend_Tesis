@@ -1,6 +1,7 @@
 package com.tesis.BackV2.services;
 
 import com.tesis.BackV2.config.ApiResponse;
+import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.dto.DocenteDTO;
 import com.tesis.BackV2.dto.EstudianteDTO;
 import com.tesis.BackV2.dto.RepresentanteDTO;
@@ -40,6 +41,9 @@ public class UsuarioServ {
     private DistributivoRepo repoDist;
     @Autowired
     private CursoRepo repoC;
+
+    @Autowired
+    AuthService auth;
 
     /* ----- CRUD DE LA ENTIDAD USUARIO ----- */
 
@@ -209,6 +213,19 @@ public class UsuarioServ {
         ));
 
         validarEstado(String.valueOf(request.getEstado()));
+
+        if (request.getEstado().equals("Inactivo")) {
+            auth.cambiarContraUsuario(usuario);
+        } else if (request.getEstado().equals("Activo")) {
+            throw new ApiException(
+                    ApiResponse.builder()
+                            .error(true)
+                            .mensaje("Error de validación")
+                            .codigo(400)
+                            .detalles("No se puede activar un usuario desde esta ruta.")
+                            .build()
+            );
+        }
 
         usuario.setEstado(EstadoUsu.valueOf(request.getEstado()));
         repoU.save(usuario);

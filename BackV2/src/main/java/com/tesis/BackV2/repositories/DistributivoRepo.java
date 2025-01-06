@@ -4,6 +4,7 @@ import com.tesis.BackV2.entities.Distributivo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -32,4 +33,8 @@ public interface DistributivoRepo extends JpaRepository<Distributivo, Long> {
     boolean existsByDocenteId(long id);
 
     Distributivo findByIdAndDocente_Usuario_Cedula(Long idDistributivo, String cedulaDocente);
+
+    Collection<Distributivo> findByCicloIdAndCursoId(Long cicloId, Long cursoId);
+
+    Collection<Distributivo> findByCicloIdAndDocente_Usuario_Cedula(Long cicloId, String cedula);
 }

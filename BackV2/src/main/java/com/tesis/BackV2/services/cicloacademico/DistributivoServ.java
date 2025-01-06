@@ -4,10 +4,13 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.DistributivoDTO;
 import com.tesis.BackV2.entities.Curso;
 import com.tesis.BackV2.entities.Distributivo;
+import com.tesis.BackV2.entities.Horario;
 import com.tesis.BackV2.entities.Materia;
+import com.tesis.BackV2.entities.contenido.Unidad;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
+import com.tesis.BackV2.repositories.contenido.UnidadRepo;
 import com.tesis.BackV2.request.DistributivoRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,10 @@ public class DistributivoServ {
     private MateriaRepo materiaRepo;
     @Autowired
     private DistributivoRepo distributivoRepo;
+    @Autowired
+    private HorarioRepo horarioRepo;
+    @Autowired
+    private UnidadRepo unidadRepo;
 
     // Crear
     @Transactional
@@ -79,19 +86,6 @@ public class DistributivoServ {
                 .build();
     }
 
-    // Registrar varios distributivos
-    @Transactional
-    public ApiResponse<String> registrarDistributivos(List<DistributivoRequest> requests) {
-        for (DistributivoRequest request : requests) {
-            crearDistributivo(request);
-        }
-        return ApiResponse.<String>builder()
-                .error(false)
-                .mensaje("Distributivos registrados con éxito.")
-                .codigo(200)
-                .build();
-    }
-
     // Traer todos
     public List<DistributivoDTO> obtenerDistributivos() {
         return distributivoRepo.findAll().stream()
@@ -110,13 +104,6 @@ public class DistributivoServ {
                         .build()
                 ));
         return convertirADTO(distributivo);
-    }
-
-    // Traer por ciclo académico
-    public List<DistributivoDTO> getDistributivoByCiclo(Long id) {
-        return distributivoRepo.findByCicloId(id).stream()
-                .map(this::convertirADTO)
-                .toList();
     }
 
     // Traer por curso
@@ -145,22 +132,6 @@ public class DistributivoServ {
         return distributivos.stream()
                 .map(this::convertirADTO)
                 .toList();
-    }
-
-    // Traer distributivo por materia y curso
-    public DistributivoDTO getDistributivoByCursoAndMateria(Long idDistributivo) {
-
-
-        Distributivo distributivo = distributivoRepo.findById(idDistributivo)
-                .orElseThrow(() -> new ApiException(ApiResponse.builder()
-                        .error(true)
-                        .mensaje("Solicitud incorrecta")
-                        .codigo(400)
-                        .detalles("Distributivo no encontrado")
-                        .build()
-                ));
-
-        return convertirADTO(distributivo);
     }
 
     // Actualizar
@@ -223,6 +194,20 @@ public class DistributivoServ {
                         .build()
                 ));
 
+        List<Horario> horarios = horarioRepo.findByDistributivoId(id);
+        List<Unidad> unidades = unidadRepo.findByDistributivoId(id);
+
+        // eliminar horarios en caso de existir
+        if (horarios != null || unidades != null) {
+            throw new ApiException(ApiResponse.builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("El distributivo está siendo utilizado en horarios o unidades")
+                    .build()
+            );
+        }
+
         distributivoRepo.delete(distributivo);
         return ApiResponse.<String>builder()
                 .error(false)
@@ -230,6 +215,20 @@ public class DistributivoServ {
                 .codigo(200)
                 .detalles("El distributivo ha sido eliminado correctamente")
                 .build();
+    }
+
+    // traer por ciclo y curso
+    public List<DistributivoDTO> getDistributivoByCicloAndCurso(Long cicloId, Long cursoId) {
+        return distributivoRepo.findByCicloIdAndCursoId(cicloId, cursoId).stream()
+                .map(this::convertirADTO)
+                .toList();
+    }
+
+    // traer por ciclo y docente
+    public List<DistributivoDTO> getDistributivoByCicloAndDocente(Long cicloId, String cedula) {
+        return distributivoRepo.findByCicloIdAndDocente_Usuario_Cedula(cicloId, cedula).stream()
+                .map(this::convertirADTO)
+                .toList();
     }
 
     /* --------- METODOS AUXILIARES ---------- */

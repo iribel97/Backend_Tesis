@@ -106,6 +106,14 @@ public class MateriaServ {
         return convertirADTO(materia);
     }
 
+    // Traer por grado
+    public List<MateriaDTO> getMateriasPorGrado(String grado) {
+        List<Materia> materias = materiaRepo.findByGradoNombre(grado);
+        return materias.stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
+    }
+
     // Actualizar
     @Transactional
     public ApiResponse<String> editarMateria(MateriaRequest request) {
@@ -188,36 +196,13 @@ public class MateriaServ {
 
     // Convertir a DTO
     private MateriaDTO convertirADTO(Materia materia) {
-        List<SistemaCalificacion> sistemaCalificacion = sistCalifRepo.porRegistro(materia.getRegistroCalificacion());
-
         return MateriaDTO.builder()
                 .id(materia.getId())
                 .nombre(materia.getNombre())
                 .area(materia.getArea())
                 .horasSemanales(materia.getHoras())
                 .nombreGrado(materia.getGrado().getNombre())
-                .sistemaCalificacion(sistemaCalificacion.stream()
-                        .map(sistema -> CalfRequest.builder()
-                                .nivel(niveles(sistema))
-                                .tipo(sistema.getTipo())
-                                .descripcion(sistema.getDescripcion())
-                                .peso(sistema.getPeso())
-                                .build())
-                        .collect(Collectors.toList()))
                 .build();
-    }
-
-    // pasar niveles de calificaciones
-    public TipoNivel niveles (SistemaCalificacion sistema){
-         if (sistema.getId().getLvl2() == 0 && sistema.getId().getLvl3() == 0 && sistema.getId().getLvl4() == 0){
-             return TipoNivel.Primero;
-         } else if (sistema.getId().getLvl3() == 0 && sistema.getId().getLvl4() == 0){
-             return TipoNivel.Segundo;
-         } else if (sistema.getId().getLvl4() == 0){
-             return TipoNivel.Tercero;
-         } else {
-             return TipoNivel.Cuarto;
-         }
     }
 
 

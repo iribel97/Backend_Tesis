@@ -14,4 +14,6 @@ public interface UnidadRepo extends JpaRepository<Unidad, Long> {
 
     // Traer unidades por distributivo y activo
     public List<Unidad> findByDistributivo_IdAndActivo(long idDistributivo, boolean activo);
+
+    List<Unidad> findByDistributivoId(Long id);
 }

@@ -100,6 +100,13 @@ public class CursoServ {
         return convertirAulaADTO(curso);
     }
 
+    // Traer por grado
+    public List<CursoDTO> obtenerAulasPorGrado(String grado) {
+        return cursoRepo.findByGradoNombre(grado).stream()
+                .map(this::convertirAulaADTO)
+                .toList();
+    }
+
     // Actualizar
     @Transactional
     public ApiResponse<String> editarAula(CursoRequest request) {

@@ -178,9 +178,6 @@ public class MatriculaService {
 
             Usuario estudiante = traerEstudiante(matricula.getInscripcion().getCedula());
 
-            Estudiante est = estRep.findByUsuarioCedula(estudiante.getCedula());
-            estRep.save(est);
-
             matricula.setCurso(curso);
             service.cambiarContraUsuario(estudiante);
         }

@@ -51,22 +51,10 @@ public class AdminGeneralController {
         return ResponseEntity.ok(authServ.register(registerRequest, Rol.ADMIN, EstadoUsu.Inactivo));
     }
 
-    // Registrar varios usuarios de tió administrador general
-    @PostMapping("registro/admins")
-    public ResponseEntity<ApiResponse<?>> registerAdmins(@RequestBody List<RegisterRequest> registerRequests) {
-        return ResponseEntity.ok(authServ.registerList(registerRequests, Rol.ADMIN, EstadoUsu.Inactivo));
-    }
-
     // Registrar administrador operacional
     @PostMapping("registro/adminOp")
     public ResponseEntity<ApiResponse<?>> registerAdminOp(@RequestBody RegisterRequest registerRequest) {
         return ResponseEntity.ok(authServ.register(registerRequest, Rol.AOPERACIONAL, EstadoUsu.Inactivo));
-    }
-
-    // Registrar varios usuarios de tipo administrador operacional
-    @PostMapping("registro/adminOps")
-    public ResponseEntity<ApiResponse<?>> registerAdminOps(@RequestBody List<RegisterRequest> registerRequests) {
-        return ResponseEntity.ok(authServ.registerList(registerRequests, Rol.AOPERACIONAL, EstadoUsu.Inactivo));
     }
 
     // Registar docente
@@ -75,11 +63,6 @@ public class AdminGeneralController {
         return ResponseEntity.ok(authServ.register(registerRequest, Rol.DOCENTE, EstadoUsu.Inactivo));
     }
 
-    // Registrar varios usuarios de tipo docente
-    @PostMapping("registro/docentes")
-    public ResponseEntity<ApiResponse<?>> registerDocentes(@RequestBody List<RegisterRequest> registerRequests) {
-        return ResponseEntity.ok(authServ.registerList(registerRequests, Rol.DOCENTE, EstadoUsu.Inactivo));
-    }
 
     // Editar estado usuarios
     @PutMapping("usuario")
@@ -99,12 +82,6 @@ public class AdminGeneralController {
         }
     }
 
-    // Eliminar usuario
-    @DeleteMapping("usuario/{cedula}")
-    public ResponseEntity<ApiResponse<?>> eliminarUsuario(@PathVariable String cedula) {
-        return ResponseEntity.ok(service.eliminarUsuario(cedula));
-    }
-
     /* ---------------------------- GESTION CICLO ACADEMICO ----------------------------*/
     // Crear
     @PostMapping("ciclo")
@@ -113,7 +90,7 @@ public class AdminGeneralController {
     }
 
     // Traer todos
-    @GetMapping("ciclo")
+    @GetMapping("ciclos")
     public ResponseEntity<?> getCiclosAcademicos() {
         return ResponseEntity.ok(cicloServ.getCiclos());
     }
@@ -172,12 +149,6 @@ public class AdminGeneralController {
         return ResponseEntity.ok(materiaServ.crearMateria(request));
     }
 
-    // Crear varias materias
-    @PostMapping("materias")
-    public ResponseEntity<ApiResponse<?>> crearMaterias(@RequestBody List<MateriaRequest> requests) {
-        return ResponseEntity.ok(materiaServ.crearMaterias(requests));
-    }
-
     // Traer todas
     @GetMapping("materias")
     public ResponseEntity<?> getMaterias() {
@@ -202,23 +173,23 @@ public class AdminGeneralController {
         return ResponseEntity.ok(materiaServ.eliminarMateria(id));
     }
 
+    // visualizar materias por grado
+    @GetMapping("materias/{grado}")
+    public ResponseEntity<?> getMateriasByGrado(@PathVariable String grado) {
+        return ResponseEntity.ok(materiaServ.getMateriasPorGrado(grado));
+    }
+
+    // visualizar cursos por grado
+    @GetMapping("cursos/{grado}")
+    public ResponseEntity<?> getCursosByGrado(@PathVariable String grado) {
+        return ResponseEntity.ok(cursoServ.obtenerAulasPorGrado(grado));
+    }
+
     /* ---------------------------- GESTIÓN DISTRIBUTIVO ---------------------------- */
     // Crear
     @PostMapping("distributivo")
     public ResponseEntity<ApiResponse<?>> crearDistributivo(@RequestBody DistributivoRequest request) {
         return ResponseEntity.ok(distributivoServ.crearDistributivo(request));
-    }
-
-    // Crear varios distributivos
-    @PostMapping("distributivos")
-    public ResponseEntity<ApiResponse<?>> crearDistributivos(@RequestBody List<DistributivoRequest> requests) {
-        return ResponseEntity.ok(distributivoServ.registrarDistributivos(requests));
-    }
-
-    // Traer todos
-    @GetMapping("distributivos")
-    public ResponseEntity<?> getDistributivos() {
-        return ResponseEntity.ok(distributivoServ.obtenerDistributivos());
     }
 
     // Traer por id
@@ -227,16 +198,16 @@ public class AdminGeneralController {
         return ResponseEntity.ok(distributivoServ.obtenerDistributivo(id));
     }
 
-    // Traer por id del curso
-    @GetMapping("distributivo/curso/{idCurso}")
-    public ResponseEntity<?> getDistributivoByCurso(@PathVariable Long idCurso) {
-        return ResponseEntity.ok(distributivoServ.getDistributivoByCurso(idCurso));
+    // traer por ciclo y curso
+    @GetMapping("distributivo/{cicloId}/{cursoId}")
+    public ResponseEntity<?> getDistributivoByCicloCurso(@PathVariable Long cicloId, @PathVariable Long cursoId) {
+        return ResponseEntity.ok(distributivoServ.getDistributivoByCicloAndCurso(cicloId, cursoId));
     }
 
-    // Traer por id del ciclo académico
-    @GetMapping("distributivo/ciclo/{idCiclo}")
-    public ResponseEntity<?> getDistributivoByCiclo(@PathVariable Long idCiclo) {
-        return ResponseEntity.ok(distributivoServ.getDistributivoByCiclo(idCiclo));
+    // traer por ciclo y docente
+    @GetMapping("distributivo/{cicloId}/{cedula}")
+    public ResponseEntity<?> getDistributivoByCicloDocente(@PathVariable Long cicloId, @PathVariable String cedula) {
+        return ResponseEntity.ok(distributivoServ.getDistributivoByCicloAndDocente(cicloId, cedula));
     }
 
     // Actualizar

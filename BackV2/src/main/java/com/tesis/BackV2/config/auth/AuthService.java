@@ -107,18 +107,6 @@ public class AuthService {
                 .build();
     }
 
-    // Registrar lista de usuarios
-    public ApiResponse<String> registerList(List<RegisterRequest> requests, Rol rol, EstadoUsu estado) {
-        for (RegisterRequest request : requests) {
-            register(request, rol, estado);
-        }
-        return ApiResponse.<String>builder()
-                .error(false)
-                .mensaje("Usuarios registrados con éxito.")
-                .codigo(200)
-                .build();
-    }
-
     public void registerEstudiante(String cedula, Rol rol, EstadoUsu estado) {
 
         Inscripcion inscripcion = insRep.findById(cedula).orElseThrow(() -> new ApiException(ApiResponse.builder()

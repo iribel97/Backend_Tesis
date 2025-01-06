@@ -4,6 +4,8 @@ import com.tesis.BackV2.entities.Curso;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+
 @Repository
 public interface CursoRepo extends JpaRepository<Curso, Long> {
 
@@ -20,4 +22,6 @@ public interface CursoRepo extends JpaRepository<Curso, Long> {
     Curso findByParaleloAndGradoNombre(String paralelo, String nombre);
 
     boolean existsByParaleloAndGradoNombre(String paralelo, String grado);
+
+    Collection<Curso> findByGradoNombre(String grado);
 }
