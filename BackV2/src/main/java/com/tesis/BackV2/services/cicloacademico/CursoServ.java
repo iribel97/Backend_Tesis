@@ -85,21 +85,6 @@ public class CursoServ {
                 .toList();
     }
 
-    // Traer solo uno
-    public CursoDTO obtenerAula(String paralelo, String grado) {
-        Curso curso = cursoRepo.findByParaleloAndGradoNombre(paralelo, grado);
-        if (curso == null) {
-            throw new ApiException(ApiResponse.<String>builder()
-                    .error(true)
-                    .mensaje("Solicitud incorrecta")
-                    .codigo(400)
-                    .detalles("El curso no existe")
-                    .build()
-            );
-        }
-        return convertirAulaADTO(curso);
-    }
-
     // Traer por grado
     public List<CursoDTO> obtenerAulasPorGrado(String grado) {
         return cursoRepo.findByGradoNombre(grado).stream()

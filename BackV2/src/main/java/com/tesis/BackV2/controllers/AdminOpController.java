@@ -10,7 +10,9 @@ import com.tesis.BackV2.request.CursoRequest;
 import com.tesis.BackV2.request.HorarioRequest;
 import com.tesis.BackV2.request.MatriculacionRequest;
 import com.tesis.BackV2.services.cicloacademico.CursoServ;
+import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
 import com.tesis.BackV2.services.cicloacademico.HorarioServ;
+import com.tesis.BackV2.services.config.HorarioConfigServ;
 import com.tesis.BackV2.services.inscripcion.InscripcionService;
 import com.tesis.BackV2.services.inscripcion.MatriculaService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,8 @@ public class AdminOpController {
     private final InscripcionService inscripServ;
     private final CursoServ cursoServ;
     private final HorarioServ horarioServ;
+    private final DistributivoServ distributivoServ;
+    private final HorarioConfigServ horarioConfigServ;
     private final AuthService authService;
     private final MatriculaService matriculaService;
 
@@ -67,12 +71,24 @@ public class AdminOpController {
     }
 
     // rechazar inscripción
-    @PutMapping("inscripcion/rechazar")
-    public ResponseEntity<ApiResponse<?>> rechazarInscripcion(@RequestBody MatriculacionRequest request) {
-        return ResponseEntity.ok(inscripServ.cambiarEstadoInscripcion(request.getCedulaEstudiante(), EstadoInscripcion.Rechazado, null));
+    @PutMapping("inscripcion/rechazar/{cedulaEst}")
+    public ResponseEntity<ApiResponse<?>> rechazarInscripcion(@PathVariable String cedulaEst) {
+        return ResponseEntity.ok(inscripServ.cambiarEstadoInscripcion(cedulaEst, EstadoInscripcion.Rechazado, null));
     }
 
     /*  ---------------------------- Gestión de Horarios  ---------------------------- */
+    // Traer todos las configuraciones de horarios
+    @GetMapping("horariosConfig")
+    public ResponseEntity<?> obtenerHorarios() {
+        return ResponseEntity.ok(horarioConfigServ.horarios());
+    }
+
+    // Traer distributivos por ciclo academico y curso
+    @GetMapping("distributivos/{cicloId}/{cursoId}")
+    public ResponseEntity<?> obtenerDistributivos(@PathVariable Long cicloId, @PathVariable Long cursoId) {
+        return ResponseEntity.ok(distributivoServ.getDistributivoByCicloAndCurso(cicloId, cursoId));
+    }
+
     // Crear
     @PostMapping("horario")
     public ResponseEntity<ApiResponse<?>> crearHorario(@RequestBody HorarioRequest request) {
@@ -99,22 +115,10 @@ public class AdminOpController {
         return ResponseEntity.ok(cursoServ.crearCurso(request));
     }
 
-    // Registrar cursos
-    @PostMapping("cursos")
-    public ResponseEntity<ApiResponse<?>> registrarCursos(@RequestBody List<CursoRequest> request) {
-        return ResponseEntity.ok(cursoServ.registrarCursos(request));
-    }
-
     // Traer todos
     @GetMapping("cursos")
     public ResponseEntity<?> obtenerAulas() {
         return ResponseEntity.ok(cursoServ.obtenerAulas());
-    }
-
-    // Traer por paralelo y nombre del grado
-    @GetMapping("curso/{nombre}/{paralelo}")
-    public ResponseEntity<?> obtenerAula(@PathVariable String nombre, @PathVariable String paralelo) {
-        return ResponseEntity.ok(cursoServ.obtenerAula(paralelo, nombre));
     }
 
     // Actualizar
