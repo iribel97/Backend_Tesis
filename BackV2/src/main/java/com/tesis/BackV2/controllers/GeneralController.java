@@ -4,14 +4,13 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.Estudiante;
-import com.tesis.BackV2.entities.Usuario;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.MatriculaRepo;
 import com.tesis.BackV2.repositories.UsuarioRepo;
+import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.UsuarioServ;
-import com.tesis.BackV2.services.cicloacademico.HorarioServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = {"http://localhost:4200"})
 public class GeneralController {
 
-    private final HorarioServ horarioServ;
+    private final CicloAcademicoServ cicloAServ;
     private final JwtService jwtService;
     private final UsuarioRepo usuarioRepo;
     private final EstudianteRepo estudianteRepo;
@@ -67,10 +66,10 @@ public class GeneralController {
         Estudiante estudiante = estudianteRepo.findByUsuarioCedula(userCedula);
 
         if (estudiante != null) {
-            return ResponseEntity.ok(horarioServ.getHorariosByCurso(matrRepo.findTopByEstudianteIdOrderByIdDesc(estudiante.getId()).getCurso().getId()));
+            return ResponseEntity.ok(cicloAServ.getHorariosByCurso(matrRepo.findTopByEstudianteIdOrderByIdDesc(estudiante.getId()).getCurso().getId()));
         }
 
-        return ResponseEntity.ok(horarioServ.getHorariosByCurso(idCurso));
+        return ResponseEntity.ok(cicloAServ.getHorariosByCurso(idCurso));
     }
 
     // Metodo para extraer el token del encabezado de la solicitud

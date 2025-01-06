@@ -7,9 +7,8 @@ import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.MatriculaRepo;
 import com.tesis.BackV2.request.contenido.EntregaRequest;
+import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.ContenidoServ;
-import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
-import com.tesis.BackV2.services.cicloacademico.HorarioServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +22,8 @@ import java.util.List;
 @CrossOrigin(origins = {"http://localhost:4200"})
 public class EstudianteController {
 
-    private final DistributivoServ disServ;
+    private final CicloAcademicoServ cicloAServ;
     private final ContenidoServ contServ;
-    private final HorarioServ horarioServ;
 
     private final JwtService jwtService;
 
@@ -50,7 +48,7 @@ public class EstudianteController {
             );
         }
 
-        return ResponseEntity.ok(horarioServ.getHorariosByCurso(matrRepo.findTopByEstudianteIdOrderByIdDesc(estudiante.getId()).getCurso().getId()));
+        return ResponseEntity.ok(cicloAServ.getHorariosByCurso(matrRepo.findTopByEstudianteIdOrderByIdDesc(estudiante.getId()).getCurso().getId()));
     }
 
     /*  ---------------------------- Materias  ---------------------------- */
@@ -60,7 +58,7 @@ public class EstudianteController {
         Estudiante estudiante = validarEstudiante(request);
         if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
 
-        return ResponseEntity.ok(disServ.getDistributivoByCurso(matrRepo.findTopByEstudianteIdOrderByIdDesc(estudiante.getId()).getCurso().getId()));
+        return ResponseEntity.ok(cicloAServ.getDistributivoByCurso(matrRepo.findTopByEstudianteIdOrderByIdDesc(estudiante.getId()).getCurso().getId()));
     }
 
     // visualizar contenido de materia activo

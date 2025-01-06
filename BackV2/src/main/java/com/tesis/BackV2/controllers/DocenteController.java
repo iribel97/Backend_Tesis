@@ -5,8 +5,8 @@ import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.request.contenido.*;
+import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.ContenidoServ;
-import com.tesis.BackV2.services.cicloacademico.DistributivoServ;
 import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ public class DocenteController {
 
     private final JwtService jwtService;
 
+    private final CicloAcademicoServ cicloAServ;
     private final ContenidoServ contServ;
-    private final DistributivoServ disServ;
     private final SisCalifServ sisCalifServ;
 
     private final DocenteRepo repDocente;
@@ -42,7 +42,7 @@ public class DocenteController {
         Docente docente = validarDocente(request);
         if (docente == null) return buildErrorResponse("No se encontró el docente", 404);
 
-        return ResponseEntity.ok(disServ.getDistributivoByDocente(docente.getUsuario().getCedula()));
+        return ResponseEntity.ok(cicloAServ.getDistributivoByDocente(docente.getUsuario().getCedula()));
 
     }
 
