@@ -2,20 +2,21 @@ package com.tesis.BackV2.services;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.asistencia.AsistenciaEstDTO;
+import com.tesis.BackV2.dto.asistencia.AsistenciasDisEstDTO;
 import com.tesis.BackV2.dto.asistencia.AsistenciasEstDTO;
 import com.tesis.BackV2.dto.asistencia.PorcentAsisEst;
 import com.tesis.BackV2.entities.Asistencia;
+import com.tesis.BackV2.entities.Distributivo;
+import com.tesis.BackV2.entities.Matricula;
 import com.tesis.BackV2.exceptions.ApiException;
-import com.tesis.BackV2.repositories.AsistenciaRepo;
-import com.tesis.BackV2.repositories.CicloAcademicoRepo;
-import com.tesis.BackV2.repositories.EstudianteRepo;
-import com.tesis.BackV2.repositories.HorarioRepo;
+import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.request.AsistenciaRequest;
 import com.tesis.BackV2.request.CicloARequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,8 @@ public class AsistenciaServ {
     private final EstudianteRepo repoEst;
     private final HorarioRepo repoHor;
     private final CicloAcademicoRepo repoCicl;
+    private final MatriculaRepo repoMatr;
+    private final DistributivoRepo repoDist;
 
     // registrar Asistencia
     @Transactional
@@ -120,9 +123,9 @@ public class AsistenciaServ {
                         .totalFaltas(falta)
                         .totalJustificadas(tardanza)
                         .totalAsist(asistio)
-                        .porcentajeAsistencias(porcentajeAsistencias)
-                        .porcentajeFaltas(porcentajeFaltas)
-                        .porcentajeJustificadas(porcentajeJustificadas)
+                        .porcentajeAsistencias(asistio == 0 ? 0 : porcentajeAsistencias)
+                        .porcentajeFaltas(falta == 0 ? 0 : porcentajeFaltas)
+                        .porcentajeJustificadas(tardanza == 0 ? 0 : porcentajeJustificadas)
                         .build())
                 .asistencias(asistencias.stream().map(asistencia -> AsistenciaEstDTO.builder()
                         .id(asistencia.getId())
@@ -134,6 +137,22 @@ public class AsistenciaServ {
                         .collect(Collectors.toList()))
                 .build();
 
+    }
+
+    // Visualización general de asistencia
+    public List<AsistenciasDisEstDTO> asistenciasByDistributivo(String cedulaEst){
+        Matricula x = repoMatr.findTopByEstudianteUsuarioCedulaOrderByIdDesc(cedulaEst);
+        List<Distributivo> materias = repoDist.findByCursoId(x.getCurso().getId());
+        List<AsistenciasDisEstDTO> asistencias = new ArrayList<>();
+
+        for (Distributivo materia : materias) {
+            asistencias.add(AsistenciasDisEstDTO.builder()
+                    .nombreMateria(materia.getMateria().getNombre())
+                    .data(asistenciaEstudiante(x.getEstudiante().getId(), materia.getId()).getDatos())
+                    .build());
+        }
+
+        return asistencias;
     }
 
     /* ---- METODOS PROPIOS DEL SERVICIO ---- */

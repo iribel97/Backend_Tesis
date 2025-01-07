@@ -107,6 +107,15 @@ public class EstudianteController {
         return ResponseEntity.ok(asistenciaServ.asistenciaEstudiante(estudiante.getId(), distriID));
     }
 
+    // Visualización general de asistencia
+    @GetMapping("asistencias")
+    public ResponseEntity<?> obtenerAsistencias(HttpServletRequest request) {
+        Estudiante estudiante = validarEstudiante(request);
+        if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
+
+        return ResponseEntity.ok(asistenciaServ.asistenciasByDistributivo(estudiante.getUsuario().getCedula()));
+    }
+
     /* ---------------------------- Métodos Privados ---------------------------- */
     // Valida y extrae el docente del token
     private Estudiante validarEstudiante(HttpServletRequest request) {

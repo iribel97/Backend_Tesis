@@ -33,4 +33,6 @@ public interface MatriculaRepo extends JpaRepository<Matricula, Long> {
 
     // Listar matrículas por ciclo académico y curso
     List<Matricula> findByCicloAndCurso(CicloAcademico ciclo, Curso curso);
+
+    Matricula findTopByEstudianteUsuarioCedulaOrderByIdDesc(String cedulaEst);
 }
