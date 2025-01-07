@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -16,4 +17,8 @@ public interface AsistenciaRepo extends JpaRepository<Asistencia, Long> {
             "AND a.horario.distributivo.id = :distributivoId")
     List<Asistencia> findByEstudianteAndDistributivo(@Param("estudianteId") Long estudianteId,
                                                      @Param("distributivoId") Long distributivoId);
+
+    List<Asistencia> findByHorario_Distributivo_IdAndFecha(long horarioDistributivoId, LocalDate fecha);
+
+
 }

@@ -1,18 +1,19 @@
-package com.tesis.BackV2.dto.horarioConfig;
+package com.tesis.BackV2.request.asistencia;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DiaDTO {
+public class AsisRequest {
 
-    private String materia;
-    private String docente;
-    private String curso;
-
+    private Long idDist;
+    private LocalDate fecha;
 }

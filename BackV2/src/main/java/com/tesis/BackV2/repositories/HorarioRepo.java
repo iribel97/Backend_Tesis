@@ -19,4 +19,7 @@ public interface HorarioRepo extends JpaRepository<Horario, Long> {
     List<Horario> findByDistributivo_Id(long id);
 
     List<Horario> findByDistributivoId(Long id);
+
+    // traer por docente
+    List<Horario> findByDistributivoDocenteUsuarioCedula(String cedula);
 }

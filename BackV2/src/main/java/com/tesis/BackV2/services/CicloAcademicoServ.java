@@ -1233,6 +1233,70 @@ public class CicloAcademicoServ {
         return dto;
     }
 
+    // Traer horarios por docente
+    public List<HorarioDTO> getHorariosByDocente(String cedDocen){
+        List<Horario> horario = horarioRepo.findByDistributivoDocenteUsuarioCedula(cedDocen);
+        List<HorarioDTO> dto = new ArrayList<>();
+        List<HorarioConfig> config = horarioConfigRepo.findAll();
+
+        for (HorarioConfig h : config) {
+            DiaDTO lunes = null, martes = null, miercoles = null, jueves = null, viernes = null;
+
+            HoraDTO hora = HoraDTO.builder()
+                    .horaInicio(String.valueOf(h.getHoraInicio()))
+                    .horaFin(String.valueOf(h.getHoraFin()))
+                    .build();
+
+            for (Horario hor : horario) {
+
+                if (h.getId() == hor.getHorario().getId()) {
+                    switch (hor.getDiaSemana()) {
+                        case Lunes:
+                            lunes = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .curso(hor.getDistributivo().getCurso().getGrado().getNombre() + " " +  hor.getDistributivo().getCurso().getParalelo())
+                                    .build();
+                            break;
+                        case Martes:
+                            martes = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .curso(hor.getDistributivo().getCurso().getGrado().getNombre() + " " +  hor.getDistributivo().getCurso().getParalelo())
+                                    .build();
+                            break;
+                        case Miercoles:
+                            miercoles = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .curso(hor.getDistributivo().getCurso().getGrado().getNombre() + " " +  hor.getDistributivo().getCurso().getParalelo())
+                                    .build();
+                            break;
+                        case Jueves:
+                            jueves = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .curso(hor.getDistributivo().getCurso().getGrado().getNombre() + " " +  hor.getDistributivo().getCurso().getParalelo())
+                                    .build();
+                            break;
+                        case Viernes:
+                            viernes = DiaDTO.builder()
+                                    .materia(hor.getDistributivo().getMateria().getNombre())
+                                    .curso(hor.getDistributivo().getCurso().getGrado().getNombre() + " " +  hor.getDistributivo().getCurso().getParalelo())
+                                    .build();
+                            break;
+                    }
+                }
+            }
+            dto.add(HorarioDTO.builder()
+                    .id(h.getId())
+                    .horario(hora)
+                    .lunes(lunes)
+                    .martes(martes)
+                    .miercoles(miercoles)
+                    .jueves(jueves)
+                    .viernes(viernes)
+                    .build());
+        }
+        return dto;
+    }
+
     private boolean validarDistributivoHoras(HorarioRequest request, long idHorario) {
         // traer distributivos
         List<Horario> horarios = horarioRepo.findAll();

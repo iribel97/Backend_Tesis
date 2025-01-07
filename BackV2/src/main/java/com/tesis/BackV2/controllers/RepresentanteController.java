@@ -31,7 +31,13 @@ public class RepresentanteController {
 
     /*  ---------------------------- Visualización de Conducta  ---------------------------- */
 
-    /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */
+    /*  ---------------------------- Visualización de Asistencia ---------------------------- */
+    @GetMapping("asistencia/{cedulaEst}")
+    public ResponseEntity<?> traerAsistencias(@PathVariable String cedulaEst){
+        return ResponseEntity.ok(asistenciaServ.asistenciasByDistributivo(cedulaEst));
+    }
+
+    /*  ---------------------------- Visualización de Calificaciones ---------------------------- */
 
     /*  ---------------------------- Gestión de Inscripciones  ---------------------------- */
     // Crear

@@ -1,13 +1,11 @@
 package com.tesis.BackV2.services;
 
 import com.tesis.BackV2.config.ApiResponse;
-import com.tesis.BackV2.dto.asistencia.AsistenciaEstDTO;
-import com.tesis.BackV2.dto.asistencia.AsistenciasDisEstDTO;
-import com.tesis.BackV2.dto.asistencia.AsistenciasEstDTO;
-import com.tesis.BackV2.dto.asistencia.PorcentAsisEst;
+import com.tesis.BackV2.dto.asistencia.*;
 import com.tesis.BackV2.entities.Asistencia;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Matricula;
+import com.tesis.BackV2.enums.EstadoAsistencia;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.request.AsistenciaRequest;
@@ -16,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,31 +66,19 @@ public class AsistenciaServ {
     // Actualizar Asistencia
     @Transactional
     public ApiResponse<String> actualizarAsistencia(AsistenciaRequest request) {
-
-        validarRequest(request);
-
-        Asistencia asistencia = repo.findById(request.getId()).orElseThrow(() ->
-                new ApiException(ApiResponse.<String>builder()
+        Asistencia asistencia = repo.findById(request.getIdAsistencia()).orElseThrow(() ->
+                new ApiException(ApiResponse.<String> builder()
                         .error(true)
-                        .codigo(400)
-                        .mensaje("Error de validación")
-                        .detalles("La asistencia no existe")
+                        .codigo(404)
+                        .mensaje("No se encontró la asistencia")
                         .build()));
 
         asistencia.setEstado(request.getEstado());
-        asistencia.setFecha(request.getFecha());
-        asistencia.setEstudiante(repoEst.findByUsuarioCedula(request.getCedulaEstudiante()));
-        asistencia.setHorario(repoHor.findById(request.getHorarioID()).orElseThrow(() ->
-                new ApiException(ApiResponse.<String>builder()
-                        .error(true)
-                        .codigo(400)
-                        .mensaje("Error de validación")
-                        .detalles("El horario no existe")
-                        .build())));
+        asistencia.setObservaciones(request.getObservaciones());
 
         repo.save(asistencia);
 
-        return ApiResponse.<String>builder()
+        return ApiResponse.<String> builder()
                 .error(false)
                 .codigo(200)
                 .mensaje("Solicitud exitosa")
@@ -153,6 +140,53 @@ public class AsistenciaServ {
         }
 
         return asistencias;
+    }
+
+    // visualización de las asistencias de los estudiantes de un distributivo
+    @Transactional
+    public AsistenciasDocenteDTO asistenciasByDistributivoFecha(long idDis, LocalDate fecha) {
+        List<Asistencia> asisList = repo.findByHorario_Distributivo_IdAndFecha(idDis, fecha);
+
+        if (asisList.isEmpty()) {
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .codigo(404)
+                    .mensaje("No se encontraron asistencias para el distributivo y fecha proporcionados")
+                    .build());
+        }
+
+        int totalAsistencias = asisList.size(), asistio = 0, falta = 0, justificado = 0;
+
+        for (Asistencia asistencia : asisList) {
+            if (asistencia.getEstado().name().equals("Presente")) asistio++;
+            if (asistencia.getEstado().name().equals("Ausente")) falta++;
+            if (asistencia.getEstado().name().equals("Justificado")) justificado++;
+        }
+
+        double porcentajeAsistencias = (double) (asistio * 100) / totalAsistencias;
+        double porcentajeFaltas = (double) (falta * 100) / totalAsistencias;
+        double porcentajeJustificadas = (double) (justificado * 100) / totalAsistencias;
+
+        return AsistenciasDocenteDTO.builder()
+                .diaSemana(asisList.get(0).getHorario().getDiaSemana().name())
+                .datos(PorcentAsisEst.builder()
+                        .totalAsistencias(totalAsistencias)
+                        .totalFaltas(falta)
+                        .totalJustificadas(justificado)
+                        .totalAsist(asistio)
+                        .porcentajeAsistencias(asistio == 0 ? 0 : porcentajeAsistencias)
+                        .porcentajeFaltas(falta == 0 ? 0 : porcentajeFaltas)
+                        .porcentajeJustificadas(justificado == 0 ? 0 : porcentajeJustificadas)
+                        .build())
+                .asistencias(asisList.stream().map(asistencia1 -> AsisDocDTO.builder()
+                        .idAsistencia(asistencia1.getId())
+                        .estado(asistencia1.getEstado())
+                        .apellidosEstudiante(asistencia1.getEstudiante().getUsuario().getApellidos())
+                        .nombresEstudiante(asistencia1.getEstudiante().getUsuario().getNombres())
+                        .observaciones(asistencia1.getObservaciones())
+                        .build())
+                        .collect(Collectors.toList()))
+                .build();
     }
 
     /* ---- METODOS PROPIOS DEL SERVICIO ---- */

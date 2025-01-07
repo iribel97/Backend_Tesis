@@ -5,6 +5,7 @@ import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.request.AsistenciaRequest;
+import com.tesis.BackV2.request.asistencia.AsisRequest;
 import com.tesis.BackV2.request.contenido.*;
 import com.tesis.BackV2.services.AsistenciaServ;
 import com.tesis.BackV2.services.CicloAcademicoServ;
@@ -36,6 +37,18 @@ public class DocenteController {
     @PostMapping("asistencia")
     public ResponseEntity<?> registrarAsistencia(@RequestBody List<AsistenciaRequest> request) {
         return ResponseEntity.ok(asistenciaServ.registrarAsistencia(request));
+    }
+
+    // Traer asistencias por distributivo y fecha
+    @GetMapping("asistencia")
+    public ResponseEntity<?> obtenerAsistencias(@RequestBody AsisRequest request) {
+        return ResponseEntity.ok(asistenciaServ.asistenciasByDistributivoFecha(request.getIdDist(), request.getFecha()));
+    }
+
+    // actualizar asistencia
+    @PutMapping("asistencia")
+    public ResponseEntity<?> actualizarAsistencia(@RequestBody AsistenciaRequest request){
+        return ResponseEntity.ok(asistenciaServ.actualizarAsistencia(request));
     }
 
     /*  ---------------------------- Gestión de Conducta  ---------------------------- */
@@ -141,6 +154,15 @@ public class DocenteController {
     @PutMapping("/entrega/calificar")
     public ResponseEntity<?> calificarEntrega(@RequestBody NotaRequest nota){
         return ResponseEntity.ok(contServ.calificarEntrega(nota));
+    }
+
+    /* ---------------------------------- HORARIO ----------------------------------------*/
+    // Traer horario por docente
+    @GetMapping("horario")
+    public ResponseEntity<?> obtenerHorario(HttpServletRequest request) {
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(cicloAServ.getHorariosByDocente(docente.getUsuario().getCedula()));
     }
 
 

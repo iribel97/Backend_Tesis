@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class AsistenciaRequest {
 
-        private Long id;
+        private Long idAsistencia;
         private EstadoAsistencia estado;
         private LocalDate fecha;
         private long horarioID;
