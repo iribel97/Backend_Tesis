@@ -28,6 +28,7 @@ public class GeneralController {
     private final EstudianteRepo estudianteRepo;
     private final MatriculaRepo matrRepo;
     private final UsuarioServ service;
+    private final UsuarioServ usuarioServ;
 
     // Traer usuario por cedula
     @GetMapping("usuario/{cedula}")
@@ -52,6 +53,12 @@ public class GeneralController {
                     .detalles("Usuario no encontrado")
                     .build());
         }
+    }
+
+    // Traer estudiantes por curso
+    @GetMapping("estudiantes/{idCurso}")
+    public ResponseEntity<?> obtenerEstudiantes(@PathVariable Long idCurso) {
+        return ResponseEntity.ok(usuarioServ.getEstudiantesByCurso(idCurso));
     }
 
 

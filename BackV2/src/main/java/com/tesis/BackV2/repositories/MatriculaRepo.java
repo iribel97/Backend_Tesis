@@ -1,6 +1,7 @@
 package com.tesis.BackV2.repositories;
 
 import com.tesis.BackV2.entities.CicloAcademico;
+import com.tesis.BackV2.entities.Curso;
 import com.tesis.BackV2.entities.Inscripcion;
 import com.tesis.BackV2.entities.Matricula;
 import com.tesis.BackV2.enums.EstadoMatricula;
@@ -29,4 +30,7 @@ public interface MatriculaRepo extends JpaRepository<Matricula, Long> {
 
     // Listar estudiantes por el último ciclo académico y por curso
     List<Matricula> findByCicloAndCurso_Id(CicloAcademico ciclo, Long idCurso);
+
+    // Listar matrículas por ciclo académico y curso
+    List<Matricula> findByCicloAndCurso(CicloAcademico ciclo, Curso curso);
 }

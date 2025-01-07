@@ -4,7 +4,9 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
+import com.tesis.BackV2.request.AsistenciaRequest;
 import com.tesis.BackV2.request.contenido.*;
+import com.tesis.BackV2.services.AsistenciaServ;
 import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.ContenidoServ;
 import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
@@ -12,6 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/docente/")
@@ -24,9 +28,15 @@ public class DocenteController {
     private final CicloAcademicoServ cicloAServ;
     private final ContenidoServ contServ;
     private final SisCalifServ sisCalifServ;
+    private final AsistenciaServ asistenciaServ;
 
     private final DocenteRepo repDocente;
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
+    // Crear asistencia
+    @PostMapping("asistencia")
+    public ResponseEntity<?> registrarAsistencia(@RequestBody List<AsistenciaRequest> request) {
+        return ResponseEntity.ok(asistenciaServ.registrarAsistencia(request));
+    }
 
     /*  ---------------------------- Gestión de Conducta  ---------------------------- */
 

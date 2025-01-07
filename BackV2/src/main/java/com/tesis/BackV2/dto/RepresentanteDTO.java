@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RepresentanteDTO {
 
-    private Long id;
+    private String nombres;
+    private String apellidos;
     private boolean autorizado;
     private String ocupacion;
     private String empresa;

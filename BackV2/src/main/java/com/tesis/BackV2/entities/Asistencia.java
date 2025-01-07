@@ -31,4 +31,7 @@ public class Asistencia {
 
     @ManyToOne (fetch = FetchType.LAZY)
     private Horario horario;
+
+    @ManyToOne (fetch = FetchType.LAZY)
+    private CicloAcademico cicloAcademico;
 }

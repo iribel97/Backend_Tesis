@@ -6,10 +6,7 @@ import com.tesis.BackV2.dto.DocenteDTO;
 import com.tesis.BackV2.dto.EstudianteDTO;
 import com.tesis.BackV2.dto.RepresentanteDTO;
 import com.tesis.BackV2.dto.UsuarioDTO;
-import com.tesis.BackV2.entities.Docente;
-import com.tesis.BackV2.entities.Estudiante;
-import com.tesis.BackV2.entities.Representante;
-import com.tesis.BackV2.entities.Usuario;
+import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
@@ -41,6 +38,10 @@ public class UsuarioServ {
     private DistributivoRepo repoDist;
     @Autowired
     private CursoRepo repoC;
+    @Autowired
+    private MatriculaRepo repoM;
+    @Autowired
+    private CicloAcademicoRepo repoCA;
 
     @Autowired
     AuthService auth;
@@ -123,16 +124,16 @@ public class UsuarioServ {
         Representante representante = repoR.findByUsuarioCedula(cedula);
 
         DocenteDTO docenteDTO = docente != null ? DocenteDTO.builder()
-                .id(docente.getId())
                 .titulo(docente.getTitulo())
                 .especialidad(docente.getEspecialidad())
                 .experiencia(docente.getExperiencia())
                 .build() : null;
 
         EstudianteDTO estudianteDTO = estudiante != null ? EstudianteDTO.builder()
-                .id(estudiante.getId())
                 .ingreso(estudiante.getIngreso())
                 .representante(RepresentanteDTO.builder()
+                        .nombres(estudiante.getRepresentante().getUsuario().getNombres())
+                        .apellidos(estudiante.getRepresentante().getUsuario().getApellidos())
                         .autorizado(estudiante.getRepresentante().isAutorizado())
                         .ocupacion(estudiante.getRepresentante().getOcupacion())
                         .empresa(estudiante.getRepresentante().getEmpresa())
@@ -143,8 +144,6 @@ public class UsuarioServ {
                 .build() : null;
 
         RepresentanteDTO representanteDTO = representante != null ? RepresentanteDTO.builder()
-                .id(representante.getId())
-                .autorizado(representante.isAutorizado())
                 .ocupacion(representante.getOcupacion())
                 .empresa(representante.getEmpresa())
                 .direccion(representante.getDireccion())
@@ -160,13 +159,43 @@ public class UsuarioServ {
                 .direccion(usuario.getDireccion())
                 .nacimiento(usuario.getNacimiento())
                 .genero(usuario.getGenero())
-                .rol(usuario.getRol())
+                .rol(cambiarRol(usuario.getRol()))
                 .estado(usuario.getEstado())
                 .docente(docenteDTO)
                 .estudiante(estudianteDTO)
                 .representante(representanteDTO)
                 .build();
 
+    }
+
+    // Traer estudiantes con matriculapor medio del ciclo academico y un curso
+    public List<UsuarioDTO> getEstudiantesByCurso(Long idCurso) {
+        List<Matricula> matriculas = repoM.findByCicloAndCurso_Id(repoCA.findByActivoTrue(), idCurso);
+        if (matriculas == null) {
+            throw new ApiException(
+                    ApiResponse.builder()
+                            .error(true)
+                            .mensaje("Error de validación")
+                            .codigo(400)
+                            .detalles("No hay estudiantes matriculados")
+                            .build()
+            );
+        }
+
+        return matriculas.stream().map(matricula -> {
+            try {
+                return buscarUsuario(matricula.getEstudiante().getUsuario().getCedula());
+            } catch (MiExcepcion e) {
+                throw new ApiException(
+                        ApiResponse.builder()
+                                .error(true)
+                                .mensaje("Error de validación")
+                                .codigo(400)
+                                .detalles("No se encontró el usuario")
+                                .build()
+                );
+            }
+        }).collect(Collectors.toList());
     }
 
     // Traer usuarios con rol AdminGeneral, AdminOp y Docente
@@ -178,7 +207,6 @@ public class UsuarioServ {
         return usuarios.stream().map(usuario -> {
             Docente docente = repoD.findByUsuarioCedula(usuario.getCedula());
             DocenteDTO docenteDTO = docente != null ? DocenteDTO.builder()
-                    .id(docente.getId())
                     .titulo(docente.getTitulo())
                     .especialidad(docente.getEspecialidad())
                     .experiencia(docente.getExperiencia())
@@ -193,7 +221,7 @@ public class UsuarioServ {
                     .direccion(usuario.getDireccion())
                     .nacimiento(usuario.getNacimiento())
                     .genero(usuario.getGenero())
-                    .rol(usuario.getRol())
+                    .rol(cambiarRol(usuario.getRol()))
                     .estado(usuario.getEstado())
                     .docente(docenteDTO)
                     .build();
@@ -303,6 +331,24 @@ public class UsuarioServ {
                             .detalles("")
                             .build()
             );
+        }
+    }
+
+    // cambiar rol de Est a String
+    private String cambiarRol(Rol rol){
+        switch (rol){
+            case ADMIN:
+                return "Admin";
+            case AOPERACIONAL:
+                return "Institucional";
+            case DOCENTE:
+                return "Docente";
+            case ESTUDIANTE:
+                return "Estudiante";
+            case REPRESENTANTE:
+                return "Representante";
+            default:
+                return "ERROR";
         }
     }
 

@@ -24,7 +24,7 @@ public class UsuarioDTO {
     private String direccion;
     private LocalDate nacimiento;
     private Genero genero;
-    private Rol rol;
+    private String rol;
     private EstadoUsu estado;
 
     private DocenteDTO docente;

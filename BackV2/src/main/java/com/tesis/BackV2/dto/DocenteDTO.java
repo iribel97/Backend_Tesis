@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DocenteDTO {
 
-    private long id;
     private String titulo;
     private String especialidad;
     private int experiencia;

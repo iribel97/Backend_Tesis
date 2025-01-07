@@ -7,6 +7,7 @@ import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.MatriculaRepo;
 import com.tesis.BackV2.request.contenido.EntregaRequest;
+import com.tesis.BackV2.services.AsistenciaServ;
 import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.ContenidoServ;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ public class EstudianteController {
 
     private final CicloAcademicoServ cicloAServ;
     private final ContenidoServ contServ;
+    private final AsistenciaServ asistenciaServ;
 
     private final JwtService jwtService;
 
@@ -96,6 +98,14 @@ public class EstudianteController {
     /*  ---------------------------- Visualización de Conducta  ---------------------------- */
 
     /*  ---------------------------- Visualización de Asistencia  ---------------------------- */
+    // Visualizar asistencia
+    @GetMapping("asistencia/{distriID}")
+    public ResponseEntity<?> obtenerAsistencia(HttpServletRequest request, @PathVariable Long distriID) {
+        Estudiante estudiante = validarEstudiante(request);
+        if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
+
+        return ResponseEntity.ok(asistenciaServ.asistenciaEstudiante(estudiante.getId(), distriID));
+    }
 
     /* ---------------------------- Métodos Privados ---------------------------- */
     // Valida y extrae el docente del token
