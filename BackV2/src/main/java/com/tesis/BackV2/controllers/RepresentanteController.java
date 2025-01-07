@@ -5,6 +5,7 @@ import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.dto.InscripcionDTO;
 import com.tesis.BackV2.request.InscripcionRequest;
 import com.tesis.BackV2.request.MatriculacionRequest;
+import com.tesis.BackV2.services.AsistenciaServ;
 import com.tesis.BackV2.services.inscripcion.InscripcionService;
 import com.tesis.BackV2.services.inscripcion.MatriculaService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +27,7 @@ public class RepresentanteController {
 
     private final InscripcionService inscripServ;
     private final MatriculaService matricServ;
+    private final AsistenciaServ asistenciaServ;
 
     /*  ---------------------------- Visualización de Conducta  ---------------------------- */
 
