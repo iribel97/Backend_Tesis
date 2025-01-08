@@ -106,7 +106,12 @@ public class InscripcionService {
                 .estado(EstadoInscripcion.Pendiente)
                 .fechaInscripcion(java.time.LocalDate.now())
                 .cilo(repoCicloAcademico.findTopByOrderByIdDesc())
-                .grado(repoGrado.findByNombre(request.getGrado()))
+                .grado(repoGrado.findById(request.getGrado()).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                        .error(true)
+                        .codigo(404)
+                        .mensaje("Solicitud invalida")
+                        .detalles("El grado con el id " + request.getGrado() + " no existe")
+                        .build())))
                 .cedulaEstudiante(guardarDoc(request.getCedulaEstudiante(), "Cedula Estudiante", request.getCedula()))
                 .cedulaPadre(guardarDoc(request.getCedulaPadre(), "Cedula Padre", request.getCedula()))
                 .cedulaMadre(guardarDoc(request.getCedulaMadre(), "Cedula Madre", request.getCedula()))
@@ -190,6 +195,13 @@ public class InscripcionService {
         inscripcion.setTelefono(request.getTelefono());
         inscripcion.setDireccion(request.getDireccion());
         inscripcion.setFechaNacimiento(request.getFechaNacimiento());
+        inscripcion.setGenero(request.getGenero());
+        inscripcion.setGrado(repoGrado.findById(request.getGrado()).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                .error(true)
+                .codigo(404)
+                .mensaje("Solicitud invalida")
+                .detalles("El grado con el id " + request.getGrado() + " no existe")
+                .build())));
         inscripcion.setNombresPadre(request.getNombresPadre());
         inscripcion.setApellidosPadre(request.getApellidosPadre());
         inscripcion.setCorreoPadre(request.getCorreoPadre());

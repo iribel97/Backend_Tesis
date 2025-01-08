@@ -25,7 +25,7 @@ public class InscripcionRequest {
     private String direccion;
     private LocalDate fechaNacimiento;
     private Genero genero;
-    private String grado;
+    private long grado;
 
     /* ----------------- DATOS FAMILIARES ----------------- */
     private String nombresPadre;

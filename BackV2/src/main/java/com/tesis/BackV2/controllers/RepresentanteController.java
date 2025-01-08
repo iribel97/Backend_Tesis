@@ -6,6 +6,7 @@ import com.tesis.BackV2.dto.InscripcionDTO;
 import com.tesis.BackV2.request.InscripcionRequest;
 import com.tesis.BackV2.request.MatriculacionRequest;
 import com.tesis.BackV2.services.AsistenciaServ;
+import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.inscripcion.InscripcionService;
 import com.tesis.BackV2.services.inscripcion.MatriculaService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ public class RepresentanteController {
 
     private final JwtService jwtService;
 
+    private final CicloAcademicoServ cicloAServ;
     private final InscripcionService inscripServ;
     private final MatriculaService matricServ;
     private final AsistenciaServ asistenciaServ;
@@ -40,6 +42,9 @@ public class RepresentanteController {
     /*  ---------------------------- Visualización de Calificaciones ---------------------------- */
 
     /*  ---------------------------- Gestión de Inscripciones  ---------------------------- */
+    // Traer todos
+    @GetMapping("grados")
+    public ResponseEntity<?> getGrados() { return ResponseEntity.ok(cicloAServ.getGrados()); }
     // Crear
     @PostMapping("inscripcion/estudiante")
     public ResponseEntity<ApiResponse<?>> crearInscripcion(@RequestBody InscripcionRequest request) throws IOException {
