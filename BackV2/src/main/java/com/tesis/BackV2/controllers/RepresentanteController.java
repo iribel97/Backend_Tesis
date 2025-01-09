@@ -47,7 +47,9 @@ public class RepresentanteController {
     public ResponseEntity<?> getGrados() { return ResponseEntity.ok(cicloAServ.getGrados()); }
     // Crear
     @PostMapping("inscripcion/estudiante")
-    public ResponseEntity<ApiResponse<?>> crearInscripcion(@RequestBody InscripcionRequest request) throws IOException {
+    public ResponseEntity<ApiResponse<?>> crearInscripcion(@RequestBody InscripcionRequest request, HttpServletRequest user) throws IOException {
+        String token = extractTokenFromRequest(user);
+        request.setRepresentanteId(jwtService.extractUsername(token));
         return ResponseEntity.ok(inscripServ.inscripcion(request));
     }
 
