@@ -30,6 +30,23 @@ public class GeneralController {
     private final UsuarioServ service;
     private final UsuarioServ usuarioServ;
 
+    // Traer todos
+    @GetMapping("ciclos")
+    public ResponseEntity<?> getCiclosAcademicos() {
+        return ResponseEntity.ok(cicloAServ.getCiclos());
+    }
+
+    // visualizar todos los cursos
+    @GetMapping("cursos")
+    public ResponseEntity<?> getCursos() {
+        return ResponseEntity.ok(cicloAServ.obtenerAulas());
+    }
+
+    // visualizar cursos por grado
+    @GetMapping("cursos/{grado}")
+    public ResponseEntity<?> getCursosByGrado(@PathVariable String grado) {
+        return ResponseEntity.ok(cicloAServ.obtenerAulasPorGrado(grado));
+    }
     // Traer usuario por cedula
     @GetMapping("usuario/{cedula}")
     public ResponseEntity<UsuarioDTO> buscarUsuario(@PathVariable String cedula) throws MiExcepcion {

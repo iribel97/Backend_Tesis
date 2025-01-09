@@ -31,6 +31,9 @@ public interface MatriculaRepo extends JpaRepository<Matricula, Long> {
     // Listar estudiantes por el último ciclo académico y por curso
     List<Matricula> findByCicloAndCurso_Id(CicloAcademico ciclo, Long idCurso);
 
+    // Listar estudiantes matriculados y del ciclo academico activo
+    List<Matricula> findByCicloAndEstado(CicloAcademico ciclo, EstadoMatricula estado);
+
     // Listar matrículas por ciclo académico y curso
     List<Matricula> findByCicloAndCurso(CicloAcademico ciclo, Curso curso);
 

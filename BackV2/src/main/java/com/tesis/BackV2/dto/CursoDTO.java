@@ -14,6 +14,7 @@ public class CursoDTO {
     private long id;
     private String paralelo;
     private int maxEstudiantes;
+    private int cant;
     private String nombreGrado;
     private String tutor;
     private String telefonoTutor;

@@ -83,12 +83,6 @@ public class AdminGeneralController {
         return ResponseEntity.ok(cicloAServ.crearCicloAcademico(request));
     }
 
-    // Traer todos
-    @GetMapping("ciclos")
-    public ResponseEntity<?> getCiclosAcademicos() {
-        return ResponseEntity.ok(cicloAServ.getCiclos());
-    }
-
     // Traer un solo por id
     @GetMapping("ciclo/{id}")
     public ResponseEntity<?> getCicloAcademico(@PathVariable Long id) {
@@ -173,11 +167,7 @@ public class AdminGeneralController {
         return ResponseEntity.ok(cicloAServ.getMateriasPorGrado(grado));
     }
 
-    // visualizar cursos por grado
-    @GetMapping("cursos/{grado}")
-    public ResponseEntity<?> getCursosByGrado(@PathVariable String grado) {
-        return ResponseEntity.ok(cicloAServ.obtenerAulasPorGrado(grado));
-    }
+
 
     /* ---------------------------- GESTIÓN DISTRIBUTIVO ---------------------------- */
     // Crear

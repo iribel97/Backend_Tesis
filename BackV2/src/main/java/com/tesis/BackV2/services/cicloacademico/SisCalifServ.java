@@ -223,6 +223,9 @@ public class SisCalifServ {
 
         return sistemas.stream().map(sistema -> SistCalfDTO.builder()
                 .nivel(niveles(sistema))
+                .descripcion(sistema.getDescripcion())
+                .base(sistema.getBase())
+                .maximo(sistema.getMaximo())
                 .califID(sistema.getId())
                 .peso(sistema.getPeso())
                 .tipo(sistema.getTipo())

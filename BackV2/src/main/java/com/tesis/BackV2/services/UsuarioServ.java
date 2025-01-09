@@ -7,6 +7,7 @@ import com.tesis.BackV2.dto.EstudianteDTO;
 import com.tesis.BackV2.dto.RepresentanteDTO;
 import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.*;
+import com.tesis.BackV2.enums.EstadoMatricula;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
@@ -20,6 +21,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -109,7 +111,22 @@ public class UsuarioServ {
                 .build();
     }
 
+    // Traer usuarios matriculados en el ciclo academico activo
+    public List<UsuarioDTO> estMatriculadosCicloAct() throws MiExcepcion {
+        List<Matricula> matriculas = repoM.findByCicloAndEstado(repoCA.findByActivoTrue(), EstadoMatricula.Matriculado);
+
+        List<UsuarioDTO> estudiantes = new ArrayList<>();
+
+        for (Matricula matricula : matriculas) {
+            estudiantes.add(buscarUsuario(matricula.getInscripcion().getCedula()));
+        }
+
+        return estudiantes;
+    }
+
     public UsuarioDTO buscarUsuario(String cedula) throws MiExcepcion {
+
+        Matricula m = repoM.findTopByInscripcionCedulaOrderByIdDesc(cedula);
         Usuario usuario = repoU.findById(cedula).orElseThrow(() -> new ApiException(
                 ApiResponse.builder()
                         .error(true)
@@ -131,6 +148,7 @@ public class UsuarioServ {
 
         EstudianteDTO estudianteDTO = estudiante != null ? EstudianteDTO.builder()
                 .ingreso(estudiante.getIngreso())
+                .curso(m == null ? "" : m.getGrado().getNombre() + " - " + m.getCurso().getParalelo())
                 .representante(RepresentanteDTO.builder()
                         .nombres(estudiante.getRepresentante().getUsuario().getNombres())
                         .apellidos(estudiante.getRepresentante().getUsuario().getApellidos())

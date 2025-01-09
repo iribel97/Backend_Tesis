@@ -5,16 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EstudianteDTO {
+public class SelectDTO {
 
-    private LocalDate ingreso;
-    private String curso;
-
-    private RepresentanteDTO representante;
+    private long id;
+    private String name;
 }

@@ -3,10 +3,12 @@ package com.tesis.BackV2.controllers;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.enums.*;
+import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.request.CursoRequest;
 import com.tesis.BackV2.request.HorarioRequest;
 import com.tesis.BackV2.request.MatriculacionRequest;
 import com.tesis.BackV2.services.CicloAcademicoServ;
+import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.config.HorarioConfigServ;
 import com.tesis.BackV2.services.inscripcion.InscripcionService;
 import com.tesis.BackV2.services.inscripcion.MatriculaService;
@@ -25,6 +27,7 @@ public class AdminOpController {
     private final CicloAcademicoServ cicloAServ;
     private final InscripcionService inscripServ;
     private final HorarioConfigServ horarioConfigServ;
+    private final UsuarioServ usuarioServ;
     private final AuthService authService;
     private final MatriculaService matriculaService;
 
@@ -126,4 +129,10 @@ public class AdminOpController {
     }
 
     /*  ---------------------------- Visualización Estudiantes Matriculados  ---------------------------- */
+
+    // Estudiantes matriculados
+    @GetMapping("estudiantes/matriculados")
+    public ResponseEntity<?> estMatriculados() throws MiExcepcion {
+        return ResponseEntity.ok(usuarioServ.estMatriculadosCicloAct());
+    }
 }

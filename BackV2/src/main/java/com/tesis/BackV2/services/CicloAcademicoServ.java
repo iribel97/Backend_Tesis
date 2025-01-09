@@ -1,10 +1,7 @@
 package com.tesis.BackV2.services;
 
 import com.tesis.BackV2.config.ApiResponse;
-import com.tesis.BackV2.dto.CursoDTO;
-import com.tesis.BackV2.dto.DistributivoDTO;
-import com.tesis.BackV2.dto.HorarioDTO;
-import com.tesis.BackV2.dto.MateriaDTO;
+import com.tesis.BackV2.dto.*;
 import com.tesis.BackV2.dto.cicloAcademico.CicloDTO;
 import com.tesis.BackV2.dto.horarioConfig.DiaDTO;
 import com.tesis.BackV2.dto.horarioConfig.HoraDTO;
@@ -410,6 +407,7 @@ public class CicloAcademicoServ {
                 .id(curso.getId())
                 .paralelo(curso.getParalelo())
                 .maxEstudiantes(curso.getMaxEstudiantes())
+                .cant(curso.getEstudiantesAsignados())
                 .nombreGrado(curso.getGrado().getNombre())
                 .tutor(curso.getTutor().getUsuario().getNombres() + " " + curso.getTutor().getUsuario().getApellidos())
                 .telefonoTutor(curso.getTutor().getUsuario().getTelefono())
@@ -446,7 +444,17 @@ public class CicloAcademicoServ {
     }
 
     // Traer todos
-    public List<Grado> getGrados() { return gradoRepo.findAll(); }
+    public List<SelectDTO> getGrados() {
+        List<Grado> grados = gradoRepo.findAll();
+
+        return grados.stream()
+                .map(grado -> SelectDTO.builder()
+                        .id(grado.getId())
+                        .name(grado.getNombre())
+                        .build()
+                )
+                .toList();
+    }
 
     // Traer por nombre
     public Grado getGrado(String nombre) {
