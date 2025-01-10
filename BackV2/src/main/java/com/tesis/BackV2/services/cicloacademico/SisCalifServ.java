@@ -2,6 +2,10 @@ package com.tesis.BackV2.services.cicloacademico;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.SistCalfDTO;
+import com.tesis.BackV2.dto.notas.SistCalfLevlCuatroDTO;
+import com.tesis.BackV2.dto.notas.SistCalfLevlDosDTO;
+import com.tesis.BackV2.dto.notas.SistCalfLevlTresDTO;
+import com.tesis.BackV2.dto.notas.SistCalfLevlUnoDTO;
 import com.tesis.BackV2.entities.CicloAcademico;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.SistemaCalificacion;
@@ -207,8 +211,7 @@ public class SisCalifServ {
                 .build();
     }
 
-    // Traer por ciclo
-    public List<SistCalfDTO> traerPorCiclo(Long cicloId){
+    public List<SistCalfLevlUnoDTO> traerPorCiclo(Long cicloId) {
         List<SistemaCalificacion> sistemas = repo.findByCicloId(cicloId);
 
         if (sistemas.isEmpty()) {
@@ -221,18 +224,72 @@ public class SisCalifServ {
             );
         }
 
-        return sistemas.stream().map(sistema -> SistCalfDTO.builder()
-                .nivel(niveles(sistema))
-                .descripcion(sistema.getDescripcion())
-                .base(sistema.getBase())
-                .maximo(sistema.getMaximo())
-                .califID(sistema.getId())
-                .peso(sistema.getPeso())
-                .tipo(sistema.getTipo())
-                .fechaInicio(sistema.getFechaInicio())
-                .fechaFin(sistema.getFechaFin())
-                .build()
-        ).collect(Collectors.toList());
+        Map<Long, SistCalfLevlUnoDTO> lvl1Map = new HashMap<>();
+        Map<Long, SistCalfLevlDosDTO> lvl2Map = new HashMap<>();
+        Map<Long, SistCalfLevlTresDTO> lvl3Map = new HashMap<>();
+
+        for (SistemaCalificacion sis : sistemas) {
+            TipoNivel nivel = niveles(sis);
+            switch (nivel) {
+                case Primero:
+                    SistCalfLevlUnoDTO lvl1 = SistCalfLevlUnoDTO.builder()
+                            .nivel(nivel)
+                            .califID(sis.getId())
+                            .descripcion(sis.getDescripcion())
+                            .peso(sis.getPeso())
+                            .tipo(sis.getTipo())
+                            .base(sis.getBase())
+                            .maximo(sis.getMaximo())
+                            .fechaInicio(sis.getFechaInicio())
+                            .fechaFin(sis.getFechaFin())
+                            .level2(new ArrayList<>())
+                            .build();
+                    lvl1Map.put(sis.getId().getLvl1(), lvl1);
+                    break;
+                case Segundo:
+                    SistCalfLevlDosDTO lvl2 = SistCalfLevlDosDTO.builder()
+                            .nivel(nivel)
+                            .califID(sis.getId())
+                            .descripcion(sis.getDescripcion())
+                            .peso(sis.getPeso())
+                            .tipo(sis.getTipo())
+                            .base(sis.getBase())
+                            .maximo(sis.getMaximo())
+                            .fechaInicio(sis.getFechaInicio())
+                            .fechaFin(sis.getFechaFin())
+                            .level3(new ArrayList<>())
+                            .build();
+                    lvl2Map.put(sis.getId().getLvl2(), lvl2);
+                    lvl1Map.get(sis.getId().getLvl1()).getLevel2().add(lvl2);
+                    break;
+                case Tercero:
+                    SistCalfLevlTresDTO lvl3 = SistCalfLevlTresDTO.builder()
+                            .nivel(nivel)
+                            .califID(sis.getId())
+                            .descripcion(sis.getDescripcion())
+                            .peso(sis.getPeso())
+                            .tipo(sis.getTipo())
+                            .base(sis.getBase())
+                            .maximo(sis.getMaximo())
+                            .level4(new ArrayList<>())
+                            .build();
+                    lvl3Map.put(sis.getId().getLvl3(), lvl3);
+                    lvl2Map.get(sis.getId().getLvl2()).getLevel3().add(lvl3);
+                    break;
+                case Cuarto:
+                    SistCalfLevlCuatroDTO lvl4 = SistCalfLevlCuatroDTO.builder()
+                            .nivel(nivel)
+                            .califID(sis.getId())
+                            .descripcion(sis.getDescripcion())
+                            .base(sis.getBase())
+                            .maximo(sis.getMaximo())
+                            .build();
+                    lvl3Map.get(sis.getId().getLvl3()).getLevel4().add(lvl4);
+                    break;
+            }
+        }
+
+        return new ArrayList<>(lvl1Map.values());
     }
 
     //Traer para Docente

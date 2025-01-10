@@ -20,8 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -888,10 +890,13 @@ public class CicloAcademicoServ {
 
     // traer por ciclo id
     public List<DistributivoDTO> getDistributivoByCiclo(Long cicloId) {
-        return distributivoRepo.findByCicloId(cicloId).stream()
-                .map(this::convertirDisADTO)
-                .toList();
-    }
+    return distributivoRepo.findByCicloId(cicloId).stream()
+            .sorted(Comparator.comparing((Distributivo d) -> d.getCurso().getGrado().getId())
+                    .thenComparing(d -> Normalizer.normalize(d.getDocente().getUsuario().getApellidos(), Normalizer.Form.NFD)
+                            .replaceAll("\\p{M}", "")))
+            .map(this::convertirDisADTO)
+            .toList();
+}
 
     /* --------- METODOS AUXILIARES ---------- */
 
