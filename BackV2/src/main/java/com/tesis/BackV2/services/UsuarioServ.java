@@ -21,8 +21,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -222,28 +225,30 @@ public class UsuarioServ {
         usuarios.addAll(repoU.findByRol(Rol.AOPERACIONAL));
         usuarios.addAll(repoU.findByRol(Rol.DOCENTE));
 
-        return usuarios.stream().map(usuario -> {
-            Docente docente = repoD.findByUsuarioCedula(usuario.getCedula());
-            DocenteDTO docenteDTO = docente != null ? DocenteDTO.builder()
-                    .titulo(docente.getTitulo())
-                    .especialidad(docente.getEspecialidad())
-                    .experiencia(docente.getExperiencia())
-                    .build() : null;
+        return usuarios.stream()
+                .sorted(Comparator.comparing(Usuario::getApellidos, Collator.getInstance(new Locale("es", "ES"))))
+                .map(usuario -> {
+                    Docente docente = repoD.findByUsuarioCedula(usuario.getCedula());
+                    DocenteDTO docenteDTO = docente != null ? DocenteDTO.builder()
+                            .titulo(docente.getTitulo())
+                            .especialidad(docente.getEspecialidad())
+                            .experiencia(docente.getExperiencia())
+                            .build() : null;
 
-            return UsuarioDTO.builder()
-                    .cedula(usuario.getCedula())
-                    .nombres(usuario.getNombres())
-                    .apellidos(usuario.getApellidos())
-                    .correo(usuario.getEmail())
-                    .telefono(usuario.getTelefono())
-                    .direccion(usuario.getDireccion())
-                    .nacimiento(usuario.getNacimiento())
-                    .genero(usuario.getGenero())
-                    .rol(cambiarRol(usuario.getRol()))
-                    .estado(usuario.getEstado())
-                    .docente(docenteDTO)
-                    .build();
-        }).collect(Collectors.toList());
+                    return UsuarioDTO.builder()
+                            .cedula(usuario.getCedula())
+                            .nombres(usuario.getNombres())
+                            .apellidos(usuario.getApellidos())
+                            .correo(usuario.getEmail())
+                            .telefono(usuario.getTelefono())
+                            .direccion(usuario.getDireccion())
+                            .nacimiento(usuario.getNacimiento())
+                            .genero(usuario.getGenero())
+                            .rol(cambiarRol(usuario.getRol()))
+                            .estado(usuario.getEstado())
+                            .docente(docenteDTO)
+                            .build();
+                }).collect(Collectors.toList());
     }
 
     // Editar el estado del usuario

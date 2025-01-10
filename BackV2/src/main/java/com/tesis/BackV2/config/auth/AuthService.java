@@ -284,8 +284,26 @@ public class AuthService {
         return AuthResponse.builder()
                 .token(token)
                 .estadoUsuario(String.valueOf(usuRep.findByCedula(request.getCedula()).getEstado()))
-                .rolUsuario(String.valueOf(usuRep.findByCedula(request.getCedula()).getRol()))
+                .rolUsuario(cambiarRol(usuRep.findByCedula(request.getCedula()).getRol()))
                 .build();
+    }
+
+    // cambiar rol de Est a String
+    private String cambiarRol(Rol rol){
+        switch (rol){
+            case ADMIN:
+                return "Admin";
+            case AOPERACIONAL:
+                return "Institucional";
+            case DOCENTE:
+                return "Docente";
+            case ESTUDIANTE:
+                return "Estudiante";
+            case REPRESENTANTE:
+                return "Representante";
+            default:
+                return "ERROR";
+        }
     }
 
 
