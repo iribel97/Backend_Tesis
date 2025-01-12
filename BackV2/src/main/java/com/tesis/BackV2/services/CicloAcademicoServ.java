@@ -709,7 +709,13 @@ public class CicloAcademicoServ {
                 d.getCiclo().getId() == request.getCicloId() &&
                         d.getCurso().getId() == request.getAulaId() &&
                         d.getMateria().getId() == request.getMateriaId() &&
-                        d.getDocente().getId() == docenteRepo.findByUsuarioCedula(request.getCedulaDocente()).getId()
+                        d.getDocente().getId() == docenteRepo.findById(request.getIdDocente()).orElseThrow( () -> new ApiException(ApiResponse.builder()
+                                .error(true)
+                                .mensaje("Solicitud incorrecta")
+                                .codigo(400)
+                                .detalles("Docente no encontrado")
+                                .build()
+                        )).getId()
         );
         if (existeDistributivo) throw new ApiException(ApiResponse.builder()
                 .error(true)
@@ -738,7 +744,7 @@ public class CicloAcademicoServ {
                 .ciclo(cicloRepo.findById(request.getCicloId()).get())
                 .curso(cursoRepo.findById(request.getAulaId()).get())
                 .materia(materiaRepo.findById(request.getMateriaId()).get())
-                .docente(docenteRepo.findByUsuarioCedula(request.getCedulaDocente()))
+                .docente(docenteRepo.findById(request.getIdDocente()).get())
                 .build();
 
         distributivoRepo.save(distributivo);
@@ -809,7 +815,13 @@ public class CicloAcademicoServ {
                         d.getCiclo().getId() == request.getCicloId() &&
                         d.getCurso().getId() == request.getAulaId() &&
                         d.getMateria().getId() == request.getMateriaId() &&
-                        d.getDocente().getId() == docenteRepo.findByUsuarioCedula(request.getCedulaDocente()).getId()
+                        d.getDocente().getId() == docenteRepo.findById(request.getIdDocente()).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                                .error(true)
+                                .mensaje("Solicitud incorrecta")
+                                .codigo(400)
+                                .detalles("Docente no encontrado")
+                                .build()
+                        )).getId()
         );
         if (duplicado) throw new ApiException(ApiResponse.builder()
                 .error(true)
@@ -828,7 +840,7 @@ public class CicloAcademicoServ {
         distributivo.setCiclo(cicloRepo.findById(request.getCicloId()).get());
         distributivo.setCurso(cursoRepo.findById(request.getAulaId()).get());
         distributivo.setMateria(materiaRepo.findById(request.getMateriaId()).get());
-        distributivo.setDocente(docenteRepo.findByUsuarioCedula(request.getCedulaDocente()));
+        distributivo.setDocente(docenteRepo.findById(request.getIdDocente()).get());
 
         distributivoRepo.save(distributivo);
         return ApiResponse.<String>builder()
@@ -922,16 +934,6 @@ public class CicloAcademicoServ {
                 .detalles("La materia no existe")
                 .build()
         );
-        if (!usuarioRepo.existsByCedula(request.getCedulaDocente()) ||
-                !usuarioRepo.findByCedula(request.getCedulaDocente()).getRol().equals(Rol.DOCENTE)) {
-            throw new ApiException(ApiResponse.builder()
-                    .error(true)
-                    .mensaje("Solicitud incorrecta")
-                    .codigo(400)
-                    .detalles("El docente no existe")
-                    .build()
-            );
-        }
     }
 
     private boolean validarExistenciaAulaMateria(DistributivoRequest request) {

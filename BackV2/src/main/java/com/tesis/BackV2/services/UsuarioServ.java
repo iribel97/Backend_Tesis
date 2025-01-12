@@ -260,6 +260,7 @@ public class UsuarioServ {
                 .map(usuario -> {
                     Docente docente = repoD.findByUsuarioCedula(usuario.getCedula());
                     DocenteDTO docenteDTO = docente != null ? DocenteDTO.builder()
+                            .id(docente.getId())
                             .titulo(docente.getTitulo())
                             .especialidad(docente.getEspecialidad())
                             .experiencia(docente.getExperiencia())
