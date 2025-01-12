@@ -76,6 +76,12 @@ public class AdminGeneralController {
         }
     }
 
+    // Traer docentes
+    @GetMapping("docentes")
+    public ResponseEntity<?> getDocentes() {
+        return ResponseEntity.ok(service.getDocentes());
+    }
+
     /* ---------------------------- GESTION CICLO ACADEMICO ----------------------------*/
     // Crear
     @PostMapping("ciclo")
