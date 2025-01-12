@@ -937,7 +937,7 @@ public class CicloAcademicoServ {
     }
 
     private boolean validarExistenciaAulaMateria(DistributivoRequest request) {
-        return distributivoRepo.existsByCursoIdAndMateriaId(request.getAulaId(), request.getMateriaId());
+        return distributivoRepo.existsByCursoIdAndMateriaIdAndCicloId(request.getAulaId(), request.getMateriaId(), request.getCicloId());
     }
 
     private void validarGradoMateriaYGradoAula(DistributivoRequest request) {
