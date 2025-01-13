@@ -52,6 +52,12 @@ public class AdminOpController {
         return ResponseEntity.ok(inscripServ.getInscripcionesPendientes());
     }
 
+    // Listar una sola inscripción
+    @GetMapping("inscripcion/{cedula}")
+    public ResponseEntity<?> obtenerInscripcion(@PathVariable String cedula) {
+        return ResponseEntity.ok(inscripServ.getInscripcion(cedula));
+    }
+
     // aceptar inscripción
     @PutMapping("inscripcion/aceptar")
     public ResponseEntity<ApiResponse<?>> aceptarInscripcion(@RequestBody MatriculacionRequest request) {

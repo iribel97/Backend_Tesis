@@ -413,6 +413,18 @@ public class InscripcionService {
 
     }
 
+    // traer por cédula de la inscripción
+    public InscripcionDTO getInscripcion(String cedula) {
+        Inscripcion inscripcion = repo.findById(cedula).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                .error(true)
+                .codigo(404)
+                .mensaje("Solicitud invalida")
+                .detalles("La inscripcion con la cedula " + cedula + " no existe")
+                .build()));
+
+        return convertirInscripcion(inscripcion);
+    }
+
     /* ---------- OTROS METODOS ---------- */
     // Validar si la inscripcion a crear ya existe
     private void validarInscripcion(String cedula) {
@@ -472,6 +484,8 @@ public class InscripcionService {
                 .email(inscripcion.getEmail())
                 .telefono(inscripcion.getTelefono())
                 .direccion(inscripcion.getDireccion())
+                .grado(inscripcion.getGrado().getNombre())
+                .fechaIns(String.valueOf(inscripcion.getFechaInscripcion()))
                 .fechaNacimiento(String.valueOf(inscripcion.getFechaNacimiento()))
                 .genero(String.valueOf(inscripcion.getGenero()))
                 .nombresPadre(inscripcion.getNombresPadre())

@@ -17,9 +17,11 @@ public class InscripcionDTO {
     private String nombres;
     private String apellidos;
     private String email;
+    private String grado;
     private String telefono;
     private String direccion;
     private String fechaNacimiento;
+    private String fechaIns;
     private String genero;
     private String nombresPadre;
     private String apellidosPadre;

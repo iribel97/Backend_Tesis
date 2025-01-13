@@ -57,6 +57,12 @@ public class AdminGeneralController {
         return ResponseEntity.ok(authServ.register(registerRequest, Rol.DOCENTE, EstadoUsu.Inactivo));
     }
 
+    // Eliminar usuario
+    @DeleteMapping("usuario/{cedula}")
+    public ResponseEntity<ApiResponse<?>> eliminarUsuario(@PathVariable String cedula) {
+        return ResponseEntity.ok(service.eliminarUsuario(cedula));
+    }
+
 
     // Editar estado usuarios
     @PutMapping("usuario")
