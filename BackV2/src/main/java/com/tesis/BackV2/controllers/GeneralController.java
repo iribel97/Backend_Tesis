@@ -36,6 +36,11 @@ public class GeneralController {
         return ResponseEntity.ok(cicloAServ.getCiclos());
     }
 
+    // Traer todos
+    @GetMapping("grados")
+    public ResponseEntity<?> getGrados() { return ResponseEntity.ok(cicloAServ.getGrados()); }
+
+
     // visualizar todos los cursos
     @GetMapping("cursos")
     public ResponseEntity<?> getCursos() {
@@ -73,9 +78,9 @@ public class GeneralController {
     }
 
     // Traer estudiantes por curso
-    @GetMapping("estudiantes/{idCurso}")
-    public ResponseEntity<?> obtenerEstudiantes(@PathVariable Long idCurso) {
-        return ResponseEntity.ok(usuarioServ.getEstudiantesByCurso(idCurso));
+    @GetMapping("estudiantes/{idDistributivo}")
+    public ResponseEntity<?> obtenerEstudiantes(@PathVariable Long idDistributivo) {
+        return ResponseEntity.ok(usuarioServ.getEstudiantesByCurso(idDistributivo));
     }
 
 

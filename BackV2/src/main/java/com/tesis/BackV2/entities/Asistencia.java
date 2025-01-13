@@ -30,7 +30,7 @@ public class Asistencia {
     private Estudiante estudiante;
 
     @ManyToOne (fetch = FetchType.LAZY)
-    private Horario horario;
+    private Distributivo distributivo;
 
     @ManyToOne (fetch = FetchType.LAZY)
     private CicloAcademico cicloAcademico;

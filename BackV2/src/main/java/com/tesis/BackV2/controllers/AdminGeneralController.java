@@ -120,10 +120,6 @@ public class AdminGeneralController {
         return ResponseEntity.ok(cicloAServ.crearGrado(request));
     }
 
-    // Traer todos
-    @GetMapping("grados")
-    public ResponseEntity<?> getGrados() { return ResponseEntity.ok(cicloAServ.getGrados()); }
-
     // Traer grado por nombre
     @GetMapping("grado/{nombre}")
     public ResponseEntity<?> getGrado(@PathVariable String nombre) {

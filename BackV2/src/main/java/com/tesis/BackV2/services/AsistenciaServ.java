@@ -42,12 +42,11 @@ public class AsistenciaServ {
                     .fecha(asistenciaRequest.getFecha())
                     .observaciones(asistenciaRequest.getObservaciones())
                     .estudiante(repoEst.findByUsuarioCedula(asistenciaRequest.getCedulaEstudiante()))
-                    .horario(repoHor.findById(asistenciaRequest.getHorarioID()).orElseThrow(() ->
+                    .distributivo(repoDist.findById(asistenciaRequest.getHorarioID()).orElseThrow(() ->
                             new ApiException(ApiResponse.<String> builder()
                                     .error(true)
-                                    .codigo(400)
-                                    .mensaje("Error de validación")
-                                    .detalles("El horario no existe")
+                                    .codigo(404)
+                                    .mensaje("No se encontró el distributivo")
                                     .build())))
                     .cicloAcademico(repoCicl.findByActivoTrue())
                     .build());
@@ -119,7 +118,7 @@ public class AsistenciaServ {
                         .estado(String.valueOf(asistencia.getEstado()))
                         .fecha(asistencia.getFecha())
                         .observaciones(asistencia.getObservaciones())
-                        .diaSemana(String.valueOf(asistencia.getHorario().getDiaSemana()))
+                        .diaSemana(String.valueOf(asistencia.getFecha().getDayOfWeek()))
                         .build())
                         .collect(Collectors.toList()))
                 .build();
@@ -145,14 +144,10 @@ public class AsistenciaServ {
     // visualización de las asistencias de los estudiantes de un distributivo
     @Transactional
     public AsistenciasDocenteDTO asistenciasByDistributivoFecha(long idDis, LocalDate fecha) {
-        List<Asistencia> asisList = repo.findByHorario_Distributivo_IdAndFecha(idDis, fecha);
+        List<Asistencia> asisList = repo.findByDistributivo_IdAndFecha(idDis, fecha);
 
         if (asisList.isEmpty()) {
-            throw new ApiException(ApiResponse.<String>builder()
-                    .error(true)
-                    .codigo(404)
-                    .mensaje("No se encontraron asistencias para el distributivo y fecha proporcionados")
-                    .build());
+            return null;
         }
 
         int totalAsistencias = asisList.size(), asistio = 0, falta = 0, justificado = 0;
@@ -168,7 +163,7 @@ public class AsistenciaServ {
         double porcentajeJustificadas = (double) (justificado * 100) / totalAsistencias;
 
         return AsistenciasDocenteDTO.builder()
-                .diaSemana(asisList.get(0).getHorario().getDiaSemana().name())
+                .diaSemana(String.valueOf(asisList.getFirst().getFecha().getDayOfWeek()))
                 .datos(PorcentAsisEst.builder()
                         .totalAsistencias(totalAsistencias)
                         .totalFaltas(falta)

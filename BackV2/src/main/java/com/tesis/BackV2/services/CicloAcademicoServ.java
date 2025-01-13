@@ -234,13 +234,13 @@ public class CicloAcademicoServ {
     @Transactional
     public ApiResponse<String> crearCurso(CursoRequest request) {
         validarParaleloYGrado(request.getParalelo(), request.getGrado());
-        validarTutor(request.getCedulaTutor());
+        validarTutor(request.getTutorId());
 
         Curso curso = Curso.builder()
                 .paralelo(request.getParalelo())
                 .maxEstudiantes(request.getCantEstudiantes())
                 .grado(gradoRepo.findByNombre(request.getGrado()))
-                .tutor(docenteRepo.findByUsuarioCedula(request.getCedulaTutor()))
+                .tutor(docenteRepo.findById(request.getTutorId()).get())
                 .build();
 
         cursoRepo.save(curso);
@@ -280,12 +280,12 @@ public class CicloAcademicoServ {
                 ));
 
         validarParaleloYGradoUnico(request.getParalelo(), request.getGrado(), request.getId());
-        validarTutorParaEdicion(request.getCedulaTutor(), curso);
+        validarTutorParaEdicion(request.getTutorId(), curso);
 
         curso.setParalelo(request.getParalelo());
         curso.setMaxEstudiantes(request.getCantEstudiantes());
         curso.setGrado(gradoRepo.findByNombre(request.getGrado()));
-        curso.setTutor(docenteRepo.findByUsuarioCedula(request.getCedulaTutor()));
+        curso.setTutor(docenteRepo.findById(request.getTutorId()).get());
 
         cursoRepo.save(curso);
         return ApiResponse.<String>builder()
@@ -360,18 +360,15 @@ public class CicloAcademicoServ {
         }
     }
 
-    private void validarTutor(String cedulaTutor) {
-        var usuario = usuarioRepo.findByCedula(cedulaTutor);
-        if (usuario == null || !usuario.getRol().equals(Rol.DOCENTE)) {
-            throw new ApiException(ApiResponse.<String>builder()
-                    .error(true)
-                    .mensaje("Docente no encontrado")
-                    .codigo(400)
-                    .detalles("La cédula ingresada no corresponde a un docente o no existe")
-                    .build()
-            );
-        }
-        if (cursoRepo.existsByTutorId(docenteRepo.findByUsuarioCedula(cedulaTutor).getId())) {
+    private void validarTutor(long tutorId) {
+        var usuario = docenteRepo.findById(tutorId).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                .error(true)
+                .mensaje("Solicitud incorrecta")
+                .codigo(400)
+                .detalles("Docente no encontrado")
+                .build()
+        ));
+        if (cursoRepo.existsByTutorId(tutorId)) {
             throw new ApiException(ApiResponse.<String>builder()
                     .error(true)
                     .mensaje("Solicitud incorrecta")
@@ -382,17 +379,14 @@ public class CicloAcademicoServ {
         }
     }
 
-    private void validarTutorParaEdicion(String cedulaTutor, Curso cursoActual) {
-        Docente tutor = docenteRepo.findByUsuarioCedula(cedulaTutor);
-        if (tutor == null) {
-            throw new ApiException(ApiResponse.<String>builder()
-                    .error(true)
-                    .mensaje("Solcitud incorrecta")
-                    .codigo(400)
-                    .detalles("El docente no existe")
-                    .build()
-            );
-        }
+    private void validarTutorParaEdicion(long idTutor, Curso cursoActual) {
+        Docente tutor = docenteRepo.findById(idTutor).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                .error(true)
+                .mensaje("Solicitud incorrecta")
+                .codigo(400)
+                .detalles("Docente no encontrado")
+                .build()
+        ));
         if (cursoRepo.existsByTutorId(tutor.getId()) && cursoActual.getTutor().getId() != tutor.getId()) {
             throw new ApiException(ApiResponse.<String>builder()
                     .error(true)

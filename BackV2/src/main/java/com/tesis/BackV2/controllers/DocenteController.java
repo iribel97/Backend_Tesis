@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -40,9 +41,9 @@ public class DocenteController {
     }
 
     // Traer asistencias por distributivo y fecha
-    @GetMapping("asistencia")
-    public ResponseEntity<?> obtenerAsistencias(@RequestBody AsisRequest request) {
-        return ResponseEntity.ok(asistenciaServ.asistenciasByDistributivoFecha(request.getIdDist(), request.getFecha()));
+    @GetMapping("asistencias/{idDist}/{fecha}")
+    public ResponseEntity<?> obtenerAsistencias(@PathVariable Long idDist, @PathVariable String fecha) {
+        return ResponseEntity.ok(asistenciaServ.asistenciasByDistributivoFecha(idDist, LocalDate.parse(fecha)));
     }
 
     // actualizar asistencia

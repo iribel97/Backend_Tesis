@@ -14,11 +14,11 @@ public interface AsistenciaRepo extends JpaRepository<Asistencia, Long> {
 
     @Query("SELECT a FROM Asistencia a " +
             "WHERE a.estudiante.id = :estudianteId " +
-            "AND a.horario.distributivo.id = :distributivoId")
+            "AND a.distributivo.id = :distributivoId")
     List<Asistencia> findByEstudianteAndDistributivo(@Param("estudianteId") Long estudianteId,
                                                      @Param("distributivoId") Long distributivoId);
 
-    List<Asistencia> findByHorario_Distributivo_IdAndFecha(long horarioDistributivoId, LocalDate fecha);
+    List<Asistencia> findByDistributivo_IdAndFecha(long horarioDistributivoId, LocalDate fecha);
 
 
 }

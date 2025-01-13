@@ -31,6 +31,12 @@ public class AdminOpController {
     private final AuthService authService;
     private final MatriculaService matriculaService;
 
+    // Traer docentes
+    @GetMapping("docentes")
+    public ResponseEntity<?> getDocentes() {
+        return ResponseEntity.ok(usuarioServ.getDocentes());
+    }
+
     /*  ---------------------------- Gestión de Matricula  ---------------------------- */
     // Listar por pendientes
     @GetMapping("matriculas/pendientes")

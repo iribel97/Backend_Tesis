@@ -15,7 +15,7 @@ public class CursoRequest {
     private String paralelo;
     private int cantEstudiantes;
     private String grado;
-    private String cedulaTutor;
+    private long tutorId;
 
 
 }

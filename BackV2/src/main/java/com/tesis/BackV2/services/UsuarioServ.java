@@ -190,8 +190,16 @@ public class UsuarioServ {
     }
 
     // Traer estudiantes con matriculapor medio del ciclo academico y un curso
-    public List<UsuarioDTO> getEstudiantesByCurso(Long idCurso) {
-        List<Matricula> matriculas = repoM.findByCicloAndCurso_Id(repoCA.findByActivoTrue(), idCurso);
+    public List<UsuarioDTO> getEstudiantesByCurso(Long idDistributivo) {
+        Distributivo dis = repoDist.findById(idDistributivo).orElseThrow(() -> new ApiException(
+                ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(404)
+                        .detalles("El distributivo con id " + idDistributivo + " no existe.")
+                        .build()
+        ));
+        List<Matricula> matriculas = repoM.findByCicloAndCurso_Id(repoCA.findByActivoTrue(), dis.getCurso().getId());
         if (matriculas == null) {
             throw new ApiException(
                     ApiResponse.builder()
