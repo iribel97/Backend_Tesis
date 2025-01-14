@@ -42,7 +42,7 @@ public class AsistenciaServ {
                     .fecha(asistenciaRequest.getFecha())
                     .observaciones(asistenciaRequest.getObservaciones())
                     .estudiante(repoEst.findByUsuarioCedula(asistenciaRequest.getCedulaEstudiante()))
-                    .distributivo(repoDist.findById(asistenciaRequest.getHorarioID()).orElseThrow(() ->
+                    .distributivo(repoDist.findById(asistenciaRequest.getDistributivoID()).orElseThrow(() ->
                             new ApiException(ApiResponse.<String> builder()
                                     .error(true)
                                     .codigo(404)
