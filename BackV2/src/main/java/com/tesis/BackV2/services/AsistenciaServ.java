@@ -62,26 +62,26 @@ public class AsistenciaServ {
                 .build();
     }
 
-    // Actualizar Asistencia
-    @Transactional
-    public ApiResponse<String> actualizarAsistencia(AsistenciaRequest request) {
-        Asistencia asistencia = repo.findById(request.getIdAsistencia()).orElseThrow(() ->
-                new ApiException(ApiResponse.<String> builder()
-                        .error(true)
-                        .codigo(404)
-                        .mensaje("No se encontró la asistencia")
-                        .build()));
+    public ApiResponse<String> actualizarAsistencia(List<AsistenciaRequest> requests) {
+        for (AsistenciaRequest request : requests) {
+            Asistencia asistencia = repo.findById(request.getIdAsistencia()).orElseThrow(() ->
+                    new ApiException(ApiResponse.<String> builder()
+                            .error(true)
+                            .codigo(404)
+                            .mensaje("No se encontró la asistencia con ID: " + request.getIdAsistencia())
+                            .build()));
 
-        asistencia.setEstado(request.getEstado());
-        asistencia.setObservaciones(request.getObservaciones());
+            asistencia.setEstado(request.getEstado());
+            asistencia.setObservaciones(request.getObservaciones());
 
-        repo.save(asistencia);
+            repo.save(asistencia);
+        }
 
         return ApiResponse.<String> builder()
                 .error(false)
                 .codigo(200)
                 .mensaje("Solicitud exitosa")
-                .detalles("Asistencia actualizada correctamente")
+                .detalles("Todas las asistencias se actualizaron correctamente")
                 .build();
     }
 

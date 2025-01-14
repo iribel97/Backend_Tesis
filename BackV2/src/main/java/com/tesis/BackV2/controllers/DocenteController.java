@@ -48,8 +48,8 @@ public class DocenteController {
 
     // actualizar asistencia
     @PutMapping("asistencia")
-    public ResponseEntity<?> actualizarAsistencia(@RequestBody AsistenciaRequest request){
-        return ResponseEntity.ok(asistenciaServ.actualizarAsistencia(request));
+    public ResponseEntity<?> actualizarAsistencia(@RequestBody List<AsistenciaRequest> requests){
+        return ResponseEntity.ok(asistenciaServ.actualizarAsistencia(requests));
     }
 
     /*  ---------------------------- Gestión de Conducta  ---------------------------- */
