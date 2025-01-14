@@ -174,6 +174,8 @@ public class AsistenciaServ {
                         .porcentajeJustificadas(justificado == 0 ? 0 : porcentajeJustificadas)
                         .build())
                 .asistencias(asisList.stream().map(asistencia1 -> AsisDocDTO.builder()
+                                .cedulaEstudiante(asistencia1.getEstudiante().getUsuario().getCedula())
+                                .idEstudiante(asistencia1.getEstudiante().getId())
                         .idAsistencia(asistencia1.getId())
                         .estado(asistencia1.getEstado())
                         .apellidosEstudiante(asistencia1.getEstudiante().getUsuario().getApellidos())

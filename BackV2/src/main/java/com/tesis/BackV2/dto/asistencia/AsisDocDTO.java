@@ -15,6 +15,8 @@ import java.util.List;
 public class AsisDocDTO {
 
     private long idAsistencia;;
+    private String cedulaEstudiante;
+    private Long idEstudiante;
     private String apellidosEstudiante;
     private String nombresEstudiante;
     private EstadoAsistencia estado;
