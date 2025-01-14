@@ -150,6 +150,7 @@ public class UsuarioServ {
                 .build() : null;
 
         EstudianteDTO estudianteDTO = estudiante != null ? EstudianteDTO.builder()
+                .id(estudiante.getId())
                 .ingreso(estudiante.getIngreso())
                 .curso(m == null ? "" : m.getGrado().getNombre() + " - " + m.getCurso().getParalelo())
                 .representante(RepresentanteDTO.builder()
@@ -326,6 +327,48 @@ public class UsuarioServ {
                 .codigo(200)
                 .detalles("El estado del usuario ha sido actualizado correctamente.")
                 .build();
+    }
+
+    // Traer estudiantes por representante
+    public List<UsuarioDTO> getEstudiantesByRepresentante(String cedula) {
+        Representante representante = repoR.findByUsuarioCedula(cedula);
+        if (representante == null) {
+            throw new ApiException(
+                    ApiResponse.builder()
+                            .error(true)
+                            .mensaje("Error de validación")
+                            .codigo(400)
+                            .detalles("No se encontró el representante")
+                            .build()
+            );
+        }
+
+        List<Estudiante> estudiantes = repoE.findByRepresentanteId(representante.getId());
+        if (estudiantes == null) {
+            throw new ApiException(
+                    ApiResponse.builder()
+                            .error(true)
+                            .mensaje("Error de validación")
+                            .codigo(400)
+                            .detalles("No se encontraron estudiantes")
+                            .build()
+            );
+        }
+
+        return estudiantes.stream().map(estudiante -> {
+            try {
+                return buscarUsuario(estudiante.getUsuario().getCedula());
+            } catch (MiExcepcion e) {
+                throw new ApiException(
+                        ApiResponse.builder()
+                                .error(true)
+                                .mensaje("Error de validación")
+                                .codigo(400)
+                                .detalles("No se encontró el usuario")
+                                .build()
+                );
+            }
+        }).collect(Collectors.toList());
     }
 
     // Eliminar usuario

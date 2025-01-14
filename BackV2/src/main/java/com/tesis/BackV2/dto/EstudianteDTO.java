@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class EstudianteDTO {
 
+    private long id;
     private LocalDate ingreso;
     private String curso;
 

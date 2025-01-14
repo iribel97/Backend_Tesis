@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface EstudianteRepo extends JpaRepository<Estudiante, Long> {
 
@@ -12,4 +14,5 @@ public interface EstudianteRepo extends JpaRepository<Estudiante, Long> {
     Estudiante findByUsuarioCedula(String cedula);
 
 
+    List<Estudiante> findByRepresentanteId(long id);
 }

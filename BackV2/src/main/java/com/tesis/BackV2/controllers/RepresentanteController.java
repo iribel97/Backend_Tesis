@@ -3,10 +3,16 @@ package com.tesis.BackV2.controllers;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.dto.InscripcionDTO;
+import com.tesis.BackV2.entities.Estudiante;
+import com.tesis.BackV2.exceptions.ApiException;
+import com.tesis.BackV2.repositories.EstudianteRepo;
+import com.tesis.BackV2.repositories.MatriculaRepo;
+import com.tesis.BackV2.repositories.UsuarioRepo;
 import com.tesis.BackV2.request.InscripcionRequest;
 import com.tesis.BackV2.request.MatriculacionRequest;
 import com.tesis.BackV2.services.AsistenciaServ;
 import com.tesis.BackV2.services.CicloAcademicoServ;
+import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.inscripcion.InscripcionService;
 import com.tesis.BackV2.services.inscripcion.MatriculaService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,10 +32,22 @@ public class RepresentanteController {
 
     private final JwtService jwtService;
 
+    private final MatriculaRepo matrRepo;
+
     private final CicloAcademicoServ cicloAServ;
     private final InscripcionService inscripServ;
     private final MatriculaService matricServ;
     private final AsistenciaServ asistenciaServ;
+    private final UsuarioServ usuarioServ;
+
+    // Obtener los estudiantes edl representante
+    @GetMapping("estudiantes")
+    public ResponseEntity<?> obtenerEstudiantes(HttpServletRequest request) {
+        String token = extractTokenFromRequest(request);
+        // Extraer el nombre de usuario (o cualquier dato que guardes en el token)
+        String userCedula = jwtService.extractUsername(token);
+        return ResponseEntity.ok(usuarioServ.getEstudiantesByRepresentante(userCedula));
+    }
 
     /*  ---------------------------- Visualización de Conducta  ---------------------------- */
 
@@ -66,9 +84,10 @@ public class RepresentanteController {
     }
 
     // Listar por cedula de representante
-    @GetMapping("inscripcion/{cedulaRep}")
-    public ResponseEntity<List<InscripcionDTO>> listarInscripciones(@PathVariable String cedulaRep){
-        return ResponseEntity.ok(inscripServ.listarPorRepresentante(cedulaRep));
+    @GetMapping("inscripcion")
+    public ResponseEntity<List<InscripcionDTO>> listarInscripciones(HttpServletRequest request){
+        String token = extractTokenFromRequest(request);
+        return ResponseEntity.ok(inscripServ.listarPorRepresentante(jwtService.extractUsername(token)));
     }
 
     /*  ---------------------------- Gestión de Matricula  ---------------------------- */
@@ -99,6 +118,11 @@ public class RepresentanteController {
     }
 
     /*  ---------------------------- Visualización de Horarios  ---------------------------- */
+    // visualizar horario por estudiante
+    @GetMapping("horario/estudiante/{idEst}")
+    public ResponseEntity<?> obtenerHorarios(@PathVariable Long idEst) {
+        return ResponseEntity.ok(cicloAServ.getHorariosByCurso(matrRepo.findTopByEstudianteIdOrderByIdDesc(idEst).getCurso().getId()));
+    }
 
     /*  ---------------------------- Visualización de Cursos  ---------------------------- */
 
