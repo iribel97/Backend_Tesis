@@ -11,6 +11,7 @@ import com.tesis.BackV2.repositories.MatriculaRepo;
 import com.tesis.BackV2.repositories.UsuarioRepo;
 import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.UsuarioServ;
+import com.tesis.BackV2.services.cicloacademico.CalendarioAcademicoServ;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ public class GeneralController {
     private final CicloAcademicoServ cicloAServ;
     private final JwtService jwtService;
     private final UsuarioRepo usuarioRepo;
+    private final CalendarioAcademicoServ calendarioAcademicoServ;
     private final EstudianteRepo estudianteRepo;
     private final MatriculaRepo matrRepo;
     private final UsuarioServ service;
@@ -81,6 +83,13 @@ public class GeneralController {
     @GetMapping("estudiantes/{idDistributivo}")
     public ResponseEntity<?> obtenerEstudiantes(@PathVariable Long idDistributivo) {
         return ResponseEntity.ok(usuarioServ.getEstudiantesByCurso(idDistributivo));
+    }
+
+    /* ----------------------------------------- DASHBOARD -----------------------------------------*/
+    // Traer calendario
+    @GetMapping("calendario")
+    public ResponseEntity<?> obtenerCalendario() {
+        return ResponseEntity.ok(calendarioAcademicoServ.obtenerCalendarioActual());
     }
 
 

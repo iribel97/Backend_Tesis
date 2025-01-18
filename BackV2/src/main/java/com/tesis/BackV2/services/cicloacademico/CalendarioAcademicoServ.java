@@ -17,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -143,6 +145,38 @@ public class CalendarioAcademicoServ {
                     .build()
             );
         }
+
+        calendariosDTO.sort(Comparator.comparing(CalendAcademDTO::getFechaInicio));
+
+        return calendariosDTO;
+    }
+
+    // Retornar calendario académico desde la fecha actual hasta la fecha que culmina el ciclo
+    public List<CalendAcademDTO> obtenerCalendarioActual() {
+        // fecha actual
+        LocalDate hoy = LocalDate.now();
+        // ciclo activo
+        CicloAcademico ciclo = cicloAcademicoRepo.findByActivoTrue();
+
+        // traer calendarios del ciclo activo
+        List<CalendarioAcademico> calendarios = calendarioAcademicoRepo.findAllByCicloId(ciclo.getId());
+
+        // filtrar los datos desde la fecha actual hasta la fecha de fin del ciclo
+        List<CalendAcademDTO> calendariosDTO = new ArrayList<>();
+        for (CalendarioAcademico calendario : calendarios) {
+            if (calendario.getFechaFin().isAfter(hoy)) {
+                calendariosDTO.add(CalendAcademDTO.builder()
+                        .id(calendario.getId())
+                        .descripcion(calendario.getDescripcion())
+                        .fechaInicio(calendario.getFechaInicio())
+                        .fechaFin(calendario.getFechaFin())
+                        .build()
+                );
+            }
+        }
+
+        // ordenar por fecha de inicio
+        calendariosDTO.sort(Comparator.comparing(CalendAcademDTO::getFechaInicio));
 
         return calendariosDTO;
     }

@@ -614,25 +614,25 @@ public class ContenidoServ {
                     .build());
         }
 
-        if (!request.getContenido().isEmpty()) {
-            // Evaluar si la fecha que entrega es mayor a la fecha de fin de la asignación
-            if (LocalDate.now().isAfter(entrega.getAsignacion().getFechaFin())) {
-                Representante representante = entrega.getEstudiante().getRepresentante();
 
-                entrega.setEstado(EstadoEntrega.Atrasado);
+        // Evaluar si la fecha que entrega es mayor a la fecha de fin de la asignación
+        if (LocalDate.now().isAfter(entrega.getAsignacion().getFechaFin())) {
+            Representante representante = entrega.getEstudiante().getRepresentante();
 
-                emailService.enviarCorreo( representante.getUsuario().getEmail(),
-                        "Entrega retrasada",
-                        mensaje.mensajeEntregaTardeAsignacion( representante.getUsuario().getApellidos() + " " + representante.getUsuario().getNombres(),
-                                entrega.getEstudiante().getUsuario().getApellidos() + " " + entrega.getEstudiante().getUsuario().getNombres(),
-                                entrega.getAsignacion().getNombre(),
-                                String.valueOf(entrega.getAsignacion().getFechaFin()),
-                                String.valueOf(request.getFechaEntrega()) )
-                );
-            } else {
-                entrega.setEstado(EstadoEntrega.Entregado);
-            }
+            entrega.setEstado(EstadoEntrega.Atrasado);
+
+            emailService.enviarCorreo( representante.getUsuario().getEmail(),
+                    "Entrega retrasada",
+                    mensaje.mensajeEntregaTardeAsignacion( representante.getUsuario().getApellidos() + " " + representante.getUsuario().getNombres(),
+                            entrega.getEstudiante().getUsuario().getApellidos() + " " + entrega.getEstudiante().getUsuario().getNombres(),
+                            entrega.getAsignacion().getNombre(),
+                            String.valueOf(entrega.getAsignacion().getFechaFin()),
+                            String.valueOf(request.getFechaEntrega()) )
+            );
+        } else {
+            entrega.setEstado(EstadoEntrega.Entregado);
         }
+
         entrega.setContenido(request.getContenido());
         entrega.setFechaEntrega(LocalDate.now());
         entrega.setHoraEntrega(LocalTime.now());
@@ -659,6 +659,22 @@ public class ContenidoServ {
                 .mensaje("Entrega creada")
                 .detalles("La entrega ha sido registrada correctamente")
                 .build();
+    }
+
+    // Mostrar las entregas de los estudiantes
+    public List<EntregaDTO> visualizarEntregasEst(long idAsignacion) {
+        // comprobar que el id de la asignación sea válido
+        repoAsig.findById(idAsignacion).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .codigo(400)
+                .mensaje("Solicitud incorrecta")
+                .detalles("La asignación no ha sido encontrada")
+                .build()));
+
+        // traer todas las entregas por el id de la asignación
+        return repoEnt.findByAsignacion_Id(idAsignacion).stream()
+                .map(this::convertirDTO)
+                .toList();
     }
 
     // Eliminar Entrega

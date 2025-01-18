@@ -31,6 +31,13 @@ public class AdminGeneralController {
     private final CalendarioAcademicoServ calendarioServ;
     private final HorarioConfigServ horarioConfigServ;
 
+    /* ---------------------------- DASHBOARD ---------------------------------------*/
+    // info docentes
+    @GetMapping("dashboard/docentes")
+    public ResponseEntity<?> infoDocentes() {
+        return ResponseEntity.ok(cicloAServ.cantDocentesFaltAsig());
+    }
+
     /* ---------------------------- GESTION DE USUARIOS ---------------------------- */
 
     // Traer usuarios

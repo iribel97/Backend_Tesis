@@ -3,6 +3,7 @@ package com.tesis.BackV2.services;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.*;
 import com.tesis.BackV2.dto.cicloAcademico.CicloDTO;
+import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
 import com.tesis.BackV2.dto.horarioConfig.DiaDTO;
 import com.tesis.BackV2.dto.horarioConfig.HoraDTO;
 import com.tesis.BackV2.entities.*;
@@ -761,6 +762,22 @@ public class CicloAcademicoServ {
                         .build()
                 ));
         return convertirDisADTO(distributivo);
+    }
+
+    // Saber la cantidad de docentes asignados a un distributivo
+    public CantidadesDTO cantDocentesFaltAsig() {
+        int cantDocentes = docenteRepo.findAll().size();
+        int cantActDocentes = distributivoRepo.findDistinctDocentesByCicloId(cicloRepo.findByActivoTrue().getId()).size();
+
+        double porcentajeAsig = (double) cantActDocentes / cantDocentes * 100;
+
+        return CantidadesDTO.builder()
+                .total(cantDocentes)
+                .completo(cantActDocentes)
+                .incompleto(cantDocentes - cantActDocentes)
+                .porcentajeCompleto(porcentajeAsig)
+                .porcentajeIncompleto(100 - porcentajeAsig)
+                .build();
     }
 
     // Traer por curso

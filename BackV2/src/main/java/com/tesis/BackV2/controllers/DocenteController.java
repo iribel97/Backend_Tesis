@@ -151,6 +151,12 @@ public class DocenteController {
         return ResponseEntity.ok(contServ.cambiarVisualizacionAsig(idAsignacion, true));
     }
 
+    // visualizar entregas
+    @GetMapping("materia/entregas/{idAsignacion}")
+    public ResponseEntity<?> visualizarEntregas(@PathVariable Long idAsignacion){
+        return ResponseEntity.ok(contServ.visualizarEntregasEst(idAsignacion));
+    }
+
     // calificar entrega
     @PutMapping("/entrega/calificar")
     public ResponseEntity<?> calificarEntrega(@RequestBody NotaRequest nota){
