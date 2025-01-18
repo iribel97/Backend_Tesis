@@ -22,7 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/docente/")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:4200"})
+@CrossOrigin(origins = {"http://192.168.2.149:4200"})
 public class DocenteController {
 
     private final JwtService jwtService;
@@ -88,6 +88,12 @@ public class DocenteController {
     @PutMapping("materia/contenido/unidad")
     public ResponseEntity<?> actualizarUnidad(@RequestBody UnidadRequest request){
         return ResponseEntity.ok(contServ.editarUnidad(request));
+    }
+
+    // Eliminar unidad
+    @DeleteMapping("materia/contenido/unidad/{idUnidad}")
+    public ResponseEntity<?> eliminarUnidad(@PathVariable Long idUnidad){
+        return ResponseEntity.ok(contServ.eliminarUnidad(idUnidad));
     }
 
     // Agregar tema a la unidad
