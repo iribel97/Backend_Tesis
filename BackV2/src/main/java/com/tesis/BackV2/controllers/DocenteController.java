@@ -33,6 +33,13 @@ public class DocenteController {
     private final AsistenciaServ asistenciaServ;
 
     private final DocenteRepo repDocente;
+
+    // % asistencias par ael admin
+    @GetMapping("admin/dashboard/total/asistencias")
+    public ResponseEntity<?> obtenerAsistencias(HttpServletRequest request) {
+        return ResponseEntity.ok(asistenciaServ.cantAsisTotalCiclo());
+    }
+
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */
     // Crear asistencia
     @PostMapping("asistencia")

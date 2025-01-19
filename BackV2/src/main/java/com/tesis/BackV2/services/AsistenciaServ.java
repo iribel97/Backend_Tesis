@@ -2,6 +2,7 @@ package com.tesis.BackV2.services;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.asistencia.*;
+import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
 import com.tesis.BackV2.entities.Asistencia;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Matricula;
@@ -184,6 +185,38 @@ public class AsistenciaServ {
                         .build())
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    // traer total y porcentaje de asistencias por ciclo académico
+    public CantidadesDTO cantAsisTotalCiclo(){
+        // Traer las asistencias por ciclo académico
+        List<Asistencia> asistencias = repo.findByCicloAcademico_Id(repoCicl.findByActivoTrue().getId());
+
+        // Contar asistencias por estado
+        int totalAsistencias = asistencias.size();
+        int asistio = 0, falta = 0, justificado = 0;
+
+        for (Asistencia asistencia : asistencias) {
+            if (asistencia.getEstado().name().equals("Presente")) asistio++;
+            if (asistencia.getEstado().name().equals("Ausente")) falta++;
+            if (asistencia.getEstado().name().equals("Justificado")) justificado++;
+        }
+
+        // Calcular porcentajes
+        double porcentajeAsistencias = (double) (asistio * 100) / totalAsistencias;
+        double porcentajeFaltas = (double) (falta * 100) / totalAsistencias;
+        double porcentajeJustificadas = (double) (justificado * 100) / totalAsistencias;
+
+        return CantidadesDTO.builder()
+                .total(totalAsistencias)
+                .completo(asistio)
+                .incompleto(falta)
+                .reservado(justificado)
+                .porcentajeCompleto(asistio == 0 ? 0 : porcentajeAsistencias)
+                .porcentajeIncompleto(falta == 0 ? 0 : porcentajeFaltas)
+                .porcentajeReservado(justificado == 0 ? 0 : porcentajeJustificadas)
+                .build();
+
     }
 
     /* ---- METODOS PROPIOS DEL SERVICIO ---- */

@@ -6,6 +6,7 @@ import com.tesis.BackV2.dto.DocenteDTO;
 import com.tesis.BackV2.dto.EstudianteDTO;
 import com.tesis.BackV2.dto.RepresentanteDTO;
 import com.tesis.BackV2.dto.UsuarioDTO;
+import com.tesis.BackV2.dto.dashboard.CantUsuariosDTO;
 import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.enums.EstadoMatricula;
 import com.tesis.BackV2.enums.EstadoUsu;
@@ -408,6 +409,24 @@ public class UsuarioServ {
                 .codigo(200)
                 .detalles("El usuario ha sido eliminado correctamente.")
                 .build();
+    }
+
+    // traer cantidad de usuarios por rol
+    public CantUsuariosDTO cantidadUsuariosTotal(){
+        List<Usuario> admin = repoU.findByRol(Rol.ADMIN);
+        List<Usuario> aOperacional = repoU.findByRol(Rol.AOPERACIONAL);
+        List<Usuario> docente = repoU.findByRol(Rol.DOCENTE);
+        List<Usuario> estudiante = repoU.findByRol(Rol.ESTUDIANTE);
+        List<Usuario> representante = repoU.findByRol(Rol.REPRESENTANTE);
+
+        return CantUsuariosDTO.builder()
+                .cantAdmin(admin.size())
+                .cantAdminOp(aOperacional.size())
+                .cantDocente(docente.size())
+                .cantEstudiante(estudiante.size())
+                .cantRepresentante(representante.size())
+                .build();
+
     }
 
     /* ---------- VALIDACIONES ----------- */

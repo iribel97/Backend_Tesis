@@ -13,7 +13,9 @@ public class CantidadesDTO {
 
     private double porcentajeCompleto;
     private double porcentajeIncompleto;
+    private double porcentajeReservado;
     private int total;
     private int completo;
     private int incompleto;
+    private int reservado;
 }

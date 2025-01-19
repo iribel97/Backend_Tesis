@@ -38,6 +38,24 @@ public class AdminGeneralController {
         return ResponseEntity.ok(cicloAServ.cantDocentesFaltAsig());
     }
 
+    // cantidad de usuarios
+    @GetMapping("dashboard/catidad/usuarios/rol")
+    public ResponseEntity<?> cantidadUsuariosPorRol() {
+        return ResponseEntity.ok(service.cantidadUsuariosTotal());
+    }
+
+    // traer ciclo activo
+    @GetMapping("dashboard/ciclo/activo")
+    public ResponseEntity<?> getCicloActivo() {
+        return ResponseEntity.ok(cicloAServ.getCicloActivo());
+    }
+
+    // cantidad de estudiantes por grado
+    @GetMapping("dashboard/estudiantes/grado")
+    public ResponseEntity<?> cantidadEstudiantesPorGrado() {
+        return ResponseEntity.ok(cicloAServ.obtenerCantidadesEstudiantes());
+    }
+
     /* ---------------------------- GESTION DE USUARIOS ---------------------------- */
 
     // Traer usuarios

@@ -20,5 +20,7 @@ public interface AsistenciaRepo extends JpaRepository<Asistencia, Long> {
 
     List<Asistencia> findByDistributivo_IdAndFecha(long horarioDistributivoId, LocalDate fecha);
 
+    // Traer asistencias por ciclo academico
+    List<Asistencia> findByCicloAcademico_Id(long cicloAcademicoId);
 
 }

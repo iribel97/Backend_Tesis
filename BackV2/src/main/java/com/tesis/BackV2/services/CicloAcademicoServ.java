@@ -3,6 +3,7 @@ package com.tesis.BackV2.services;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.*;
 import com.tesis.BackV2.dto.cicloAcademico.CicloDTO;
+import com.tesis.BackV2.dto.dashboard.CantEstCursoDTO;
 import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
 import com.tesis.BackV2.dto.horarioConfig.DiaDTO;
 import com.tesis.BackV2.dto.horarioConfig.HoraDTO;
@@ -23,9 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,6 +130,10 @@ public class CicloAcademicoServ {
                                 .build()
                 ))
         );
+    }
+    // traer ciclo activo
+    public CicloDTO getCicloActivo() {
+        return convertirCicloDTO(cicloRepo.findByActivoTrue());
     }
 
     // Editar
@@ -267,6 +270,24 @@ public class CicloAcademicoServ {
                 .map(this::convertirAulaADTO)
                 .toList();
     }
+
+    // Mostrar cantidad de estudiantes por curso
+public List<CantEstCursoDTO> obtenerCantidadesEstudiantes() {
+    List<Curso> cursos = cursoRepo.findAll();
+    Map<String, CantEstCursoDTO> cantidadesPorGrado = new HashMap<>();
+
+    for (Curso curso : cursos) {
+        String nombreGrado = curso.getGrado().getNombre();
+        CantEstCursoDTO cantidades = cantidadesPorGrado.getOrDefault(nombreGrado, new CantEstCursoDTO(0, 0));
+
+        cantidades.setTotalEstudiantes(cantidades.getTotalEstudiantes() + curso.getMaxEstudiantes());
+        cantidades.setAsigEstudiantes(cantidades.getAsigEstudiantes() + curso.getEstudiantesAsignados());
+
+        cantidadesPorGrado.put(nombreGrado, cantidades);
+    }
+
+    return new ArrayList<>(cantidadesPorGrado.values());
+}
 
     // Actualizar
     @Transactional

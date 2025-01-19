@@ -25,7 +25,6 @@ public class GeneralController {
 
     private final CicloAcademicoServ cicloAServ;
     private final JwtService jwtService;
-    private final UsuarioRepo usuarioRepo;
     private final CalendarioAcademicoServ calendarioAcademicoServ;
     private final EstudianteRepo estudianteRepo;
     private final MatriculaRepo matrRepo;
