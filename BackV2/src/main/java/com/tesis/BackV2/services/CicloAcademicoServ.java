@@ -3,6 +3,7 @@ package com.tesis.BackV2.services;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.*;
 import com.tesis.BackV2.dto.cicloAcademico.CicloDTO;
+import com.tesis.BackV2.dto.dashboard.CantCursosEst;
 import com.tesis.BackV2.dto.dashboard.CantEstCursoDTO;
 import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
 import com.tesis.BackV2.dto.horarioConfig.DiaDTO;
@@ -272,22 +273,50 @@ public class CicloAcademicoServ {
     }
 
     // Mostrar cantidad de estudiantes por curso
-public List<CantEstCursoDTO> obtenerCantidadesEstudiantes() {
-    List<Curso> cursos = cursoRepo.findAll();
-    Map<String, CantEstCursoDTO> cantidadesPorGrado = new HashMap<>();
+    public List<CantEstCursoDTO> obtenerCantidadesEstudiantes() {
+        List<Curso> cursos = cursoRepo.findAll();
+        Map<String, CantEstCursoDTO> cantidadesPorGrado = new HashMap<>();
 
-    for (Curso curso : cursos) {
-        String nombreGrado = curso.getGrado().getNombre();
-        CantEstCursoDTO cantidades = cantidadesPorGrado.getOrDefault(nombreGrado, new CantEstCursoDTO(0, 0));
+        for (Curso curso : cursos) {
+            String nombreGrado = curso.getGrado().getNombre();
+            CantEstCursoDTO cantidades = cantidadesPorGrado.getOrDefault(nombreGrado, new CantEstCursoDTO(0, 0));
 
-        cantidades.setTotalEstudiantes(cantidades.getTotalEstudiantes() + curso.getMaxEstudiantes());
-        cantidades.setAsigEstudiantes(cantidades.getAsigEstudiantes() + curso.getEstudiantesAsignados());
+            cantidades.setTotalEstudiantes(cantidades.getTotalEstudiantes() + curso.getMaxEstudiantes());
+            cantidades.setAsigEstudiantes(cantidades.getAsigEstudiantes() + curso.getEstudiantesAsignados());
 
-        cantidadesPorGrado.put(nombreGrado, cantidades);
+            cantidadesPorGrado.put(nombreGrado, cantidades);
+        }
+
+        return new ArrayList<>(cantidadesPorGrado.values());
     }
 
-    return new ArrayList<>(cantidadesPorGrado.values());
-}
+    // Mostrar cantidad de estudiantes por aula individual
+    public List<CantCursosEst> obtenerCantidadesEstudiantesPorAula() {
+        List<Curso> cursos = cursoRepo.findAll();
+        Map<String, CantCursosEst> cantidadesPorAula = new HashMap<>();
+
+        for (Curso curso : cursos) {
+            String etiqueta = "Paralelo " + curso.getParalelo();
+
+            CantCursosEst cantidades = cantidadesPorAula.getOrDefault(etiqueta, CantCursosEst.builder()
+                    .etiqueta(etiqueta)
+                    .datos(new ArrayList<>())
+                    .build()
+            );
+
+            cantidades.getDatos().add(CantEstCursoDTO.builder()
+                    .totalEstudiantes(curso.getMaxEstudiantes() != 0 ? curso.getMaxEstudiantes() : 0)
+                    .asigEstudiantes(curso.getEstudiantesAsignados() != 0 ? curso.getEstudiantesAsignados() : 0)
+                    .build()
+            );
+
+            cantidadesPorAula.put(etiqueta, cantidades);
+        }
+
+        List<CantCursosEst> result = new ArrayList<>(cantidadesPorAula.values());
+        result.sort(Comparator.comparing(CantCursosEst::getEtiqueta));
+        return result;
+    }
 
     // Actualizar
     @Transactional
@@ -341,6 +370,8 @@ public List<CantEstCursoDTO> obtenerCantidadesEstudiantes() {
                 .detalles("El aula ha sido eliminada correctamente")
                 .build();
     }
+
+
 
     /* --------- METODOS AUXILIARES ---------- */
 

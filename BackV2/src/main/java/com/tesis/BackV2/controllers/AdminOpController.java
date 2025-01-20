@@ -37,6 +37,25 @@ public class AdminOpController {
         return ResponseEntity.ok(usuarioServ.getDocentes());
     }
 
+    /*--------------------------- DASHBOARD --------------------------------------------------*/
+    // Traer cantidad de inscripciones
+    @GetMapping("dashboard/inscripciones")
+    public ResponseEntity<?> cantidadesInscripciones() {
+        return ResponseEntity.ok(inscripServ.inscripcionesPorEstadoYCiclo());
+    }
+
+    // Traer cantidad de matriculas
+    @GetMapping("dashboard/matriculas")
+    public ResponseEntity<?> cantidadesMatriculas() {
+        return ResponseEntity.ok(matriculaService.matriculasCanntEstCiclo());
+    }
+
+    // Traer la cantidad de estudiantes por aulas
+    @GetMapping("dashboard/estudiantes/aulas")
+    public ResponseEntity<?> cantEstPorAulas() {
+        return ResponseEntity.ok(cicloAServ.obtenerCantidadesEstudiantesPorAula());
+    }
+
     /*  ---------------------------- Gestión de Matricula  ---------------------------- */
     // Listar por pendientes
     @GetMapping("matriculas/pendientes")

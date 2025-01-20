@@ -3,7 +3,9 @@ package com.tesis.BackV2.services.inscripcion;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.dto.InscripcionDTO;
+import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
 import com.tesis.BackV2.dto.doc.DocumentoDTO;
+import com.tesis.BackV2.entities.CicloAcademico;
 import com.tesis.BackV2.entities.Curso;
 import com.tesis.BackV2.entities.Inscripcion;
 import com.tesis.BackV2.entities.Matricula;
@@ -423,6 +425,16 @@ public class InscripcionService {
                 .build()));
 
         return convertirInscripcion(inscripcion);
+    }
+
+    // Obtener total de inscripciones por estado y ciclo académico
+    public CantidadesDTO inscripcionesPorEstadoYCiclo() {
+        CicloAcademico ciclo  = repoCicloAcademico.findByActivoTrue();
+        return CantidadesDTO.builder()
+                .reservado(repo.countByEstadoAndCilo(EstadoInscripcion.Pendiente, ciclo))
+                .completo(repo.countByEstadoAndCilo(EstadoInscripcion.Aceptado, ciclo))
+                .incompleto(repo.countByEstadoAndCilo(EstadoInscripcion.Rechazado, ciclo))
+                .build();
     }
 
     /* ---------- OTROS METODOS ---------- */

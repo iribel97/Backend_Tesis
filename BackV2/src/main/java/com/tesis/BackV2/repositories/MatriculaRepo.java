@@ -38,4 +38,7 @@ public interface MatriculaRepo extends JpaRepository<Matricula, Long> {
     List<Matricula> findByCicloAndCurso(CicloAcademico ciclo, Curso curso);
 
     Matricula findTopByEstudianteUsuarioCedulaOrderByIdDesc(String cedulaEst);
+
+    // cantidad de matricula por ciclo academico y por estado
+    int countByCicloAndEstado(CicloAcademico ciclo, EstadoMatricula estado);
 }

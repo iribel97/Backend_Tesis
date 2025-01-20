@@ -3,6 +3,7 @@ package com.tesis.BackV2.services.inscripcion;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.dto.MatriculaDTO;
+import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
 import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.enums.EstadoInscripcion;
 import com.tesis.BackV2.enums.EstadoMatricula;
@@ -190,6 +191,16 @@ public class MatriculaService {
                 .mensaje("Cambio de estado")
                 .codigo(200)
                 .detalles("Matricula actualizada exitosamente.")
+                .build();
+    }
+
+    // matriculas por estado y por ciclo
+    public CantidadesDTO matriculasCanntEstCiclo(){
+        CicloAcademico ciclo = cicloRep.findByActivoTrue();
+        return CantidadesDTO.builder()
+                .completo(repo.countByCicloAndEstado(ciclo, EstadoMatricula.Matriculado))
+                .incompleto(repo.countByCicloAndEstado(ciclo, EstadoMatricula.Pendiente))
+                .reservado(repo.countByCicloAndEstado(ciclo, EstadoMatricula.Retirado))
                 .build();
     }
 
