@@ -16,6 +16,8 @@ public class DisNotasEst {
 
     private String nombreMateria;
     private String nombreEstudiante;
+    private String nombreDocente;
+    private double progreso;
     private double promedio;
 
     List<NivelUnoEntDTO> promedios;

@@ -2,6 +2,7 @@ package com.tesis.BackV2.controllers;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
+import com.tesis.BackV2.dto.dashboard.ContGeneralEstDTO;
 import com.tesis.BackV2.entities.Estudiante;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.EstudianteRepo;
@@ -31,6 +32,28 @@ public class EstudianteController {
 
     private final EstudianteRepo repEst;
     private final MatriculaRepo matrRepo;
+
+    /*  ---------------------------- Dashboard  ---------------------------- */
+    //visualizar %asistencia y promedio
+    @GetMapping("dashboard")
+    public ResponseEntity<?> obtenerDashboard(HttpServletRequest request) {
+        Estudiante estudiante = validarEstudiante(request);
+        if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
+
+        return ResponseEntity.ok(ContGeneralEstDTO.builder()
+                        .promedio(contServ.promedioCursoGeneralEst(estudiante.getId()))
+                        .porcentajeAsist(asistenciaServ.promedioAsistencias(estudiante.getId()))
+                .build());
+    }
+
+    // visualizar entregas pendientes
+    @GetMapping("dashboard/entregas")
+    public ResponseEntity<?> obtenerEntregas(HttpServletRequest request) {
+        Estudiante estudiante = validarEstudiante(request);
+        if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
+
+        return ResponseEntity.ok(contServ.estregasPendientesEst(estudiante.getId()));
+    }
 
     @GetMapping("horario")
     public ResponseEntity<?> obtenerHorarios(HttpServletRequest request) {

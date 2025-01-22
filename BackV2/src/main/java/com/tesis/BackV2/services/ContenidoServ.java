@@ -2,6 +2,7 @@ package com.tesis.BackV2.services;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.contenido.*;
+import com.tesis.BackV2.dto.dashboard.EntregaDashEstDTO;
 import com.tesis.BackV2.dto.doc.DocumentoDTO;
 import com.tesis.BackV2.dto.horarioConfig.AgendaDTO;
 import com.tesis.BackV2.dto.notas.NivelDosEntDTO;
@@ -701,6 +702,23 @@ public class ContenidoServ {
                 .toList();
     }
 
+    // Listar las entregas pendientes
+    public List<EntregaDashEstDTO> estregasPendientesEst (long idEst){
+        return repoEnt.findByEstudiante_IdAndActivoAndEstado(idEst,true, EstadoEntrega.Pendiente).stream()
+                .map(this::convertirEntregaDashEst)
+                .toList();
+    }
+
+    private EntregaDashEstDTO convertirEntregaDashEst(Entrega entrega) {
+        return  EntregaDashEstDTO.builder()
+                .idAsig(entrega.getAsignacion().getId())
+                .idDis(entrega.getAsignacion().getTema().getUnidad().getDistributivo().getId())
+                .nombreAsig(entrega.getAsignacion().getNombre())
+                .nombreMateria(entrega.getAsignacion().getTema().getUnidad().getDistributivo().getMateria().getNombre())
+                .fechaFin(entrega.getAsignacion().getFechaFin())
+                .build();
+    }
+
     // Eliminar Entrega
     @Transactional
     public ApiResponse<String> eliminarEntrega(Long id) {
@@ -956,9 +974,15 @@ public class ContenidoServ {
             }
         }
 
+        int entregadas = 0;
+
         for (Entrega x : entregas ) {
             double nota = parseDoubleSafe(x.getNota());
             long nivel4Id = x.getAsignacion().getCalif().getId().getLvl4();
+
+            if (x.getEstado().equals(EstadoEntrega.Calificado) || x.getEstado().equals(EstadoEntrega.Entregado)) {
+                entregadas++;
+            }
 
             if (nivel4Id == 0) {
                 nivel3.get(x.getAsignacion().getCalif().getId()).getNivelEntregas().add(
@@ -1016,6 +1040,46 @@ public class ContenidoServ {
             List<NivelUnoEntDTO> notasDis = new ArrayList<>();
             double sum = 0;
 
+            // traer la cantidad de niveles 4 que existen
+            // si notas es nulo setear todo a 0 poner datos en default
+            if (notas.isEmpty()) {
+                NivelUnoEntDTO nivel1x = NivelUnoEntDTO.builder()
+                        .nombreNivel("1er Trimestre")
+                        .sumativa(0)
+                        .peso(0)
+                        .niveles(new ArrayList<>())
+                        .build();
+                NivelUnoEntDTO nivel1y = NivelUnoEntDTO.builder()
+                        .nombreNivel("2do Trimestre")
+                        .sumativa(0)
+                        .peso(0)
+                        .niveles(new ArrayList<>())
+                        .build();
+                NivelUnoEntDTO nivel1z = NivelUnoEntDTO.builder()
+                        .nombreNivel("3er Trimestre")
+                        .sumativa(0)
+                        .peso(0)
+                        .niveles(new ArrayList<>())
+                        .build();
+                NivelDosEntDTO nivel2x = NivelDosEntDTO.builder()
+                        .nombreNivel("1er Parcial")
+                        .sumativa(0)
+                        .peso(0)
+                        .build();
+                NivelDosEntDTO nivel2y = NivelDosEntDTO.builder()
+                        .nombreNivel("2do Parcial")
+                        .sumativa(0)
+                        .peso(0)
+                        .build();
+                nivel1x.setNiveles(List.of(nivel2x, nivel2y));
+                nivel1y.setNiveles(List.of(nivel2x, nivel2y));
+                nivel1z.setNiveles(List.of(nivel2x, nivel2y));
+
+                notas.add(nivel1x);
+                notas.add(nivel1y);
+                notas.add(nivel1z);
+            }
+
             for (NivelUnoEntDTO x : notas) {
                 // de niveles solo quiero el nombre y el promedio
                 notasDis.add( NivelUnoEntDTO.builder()
@@ -1030,21 +1094,47 @@ public class ContenidoServ {
                                 )
                         .build()
                 );
+
                 sum += x.getPromedio() * (x.getPeso() / 100);
+            }
+
+            // llamemos entregas
+            List<Entrega> entregas = repoEnt.findByEstudiante_IdAndAsignacion_Tema_Unidad_Distributivo_Id(idEst, dis.getId());
+
+            boolean bandera = entregas.isEmpty();
+            long entregadas = 0;
+            if (!bandera) {
+                // contar cuantas entregas hay de estado "Entregado" y estado "Calificado"
+                entregadas = entregas.stream().filter(entrega -> entrega.getEstado().equals(EstadoEntrega.Entregado) || entrega.getEstado().equals(EstadoEntrega.Calificado)).count();
             }
 
             disNotasEst.add (
                     DisNotasEst.builder()
                             .nombreMateria(dis.getMateria().getNombre())
+                            .progreso(!bandera ? ((double) (entregadas * 100) / entregas.size()) : 0)
+                            .nombreDocente(dis.getDocente().getUsuario().getApellidos() + " " + dis.getDocente().getUsuario().getNombres())
                             .promedio(sum)
                             .nombreEstudiante(estudiante.getUsuario().getApellidos() + " " + estudiante.getUsuario().getNombres())
                             .promedios(notasDis)
                             .build()
-            );
+);
         }
 
         disNotasEst.sort(Comparator.comparing(DisNotasEst::getNombreMateria));
         return disNotasEst;
+    }
+
+    // Promedio general del estudiante
+    public double promedioCursoGeneralEst(long idEst){
+        List<DisNotasEst> notas = notasCursoEst(idEst);
+
+        double sum = 0;
+
+        for (DisNotasEst x : notas) {
+            sum += x.getPromedio();
+        }
+
+        return sum / notas.size();
     }
 
     // Traer todos los promedios de los estudiantes de un curso

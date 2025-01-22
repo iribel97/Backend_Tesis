@@ -296,6 +296,19 @@ public class AsistenciaServ {
         return asistencias;
     }
 
+    // promedio de asistencias por ciclo académico y id estudiante
+    public double promedioAsistencias(long idEst) {
+        List<AsistenciasDisEstDTO> asistencias = asistenciasByDistributivo(repoMatr.findTopByEstudianteIdOrderByIdDesc(idEst).getEstudiante().getUsuario().getCedula());
+
+        double asistio = 0;
+
+        for (AsistenciasDisEstDTO asistencia : asistencias) {
+            asistio += asistencia.getData().getPorcentajeAsistencias();
+        }
+
+        return asistio /asistencias.size();
+    }
+
     /* ---- METODOS PROPIOS DEL SERVICIO ---- */
     // validar atributos del request
     private void validarRequest(AsistenciaRequest request) {

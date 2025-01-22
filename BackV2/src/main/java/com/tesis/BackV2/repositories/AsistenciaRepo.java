@@ -39,4 +39,10 @@ public interface AsistenciaRepo extends JpaRepository<Asistencia, Long> {
 
     // asistencia por distributivo
     List<Asistencia> findByDistributivo_Id(long distributivoId);
+
+    // listar por estudiante y el ciclo activo
+    @Query("SELECT a FROM Asistencia a " +
+            "WHERE a.estudiante.id = :estudianteId " +
+            "AND a.cicloAcademico.activo = true")
+    List<Asistencia> findByEstudianteAndCicloActivo(@Param("estudianteId") Long estudianteId);
 }

@@ -1,6 +1,7 @@
 package com.tesis.BackV2.repositories.contenido;
 
 import com.tesis.BackV2.entities.contenido.Entrega;
+import com.tesis.BackV2.enums.EstadoEntrega;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,4 +21,6 @@ public interface EntregaRepo extends JpaRepository<Entrega, Long> {
 
     // Listar por distributivo id
     List<Entrega> findByAsignacion_Tema_Unidad_Distributivo_Id(Long idDistributivo);
+
+    List<Entrega> findByEstudiante_IdAndActivoAndEstado(long estudianteId, boolean activo, EstadoEntrega estado);
 }
