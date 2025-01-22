@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://192.168.2.149:4200"})
+@CrossOrigin(origins = {"http://localhost:4200"})
 public class AdminGeneralController {
 
     private final CicloAcademicoServ cicloAServ;

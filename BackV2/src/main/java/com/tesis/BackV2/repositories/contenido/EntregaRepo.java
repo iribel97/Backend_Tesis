@@ -14,4 +14,10 @@ public interface EntregaRepo extends JpaRepository<Entrega, Long> {
 
     //Listar por seignación y estudiante
     Entrega findByAsignacion_IdAndEstudiante_Id(Long idAsignacion, long idEstudiante);
+
+    // Listar por estudiante y distributivo id
+    List<Entrega> findByEstudiante_IdAndAsignacion_Tema_Unidad_Distributivo_Id(Long idEstudiante, Long idDistributivo);
+
+    // Listar por distributivo id
+    List<Entrega> findByAsignacion_Tema_Unidad_Distributivo_Id(Long idDistributivo);
 }

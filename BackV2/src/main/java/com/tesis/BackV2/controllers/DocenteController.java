@@ -2,6 +2,9 @@ package com.tesis.BackV2.controllers;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
+import com.tesis.BackV2.dto.CursoDocenteTutorDTO;
+import com.tesis.BackV2.dto.contenido.DisNotasEst;
+import com.tesis.BackV2.entities.Curso;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.request.AsistenciaRequest;
@@ -22,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/docente/")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://192.168.2.149:4200"})
+@CrossOrigin(origins = {"http://localhost:4200"})
 public class DocenteController {
 
     private final JwtService jwtService;
@@ -38,6 +41,52 @@ public class DocenteController {
     @GetMapping("admin/dashboard/total/asistencias")
     public ResponseEntity<?> obtenerAsistencias(HttpServletRequest request) {
         return ResponseEntity.ok(asistenciaServ.cantAsisTotalCiclo());
+    }
+
+    // mostrar notas por curso tutor
+    @GetMapping("tutor/notas")
+    public ResponseEntity<?> notasCursoTutor(HttpServletRequest request){
+        // Traer docente
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        Curso curso = cicloAServ.cursoTutor(docente.getId());
+
+        if (curso == null) return null;
+
+        List<DisNotasEst> peoresNotas = contServ.notasCurso(curso.getId());
+
+        return ResponseEntity.ok(CursoDocenteTutorDTO.builder()
+                        .curso(curso.getGrado().getNombre() + " " + curso.getParalelo())
+                        .asistenciasGeneral(asistenciaServ.asistenciasByCurso(curso.getId()))
+                        .asistenciaByMateria(asistenciaServ.asisPorDisDeUnCurso(curso.getId()))
+                        .peorProm(peoresNotas.getFirst())
+                        .estMasInasistencias(asistenciaServ.estudianteConMasFaltas(curso.getId()))
+                        .notasEstudiantes(peoresNotas)
+                .build());
+    }
+
+    // mostrar si tiene horario el día de hoy
+    @GetMapping("dashboard/horario/hoy")
+    public ResponseEntity<?> horarioHoy(HttpServletRequest request){
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(cicloAServ.getHorarioDeHoy(docente.getId()));
+    }
+
+    // traer asignaciones que falten por calificar
+    @GetMapping("dashboard/asignaciones/pendientes")
+    public ResponseEntity<?> asignacionesPendientes(HttpServletRequest request){
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(contServ.traerAsignacionesPendientesPorDocente(docente.getId()));
+    }
+
+    // traer promedios de los distributivos que imparte el docente
+    @GetMapping("dashboard/promedios")
+    public ResponseEntity<?> promediosDocente(HttpServletRequest request){
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(contServ.notasCursoDistributivo(docente.getId()));
     }
 
     /*  ---------------------------- Gestión de Asistencia  ---------------------------- */

@@ -20,6 +20,12 @@ public interface HorarioRepo extends JpaRepository<Horario, Long> {
 
     List<Horario> findByDistributivoId(Long id);
 
+    // Listar horatio por id del docente
+    List<Horario> findByDistributivoDocenteId(Long id);
+
+    // Listar horarios que coincida con el día de la semana y el id del docente
+    List<Horario> findByDiaSemanaAndDistributivoDocenteId(DiaSemana diaSemana, Long id);
+
     // traer por docente
     List<Horario> findByDistributivoDocenteUsuarioCedula(String cedula);
 }

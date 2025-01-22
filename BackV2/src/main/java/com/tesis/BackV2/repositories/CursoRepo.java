@@ -24,4 +24,7 @@ public interface CursoRepo extends JpaRepository<Curso, Long> {
     boolean existsByParaleloAndGradoNombre(String paralelo, String grado);
 
     Collection<Curso> findByGradoNombre(String grado);
+
+    // Traer curso por tutor
+    Curso findByTutorId(long tutorId);
 }

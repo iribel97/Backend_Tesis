@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/estudiante/")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://192.168.2.149:4200"})
+@CrossOrigin(origins = {"http://localhost:4200"})
 public class EstudianteController {
 
     private final CicloAcademicoServ cicloAServ;
@@ -92,6 +92,24 @@ public class EstudianteController {
     }
 
     /*  ---------------------------- Visualización de Calificaciones  ---------------------------- */
+
+    // Visualizar calificaciones por distributivo y id de estudiante
+    @GetMapping("calificaciones/{distriID}")
+    public ResponseEntity<?> obtenerCalificaciones(HttpServletRequest request, @PathVariable Long distriID) {
+        Estudiante estudiante = validarEstudiante(request);
+        if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
+
+        return ResponseEntity.ok(contServ.entregasPorDisYEst( distriID, estudiante.getId()));
+    }
+
+    // visualizar notas por id estudiante
+    @GetMapping("notas")
+    public ResponseEntity<?> obtenerNotas(HttpServletRequest request) {
+        Estudiante estudiante = validarEstudiante(request);
+        if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
+
+        return ResponseEntity.ok(contServ.notasCursoEst(estudiante.getId()));
+    }
 
     /*  ---------------------------- Visualización de Compañeros  ---------------------------- */
 

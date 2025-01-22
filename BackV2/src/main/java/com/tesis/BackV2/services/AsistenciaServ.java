@@ -2,7 +2,9 @@ package com.tesis.BackV2.services;
 
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.dto.asistencia.*;
+import com.tesis.BackV2.dto.dashboard.CantAsisTutorDTO;
 import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
+import com.tesis.BackV2.dto.dashboard.EstudianteFaltasDTO;
 import com.tesis.BackV2.entities.Asistencia;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Matricula;
@@ -217,6 +219,81 @@ public class AsistenciaServ {
                 .porcentajeReservado(justificado == 0 ? 0 : porcentajeJustificadas)
                 .build();
 
+    }
+
+    // traer por curso
+    public CantidadesDTO asistenciasByCurso(long cursoId) {
+        List<Asistencia> asistencias = repo.findByDistributivo_Curso_Id(cursoId);
+
+        // Contar asistencias por estado
+        int totalAsistencias = asistencias.size();
+        int asistio = 0, falta = 0, justificado = 0;
+
+        for (Asistencia asistencia : asistencias) {
+            if (asistencia.getEstado().name().equals("Presente")) asistio++;
+            if (asistencia.getEstado().name().equals("Ausente")) falta++;
+            if (asistencia.getEstado().name().equals("Justificado")) justificado++;
+        }
+
+        // Calcular porcentajes
+        double porcentajeAsistencias = (double) (asistio * 100) / totalAsistencias;
+        double porcentajeFaltas = (double) (falta * 100) / totalAsistencias;
+        double porcentajeJustificadas = (double) (justificado * 100) / totalAsistencias;
+
+        return CantidadesDTO.builder()
+                .total(totalAsistencias)
+                .completo(asistio)
+                .incompleto(falta)
+                .reservado(justificado)
+                .porcentajeCompleto(asistio == 0 ? 0 : porcentajeAsistencias)
+                .porcentajeIncompleto(falta == 0 ? 0 : porcentajeFaltas)
+                .porcentajeReservado(justificado == 0 ? 0 : porcentajeJustificadas)
+                .build();
+    }
+
+    // traer estudiante con mas faltas de un curso
+    public EstudianteFaltasDTO estudianteConMasFaltas(long cursoId) {
+        List<Object[]> faltas = repo.findEstudianteConMasFaltas(cursoId, EstadoAsistencia.Ausente);
+
+        if (faltas.isEmpty()) {
+            return null;
+        }
+
+        return EstudianteFaltasDTO.builder()
+                .apellidos(String.valueOf(faltas.get(0)[0]))
+                .nombres(String.valueOf(faltas.get(0)[1]))
+                .faltas(Integer.parseInt(String.valueOf(faltas.get(0)[2])))
+                .build();
+    }
+
+    // asistencia por distributivo de un curso
+    public List<CantAsisTutorDTO> asisPorDisDeUnCurso(long idCurso) {
+        List<Distributivo> distributivos = repoDist.findByCursoId(idCurso);
+        List<CantAsisTutorDTO> asistencias = new ArrayList<>();
+
+        for (Distributivo distributivo : distributivos) {
+            List<Asistencia> asistenciasList = repo.findByDistributivo_Id(distributivo.getId());
+            int asistio = 0, falta = 0, justificado = 0;
+
+            if ( !asistenciasList.isEmpty()) {
+                for (Asistencia asistencia : asistenciasList) {
+                    if (asistencia.getEstado().name().equals("Presente")) asistio++;
+                    if (asistencia.getEstado().name().equals("Ausente")) falta++;
+                    if (asistencia.getEstado().name().equals("Justificado")) justificado++;
+                }
+
+
+            }
+
+            asistencias.add(CantAsisTutorDTO.builder()
+                    .materia(distributivo.getMateria().getNombre())
+                    .asistidos(asistio)
+                    .faltas(falta)
+                    .justificados(justificado)
+                    .build());
+        }
+
+        return asistencias;
     }
 
     /* ---- METODOS PROPIOS DEL SERVICIO ---- */

@@ -8,10 +8,12 @@ import com.tesis.BackV2.dto.dashboard.CantEstCursoDTO;
 import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
 import com.tesis.BackV2.dto.horarioConfig.DiaDTO;
 import com.tesis.BackV2.dto.horarioConfig.HoraDTO;
+import com.tesis.BackV2.dto.horarioConfig.HorarioDocenDTO;
 import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.entities.config.HorarioConfig;
 import com.tesis.BackV2.entities.config.InscripcionConfig;
 import com.tesis.BackV2.entities.contenido.Unidad;
+import com.tesis.BackV2.enums.DiaSemana;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -316,6 +319,11 @@ public class CicloAcademicoServ {
         List<CantCursosEst> result = new ArrayList<>(cantidadesPorAula.values());
         result.sort(Comparator.comparing(CantCursosEst::getEtiqueta));
         return result;
+    }
+
+    // Curso del tutor
+    public Curso cursoTutor (long idTutor){
+        return cursoRepo.findByTutorId(idTutor);
     }
 
     // Actualizar
@@ -1372,6 +1380,49 @@ public class CicloAcademicoServ {
                     .viernes(viernes)
                     .build());
         }
+        return dto;
+    }
+
+    // Traer el horario que le toca el día de hoy al docente
+    public List<HorarioDocenDTO> getHorarioDeHoy(long idDocente){
+        List<HorarioDocenDTO> dto = new ArrayList<>();
+
+        // Dia de hoy
+        DayOfWeek dia = LocalDate.now().getDayOfWeek();
+
+        // Pasar de ingles a español el día de la semana
+        String diaSemana = switch (dia) {
+            case MONDAY -> "Lunes";
+            case TUESDAY -> "Martes";
+            case WEDNESDAY -> "Miercoles";
+            case THURSDAY -> "Jueves";
+            case FRIDAY -> "Viernes";
+            default -> "Hoy no es día laboral";
+        };
+
+        if (diaSemana.equals("Hoy no es día laboral")) {
+            return dto;
+        }
+
+        List<Horario> horario = horarioRepo.findByDiaSemanaAndDistributivoDocenteId(DiaSemana.valueOf(diaSemana), idDocente);
+
+        if (horario.isEmpty()) {
+            return dto;
+        }
+
+        for (Horario x: horario) {
+            dto.add(HorarioDocenDTO.builder()
+                            .hora(HoraDTO.builder()
+                                    .horaInicio(String.valueOf(x.getHorario().getHoraInicio()))
+                                    .horaFin(String.valueOf(x.getHorario().getHoraFin()))
+                                    .build())
+                            .dia(DiaDTO.builder()
+                                    .materia(x.getDistributivo().getMateria().getNombre())
+                                    .curso(x.getDistributivo().getCurso().getGrado().getNombre() + " " + x.getDistributivo().getCurso().getParalelo())
+                                    .build())
+                    .build());
+        }
+
         return dto;
     }
 
