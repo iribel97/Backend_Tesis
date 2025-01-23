@@ -213,21 +213,67 @@ public class UsuarioServ {
             );
         }
 
-        return matriculas.stream().map(matricula -> {
-            try {
-                return buscarUsuario(matricula.getEstudiante().getUsuario().getCedula());
-            } catch (MiExcepcion e) {
-                throw new ApiException(
-                        ApiResponse.builder()
-                                .error(true)
-                                .mensaje("Error de validación")
-                                .codigo(400)
-                                .detalles("No se encontró el usuario")
-                                .build()
-                );
+        return matriculas.stream()
+            .map(matricula -> {
+                try {
+                    return buscarUsuario(matricula.getEstudiante().getUsuario().getCedula());
+                } catch (MiExcepcion e) {
+                    throw new ApiException(
+                            ApiResponse.builder()
+                                    .error(true)
+                                    .mensaje("Error de validación")
+                                    .codigo(400)
+                                    .detalles("No se encontró el usuario")
+                                    .build()
+                    );
+                }
+            })
+            .sorted(Comparator.comparing(UsuarioDTO::getApellidos))
+            .collect(Collectors.toList());
             }
-        }).collect(Collectors.toList());
-    }
+
+    // Listar estudiantes por ciclo y el id del aula
+    public List<UsuarioDTO> getEstudiantesByAula(Long idCurso) {
+        Curso curso = repoC.findById(idCurso).orElseThrow(() -> new ApiException(
+                ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud inválida")
+                        .codigo(404)
+                        .detalles("El curso con id " + idCurso + " no existe.")
+                        .build()
+        ));
+
+        List<Matricula> matriculas = repoM.findByCicloAndCurso_Id(repoCA.findByActivoTrue(), curso.getId());
+
+        if (matriculas == null) {
+            throw new ApiException(
+                    ApiResponse.builder()
+                            .error(true)
+                            .mensaje("Solicitud invalida")
+                            .codigo(400)
+                            .detalles("No hay estudiantes matriculados")
+                            .build()
+            );
+        }
+
+        return matriculas.stream()
+            .map(matricula -> {
+                try {
+                    return buscarUsuario(matricula.getEstudiante().getUsuario().getCedula());
+                } catch (MiExcepcion e) {
+                    throw new ApiException(
+                            ApiResponse.builder()
+                                    .error(true)
+                                    .mensaje("Error de validación")
+                                    .codigo(400)
+                                    .detalles("No se encontró el usuario")
+                                    .build()
+                    );
+                }
+            })
+            .sorted(Comparator.comparing(UsuarioDTO::getApellidos))
+            .collect(Collectors.toList());
+            }
 
     // Traer usuarios con rol AdminGeneral, AdminOp y Docente
     public List<UsuarioDTO> getUsuarios() {

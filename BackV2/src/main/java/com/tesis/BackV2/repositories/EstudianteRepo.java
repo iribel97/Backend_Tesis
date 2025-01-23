@@ -15,4 +15,6 @@ public interface EstudianteRepo extends JpaRepository<Estudiante, Long> {
 
 
     List<Estudiante> findByRepresentanteId(long id);
+
+    List<Estudiante> findByRepresentante_Id(long representanteId);
 }

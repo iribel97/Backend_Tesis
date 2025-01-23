@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ContGeneralEstDTO {
 
+    private String nombreEstudiante;
+    private String curso;
     private double porcentajeAsist;
     private double promedio;
 }

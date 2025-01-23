@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -166,27 +167,29 @@ public class AsistenciaServ {
         double porcentajeJustificadas = (double) (justificado * 100) / totalAsistencias;
 
         return AsistenciasDocenteDTO.builder()
-                .diaSemana(String.valueOf(asisList.getFirst().getFecha().getDayOfWeek()))
-                .datos(PorcentAsisEst.builder()
-                        .totalAsistencias(totalAsistencias)
-                        .totalFaltas(falta)
-                        .totalJustificadas(justificado)
-                        .totalAsist(asistio)
-                        .porcentajeAsistencias(asistio == 0 ? 0 : porcentajeAsistencias)
-                        .porcentajeFaltas(falta == 0 ? 0 : porcentajeFaltas)
-                        .porcentajeJustificadas(justificado == 0 ? 0 : porcentajeJustificadas)
-                        .build())
-                .asistencias(asisList.stream().map(asistencia1 -> AsisDocDTO.builder()
-                                .cedulaEstudiante(asistencia1.getEstudiante().getUsuario().getCedula())
-                                .idEstudiante(asistencia1.getEstudiante().getId())
-                        .idAsistencia(asistencia1.getId())
-                        .estado(asistencia1.getEstado())
-                        .apellidosEstudiante(asistencia1.getEstudiante().getUsuario().getApellidos())
-                        .nombresEstudiante(asistencia1.getEstudiante().getUsuario().getNombres())
-                        .observaciones(asistencia1.getObservaciones())
-                        .build())
-                        .collect(Collectors.toList()))
-                .build();
+            .diaSemana(String.valueOf(asisList.getFirst().getFecha().getDayOfWeek()))
+            .datos(PorcentAsisEst.builder()
+                    .totalAsistencias(totalAsistencias)
+                    .totalFaltas(falta)
+                    .totalJustificadas(justificado)
+                    .totalAsist(asistio)
+                    .porcentajeAsistencias(asistio == 0 ? 0 : porcentajeAsistencias)
+                    .porcentajeFaltas(falta == 0 ? 0 : porcentajeFaltas)
+                    .porcentajeJustificadas(justificado == 0 ? 0 : porcentajeJustificadas)
+                    .build())
+            .asistencias(asisList.stream()
+                    .sorted(Comparator.comparing(asistencia1 -> asistencia1.getEstudiante().getUsuario().getApellidos()))
+                    .map(asistencia1 -> AsisDocDTO.builder()
+                            .cedulaEstudiante(asistencia1.getEstudiante().getUsuario().getCedula())
+                            .idEstudiante(asistencia1.getEstudiante().getId())
+                            .idAsistencia(asistencia1.getId())
+                            .estado(asistencia1.getEstado())
+                            .apellidosEstudiante(asistencia1.getEstudiante().getUsuario().getApellidos())
+                            .nombresEstudiante(asistencia1.getEstudiante().getUsuario().getNombres())
+                            .observaciones(asistencia1.getObservaciones())
+                            .build())
+                    .collect(Collectors.toList()))
+            .build();
     }
 
     // traer total y porcentaje de asistencias por ciclo académico

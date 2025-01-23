@@ -4,9 +4,12 @@ import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.dto.dashboard.ContGeneralEstDTO;
 import com.tesis.BackV2.entities.Estudiante;
+import com.tesis.BackV2.entities.Matricula;
+import com.tesis.BackV2.entities.Representante;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.MatriculaRepo;
+import com.tesis.BackV2.repositories.RepresentanteRepo;
 import com.tesis.BackV2.request.contenido.EntregaRequest;
 import com.tesis.BackV2.services.AsistenciaServ;
 import com.tesis.BackV2.services.CicloAcademicoServ;
@@ -16,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -31,9 +35,35 @@ public class EstudianteController {
     private final JwtService jwtService;
 
     private final EstudianteRepo repEst;
+    private final RepresentanteRepo repRep;
     private final MatriculaRepo matrRepo;
 
     /*  ---------------------------- Dashboard  ---------------------------- */
+    // visualización general representante
+    @GetMapping("dashboard/representante")
+    public ResponseEntity<?> obtenerDashboardRepresentante(HttpServletRequest request) {
+        Representante representante = repRep.findByUsuarioCedula(jwtService.extractUsername(extractTokenFromRequest(request)));
+        if (representante == null) return buildErrorResponse("No se encontró el representante", 404);
+
+        List<Estudiante> estudiantes = repEst.findByRepresentanteId(representante.getId());
+
+        if (estudiantes.isEmpty()) return buildErrorResponse("Aún no cuenta con estudiantes", 404);
+
+        List<ContGeneralEstDTO> general = new ArrayList<>();
+
+        for ( Estudiante x : estudiantes) {
+            Matricula matricula = matrRepo.findTopByEstudianteIdOrderByIdDesc(x.getId());
+            general.add(ContGeneralEstDTO.builder()
+                    .nombreEstudiante(x.getUsuario().getApellidos() + " " + x.getUsuario().getNombres())
+                    .curso(matricula.getCurso().getGrado().getNombre() + " " + matricula.getCurso().getParalelo())
+                    .promedio(contServ.promedioCursoGeneralEst(x.getId()))
+                    .porcentajeAsist(asistenciaServ.promedioAsistencias(x.getId()))
+                    .build());
+        }
+
+        return ResponseEntity.ok(general);
+    }
+
     //visualizar %asistencia y promedio
     @GetMapping("dashboard")
     public ResponseEntity<?> obtenerDashboard(HttpServletRequest request) {

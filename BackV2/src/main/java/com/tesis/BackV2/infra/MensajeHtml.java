@@ -894,4 +894,122 @@ public class MensajeHtml {
                 "\n" +
                 "</html>";
     }
+
+    public String mensajeCitacionDocenteRep (String nombreRepresentante, String nombreEstudiante, String nombreDocente, String fechaCitacion, String horaCitacion, String motivoCitacion, String observaciones) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <title>Citación</title>\n" +
+                "    <style>\n" +
+                "        body {\n" +
+                "            font-family: 'Arial', sans-serif;\n" +
+                "            margin: 0;\n" +
+                "            padding: 0;\n" +
+                "            background-color: #f4f4f4;\n" +
+                "        }\n" +
+                "        .email-container {\n" +
+                "            max-width: 600px;\n" +
+                "            margin: 20px auto;\n" +
+                "            background-color: #ffffff;\n" +
+                "            border-radius: 10px;\n" +
+                "            overflow: hidden;\n" +
+                "            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n" +
+                "        }\n" +
+                "        .email-header {\n" +
+                "            background: linear-gradient(90deg, #007bff, #0056b3);\n" +
+                "            color: #ffffff;\n" +
+                "            padding: 20px;\n" +
+                "            text-align: center;\n" +
+                "        }\n" +
+                "        .email-header h1 {\n" +
+                "            margin: 0;\n" +
+                "            font-size: 26px;\n" +
+                "            font-weight: bold;\n" +
+                "        }\n" +
+                "        .email-body {\n" +
+                "            padding: 20px 30px;\n" +
+                "            color: #333333;\n" +
+                "        }\n" +
+                "        .email-body p {\n" +
+                "            margin: 15px 0;\n" +
+                "            line-height: 1.6;\n" +
+                "            font-size: 16px;\n" +
+                "        }\n" +
+                "        .details {\n" +
+                "            margin: 20px 0;\n" +
+                "            padding: 15px;\n" +
+                "            background-color: #f9f9f9;\n" +
+                "            border: 1px solid #e0e0e0;\n" +
+                "            border-radius: 8px;\n" +
+                "        }\n" +
+                "        .details .detail-item {\n" +
+                "            margin-bottom: 10px;\n" +
+                "            font-size: 16px;\n" +
+                "        }\n" +
+                "        .details .detail-item strong {\n" +
+                "            color: #007bff;\n" +
+                "        }\n" +
+                "        .button-container {\n" +
+                "            text-align: center;\n" +
+                "            margin: 20px 0;\n" +
+                "        }\n" +
+                "        .button {\n" +
+                "            display: inline-block;\n" +
+                "            padding: 12px 25px;\n" +
+                "            background-color: #007bff;\n" +
+                "            color: #ffffff;\n" +
+                "            text-decoration: none;\n" +
+                "            font-weight: bold;\n" +
+                "            border-radius: 5px;\n" +
+                "            font-size: 16px;\n" +
+                "            transition: background-color 0.3s;\n" +
+                "        }\n" +
+                "        .button:hover {\n" +
+                "            background-color: #0056b3;\n" +
+                "        }\n" +
+                "        .email-footer {\n" +
+                "            background-color: #f8f9fa;\n" +
+                "            padding: 15px;\n" +
+                "            text-align: center;\n" +
+                "            font-size: 14px;\n" +
+                "            color: #888888;\n" +
+                "            border-top: 1px solid #eeeeee;\n" +
+                "        }\n" +
+                "        .email-footer p {\n" +
+                "            margin: 5px 0;\n" +
+                "        }\n" +
+                "    </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "    <div class=\"email-container\">\n" +
+                "        <!-- Header -->\n" +
+                "        <div class=\"email-header\">\n" +
+                "            <h1>Citación Importante</h1>\n" +
+                "        </div>\n" +
+                "        <!-- Body -->\n" +
+                "        <div class=\"email-body\">\n" +
+                "            <p>Estimado/a <strong>" + nombreRepresentante + "</strong>,</p>\n" +
+                "            <p>\n" +
+                "                Le informamos que ha sido programada una citación para tratar asuntos relacionados con el estudiante \n" +
+                "                <strong>"+ nombreEstudiante +"</strong>.\n" +
+                "            </p>\n" +
+                "            <div class=\"details\">\n" +
+                "                <div class=\"detail-item\"><strong>Docente:</strong>" + nombreDocente + "</div>\n" +
+                "                <div class=\"detail-item\"><strong>Motivo:</strong> "+motivoCitacion+"</div>\n" +
+                "                <div class=\"detail-item\"><strong>Fecha:</strong> "+fechaCitacion+"</div>\n" +
+                "                <div class=\"detail-item\"><strong>Hora:</strong> "+horaCitacion+"</div>\n" +
+                "                <div class=\"detail-item\"><strong>Observaciones:</strong> "+observaciones+"</div>\n" +
+                "            </div>\n" +
+                "        </div>\n" +
+                "        <!-- Footer -->\n" +
+                "        <div class=\"email-footer\">\n" +
+                "            <p>Este es un mensaje automático, por favor no responder a este correo.</p>\n" +
+                "            <p>&copy; 2025 Sistema Académico. Todos los derechos reservados.</p>\n" +
+                "        </div>\n" +
+                "    </div>\n" +
+                "</body>\n" +
+                "</html>\n";
+    }
 }

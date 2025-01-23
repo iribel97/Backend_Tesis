@@ -8,10 +8,12 @@ import com.tesis.BackV2.entities.Curso;
 import com.tesis.BackV2.entities.Docente;
 import com.tesis.BackV2.repositories.DocenteRepo;
 import com.tesis.BackV2.request.AsistenciaRequest;
+import com.tesis.BackV2.request.CitacionRequest;
 import com.tesis.BackV2.request.asistencia.AsisRequest;
 import com.tesis.BackV2.request.contenido.*;
 import com.tesis.BackV2.services.AsistenciaServ;
 import com.tesis.BackV2.services.CicloAcademicoServ;
+import com.tesis.BackV2.services.CitacionService;
 import com.tesis.BackV2.services.ContenidoServ;
 import com.tesis.BackV2.services.cicloacademico.SisCalifServ;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,6 +36,7 @@ public class DocenteController {
     private final ContenidoServ contServ;
     private final SisCalifServ sisCalifServ;
     private final AsistenciaServ asistenciaServ;
+    private final CitacionService citacionServ;
 
     private final DocenteRepo repDocente;
 
@@ -111,6 +114,37 @@ public class DocenteController {
     /*  ---------------------------- Gestión de Conducta  ---------------------------- */
 
     /*  ---------------------------- Gestión de Citaciones  ---------------------------- */
+    // Crear citación
+    @PostMapping("citacion")
+    public ResponseEntity<?> crearCitacion(@RequestBody CitacionRequest request, HttpServletRequest req) {
+        Docente docente = validarDocente(req);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(citacionServ.crearCitacion(request, docente.getUsuario().getCedula()));
+    }
+
+    // cambiar el estado de la citacion
+    @PutMapping("citacion/estado/{idCitacion}")
+    public ResponseEntity<?> cambiarEstadoCitacion(@PathVariable Long idCitacion){
+        return ResponseEntity.ok(citacionServ.cambiarEstadoCitacion(idCitacion));
+    }
+
+    // Mostrar citaciones por docente
+    @GetMapping("citaciones")
+    public ResponseEntity<?> mostrarCitaciones(HttpServletRequest request){
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(citacionServ.citacionByDocente(docente.getId()));
+    }
+
+    // visualizar cursos del docente
+    @GetMapping("cursos")
+    public ResponseEntity<?> cursosDocente(HttpServletRequest request){
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(cicloAServ.obtenerCursosPorDocente(docente.getId()));
+    }
+
+
 
     /*  ---------------------------- Reporte de Calificaciones  ---------------------------- */
 

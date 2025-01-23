@@ -84,6 +84,12 @@ public class GeneralController {
         return ResponseEntity.ok(usuarioServ.getEstudiantesByCurso(idDistributivo));
     }
 
+    // traer estudianter por aula
+    @GetMapping("estudiantes/curso/{idCurso}")
+    public ResponseEntity<?> obtenerEstudiantesCurso(@PathVariable Long idCurso){
+        return ResponseEntity.ok(usuarioServ.getEstudiantesByAula(idCurso));
+    }
+
     /* ----------------------------------------- DASHBOARD -----------------------------------------*/
     // Traer calendario
     @GetMapping("calendario")

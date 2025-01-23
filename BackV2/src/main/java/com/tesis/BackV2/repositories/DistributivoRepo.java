@@ -1,5 +1,6 @@
 package com.tesis.BackV2.repositories;
 
+import com.tesis.BackV2.entities.Curso;
 import com.tesis.BackV2.entities.Distributivo;
 import com.tesis.BackV2.entities.Docente;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -47,4 +48,6 @@ public interface DistributivoRepo extends JpaRepository<Distributivo, Long> {
     @Query("SELECT DISTINCT d.docente FROM Distributivo d WHERE d.ciclo.id = :cicloId")
     List<Docente> findDistinctDocentesByCicloId(@Param("cicloId") long cicloId);
 
+    @Query("SELECT DISTINCT d.curso FROM Distributivo d WHERE d.docente.id = :idDocente")
+    List<Curso> findDistinctCursosByDocenteId(@Param("idDocente") Long idDocente);
 }

@@ -326,6 +326,22 @@ public class CicloAcademicoServ {
         return cursoRepo.findByTutorId(idTutor);
     }
 
+    // traer todos los cursos donde se encuentra un docente
+    public List<CursoDTO> obtenerCursosPorDocente(long idDocente) {
+        // Primero se trae el curso donde es tutor
+        Curso cursoT = cursoTutor(idDocente);
+
+        List<Curso> cursos = distributivoRepo.findDistinctCursosByDocenteId(idDocente);
+
+        if (cursoT != null) {
+            cursos.add(cursoT);
+        }
+
+        return cursos.stream()
+                .map(this::convertirAulaADTO)
+                .toList();
+    }
+
     // Actualizar
     @Transactional
     public ApiResponse<String> editarAula(CursoRequest request) {
