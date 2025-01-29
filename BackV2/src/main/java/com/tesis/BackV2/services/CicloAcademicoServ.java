@@ -295,7 +295,10 @@ public class CicloAcademicoServ {
 
     // Mostrar cantidad de estudiantes por aula individual
     public List<CantCursosEst> obtenerCantidadesEstudiantesPorAula() {
-        List<Curso> cursos = cursoRepo.findAll();
+        List<Curso> cursos = cursoRepo.findAll().stream()
+            .sorted(Comparator.comparing(curso -> curso.getGrado().getId()))
+            .collect(Collectors.toList());
+
         Map<String, CantCursosEst> cantidadesPorAula = new HashMap<>();
 
         for (Curso curso : cursos) {
@@ -1050,7 +1053,7 @@ public class CicloAcademicoServ {
                 .materia(distributivo.getMateria().getNombre())
                 .horasSemanales(distributivo.getMateria().getHoras())
                 .horasAsignadas(distributivo.getHorasAsignadas())
-                .docente(distributivo.getDocente().getUsuario().getNombres() + " " + distributivo.getDocente().getUsuario().getApellidos())
+                .docente(distributivo.getDocente().getUsuario().getApellidos() + " " + distributivo.getDocente().getUsuario().getNombres())
                 .build();
     }
 
