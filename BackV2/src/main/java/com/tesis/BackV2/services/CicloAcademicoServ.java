@@ -264,8 +264,9 @@ public class CicloAcademicoServ {
     // Traer todas
     public List<CursoDTO> obtenerAulas() {
         return cursoRepo.findAll().stream()
-                .map(this::convertirAulaADTO)
-                .toList();
+                    .sorted(Comparator.comparing(curso -> curso.getGrado().getId()))
+                    .map(this::convertirAulaADTO)
+                    .toList();
     }
 
     // Traer por grado
