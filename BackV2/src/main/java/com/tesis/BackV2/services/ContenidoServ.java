@@ -610,7 +610,7 @@ public class ContenidoServ {
     private List<Estudiante> estudiantes (Long idCurso) {
         List<Estudiante> estudents = new ArrayList<>();
 
-        List<Matricula> matriculas = repoMat.findByCicloAndCurso_Id(repoCicl.findTopByOrderByIdDesc(), idCurso);
+        List<Matricula> matriculas = repoMat.findByCicloAndCurso_Id(repoCicl.findByActivoTrue(), idCurso);
 
         matriculas.forEach(matricula -> {
             estudents.add(repoEst.findById(matricula.getEstudiante().getId()).get());
@@ -808,6 +808,15 @@ public class ContenidoServ {
                 .horaEntrega(entrega.getHoraEntrega() == null ? "" : String.valueOf(entrega.getHoraEntrega()))
                 .nombresEstudiante(entrega.getEstudiante().getUsuario().getNombres() + " " + entrega.getEstudiante().getUsuario().getApellidos())
                 .documentos(docEntrega.stream().map(this::convertirDocDTO).toList())
+                .build();
+    }
+
+    private DocumentoDTO convertirDocAsigDTO (DocContMateria doc){
+        return DocumentoDTO.builder()
+                .id(doc.getId())
+                .nombre(doc.getNombre())
+                .mime(doc.getMime())
+                .base64(Base64.getEncoder().encodeToString(doc.getContenido()))
                 .build();
     }
 
@@ -1396,11 +1405,17 @@ public class ContenidoServ {
         for (Asignacion asignacion : asignaciones) {
             asigDTO.add(AsignacionesDTO.builder()
                     .idAsignacion(asignacion.getId())
+                    .idCalificacion(asignacion.getCalif().getId())
                     .activo(asignacion.isActivo())
                     .nombre(asignacion.getNombre())
                     .descripcion(asignacion.getDescripcion())
+                    .horaInicio(String.valueOf(asignacion.getHoraInicio()))
+                    .fechaInicio(String.valueOf(asignacion.getFechaInicio()))
                     .fechaFin(String.valueOf(asignacion.getFechaFin()))
                     .horaFin(String.valueOf(asignacion.getHoraFin()))
+                    .documentos(repoDoc.findByAsignacion_Id(asignacion.getId()).stream()
+                        .map(this::convertirDocAsigDTO)
+                        .collect(Collectors.toList()))
                     .build());
         }
 
