@@ -547,6 +547,16 @@ public class ContenidoServ {
                 .build())), idEst);
     }
 
+    // traer asignación para docente
+    public AsignacionDocenteDTO traerAsigPorIdDocente(long idAsignacion) {
+        return convertirAsigDocenteDTO(repoAsig.findById(idAsignacion).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
+                .error(true)
+                .codigo(400)
+                .mensaje("Solicitud inválida")
+                .detalles("La asignación con id " + idAsignacion + " no ha sido encontrada")
+                .build())));
+    }
+
     // convertir a DTO para un estudiante
     private AsignacionDTO convertirAsigDTOEstudiante(Asignacion request, Long idEst) {
         return AsignacionDTO.builder()
@@ -563,6 +573,43 @@ public class ContenidoServ {
                         .map(this::convertirDoc)
                         .collect(Collectors.toList()))
                 .entregaEst(traerPorAsignacionYEstudiante(request.getId(), idEst))
+                .build();
+    }
+
+    // convertir a DTO una asignación para DOCENTE
+    private AsignacionDocenteDTO convertirAsigDocenteDTO(Asignacion request) {
+        return AsignacionDocenteDTO.builder()
+                .id(request.getId())
+                .activo(request.isActivo())
+                .nombre(request.getNombre())
+                .descripcion(request.getDescripcion())
+                .fechaInicio(String.valueOf(request.getFechaInicio()))
+                .horaInicio(String.valueOf(request.getHoraInicio()))
+                .fechaFin(String.valueOf(request.getFechaFin()))
+                .horaFin(String.valueOf(request.getHoraFin()))
+                .notaMax(request.getCalif().getMaximo())
+                .documentos(repoDoc.findByAsignacion_Id(request.getId()).stream()
+                        .map(this::convertirDoc)
+                        .collect(Collectors.toList()))
+                .entregas(repoEnt.findByAsignacion_Id(request.getId()).stream()
+                            .map(this::convertirEntrega)
+                            .sorted(Comparator.comparing(entrega -> entrega.getNombresEstudiante().split(" ")[0]))
+                            .collect(Collectors.toList()))
+                .build();
+    }
+
+    private EntregaDTO convertirEntrega(Entrega entrega) {
+        return EntregaDTO.builder()
+                .id(entrega.getId())
+                .estado(String.valueOf(entrega.getEstado()))
+                .nota(entrega.getNota())
+                .fechaEntrega(entrega.getFechaEntrega() == null ? "" : String.valueOf(entrega.getFechaEntrega()))
+                .horaEntrega(entrega.getHoraEntrega()  == null ? "" : String.valueOf(entrega.getHoraEntrega()))
+                .contenido(entrega.getContenido())
+                .nombresEstudiante(entrega.getEstudiante().getUsuario().getApellidos() + " " + entrega.getEstudiante().getUsuario().getNombres())
+                .documentos(repoDocEnt.findByEntrega(entrega).stream()
+                        .map(this::convertirDocDTO)
+                        .collect(Collectors.toList()))
                 .build();
     }
 

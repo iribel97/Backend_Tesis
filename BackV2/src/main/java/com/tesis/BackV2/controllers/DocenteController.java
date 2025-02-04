@@ -247,6 +247,12 @@ public class DocenteController {
         return ResponseEntity.ok(contServ.cambiarVisualizacionAsig(idAsignacion, true));
     }
 
+    // mostrar una asignación
+    @GetMapping("materia/asignacion/{idAsignacion}")
+    public ResponseEntity<?> obtenerAsignacion(@PathVariable Long idAsignacion){
+        return ResponseEntity.ok(contServ.traerAsigPorIdDocente(idAsignacion));
+    }
+
     // visualizar entregas
     @GetMapping("materia/entregas/{idAsignacion}")
     public ResponseEntity<?> visualizarEntregas(@PathVariable Long idAsignacion){
