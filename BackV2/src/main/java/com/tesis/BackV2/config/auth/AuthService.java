@@ -3,11 +3,16 @@ package com.tesis.BackV2.config.auth;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.entities.*;
+import com.tesis.BackV2.entities.contenido.Asignacion;
+import com.tesis.BackV2.entities.contenido.Entrega;
+import com.tesis.BackV2.enums.EstadoEntrega;
 import com.tesis.BackV2.enums.EstadoUsu;
 import com.tesis.BackV2.enums.Rol;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.infra.MensajeHtml;
 import com.tesis.BackV2.repositories.*;
+import com.tesis.BackV2.repositories.contenido.AsignacionRepo;
+import com.tesis.BackV2.repositories.contenido.EntregaRepo;
 import com.tesis.BackV2.services.CorreoServ;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -36,8 +42,12 @@ public class AuthService {
     private final DocenteRepo docRep;
     private final EstudianteRepo estRep;
     private final RepresentanteRepo repRep;
+    private final CicloAcademicoRepo cicloRep;
     private final InscripcionRepo insRep;
     private final MatriculaRepo matrRep;
+    private final DistributivoRepo distRep;
+    private final AsignacionRepo asigRep;
+    private final EntregaRepo entreRep;
     private final PromocionRepo promRep;
 
     public ApiResponse<String> register(RegisterRequest request, Rol rol, EstadoUsu estado) {
@@ -203,6 +213,11 @@ public class AuthService {
     }
 
     private void crearYGuardarEstudiante(Inscripcion request, Usuario usuario) {
+        // traer fecha actual
+        LocalDate fechaActual = LocalDate.now();
+        // traer ciclo activo
+        CicloAcademico ciclo = cicloRep.findByActivoTrue();
+
         Representante representante = repRep.findByUsuarioCedula(request.getRepresentante().getUsuario().getCedula());
         if (representante == null) {
             throw new ApiException(ApiResponse.builder()
@@ -223,7 +238,30 @@ public class AuthService {
         Matricula matricula = matrRep.findTopByInscripcionCedulaOrderByIdDesc(request.getCedula());
         matricula.setEstudiante(estRep.save(estudiante));
 
-        matrRep.save(matricula);
+        Matricula matriculaAct = matrRep.save(matricula);
+
+        // si la fecha actual se encuentra dentro del rango del ciclo
+        if (fechaActual.isAfter(ciclo.getFechaInicio()) && fechaActual.isBefore(ciclo.getFechaFin())) {
+            // traer el distributivo por id del ciclo y el id del curso
+            Collection<Distributivo> distributivos = distRep.findByCicloIdAndCursoId(ciclo.getId(), matriculaAct.getCurso().getId());
+             for ( Distributivo dis : distributivos) {
+                 // traer las asignaciones por id del distributivo
+                 List<Asignacion> asignaciones = asigRep.findByTema_Unidad_Distributivo_Id(dis.getId());
+
+                 // si asignaciones no esta vacio
+                    if (!asignaciones.isEmpty()) {
+                        for (Asignacion asig : asignaciones) {
+                            // crear entrega
+                            entreRep.save(Entrega.builder()
+                                            .estudiante(matriculaAct.getEstudiante())
+                                            .activo(asig.isActivo())
+                                            .asignacion(asig)
+                                            .estado(EstadoEntrega.Pendiente)
+                                    .build());
+                        }
+                    }
+             }
+        }
 
     }
 

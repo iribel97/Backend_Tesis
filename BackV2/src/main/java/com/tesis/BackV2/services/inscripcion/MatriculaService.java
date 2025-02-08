@@ -5,13 +5,14 @@ import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.dto.MatriculaDTO;
 import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
 import com.tesis.BackV2.entities.*;
-import com.tesis.BackV2.enums.EstadoInscripcion;
-import com.tesis.BackV2.enums.EstadoMatricula;
-import com.tesis.BackV2.enums.EstadoUsu;
-import com.tesis.BackV2.enums.Rol;
+import com.tesis.BackV2.entities.contenido.Asignacion;
+import com.tesis.BackV2.entities.contenido.Entrega;
+import com.tesis.BackV2.enums.*;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.infra.MensajeHtml;
 import com.tesis.BackV2.repositories.*;
+import com.tesis.BackV2.repositories.contenido.AsignacionRepo;
+import com.tesis.BackV2.repositories.contenido.EntregaRepo;
 import com.tesis.BackV2.request.MatriculacionRequest;
 import com.tesis.BackV2.services.CorreoServ;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -39,6 +41,9 @@ public class MatriculaService {
     private final CicloAcademicoRepo cicloRep;
     private final UsuarioRepo usuRep;
     private final EstudianteRepo estRep;
+    private final DistributivoRepo distRep;
+    private final AsignacionRepo asigRep;
+    private final EntregaRepo entreRep;
 
     // Crear Matricula
     @Transactional
@@ -152,6 +157,11 @@ public class MatriculaService {
     // Cambiar el estado de la matricula
     @Transactional
     public ApiResponse<String> cambiarEstMatricula(EstadoMatricula estado, MatriculacionRequest request){
+        // traer fecha actual
+        LocalDate fechaActual = LocalDate.now();
+        // traer ciclo activo
+        CicloAcademico ciclo = cicloRep.findByActivoTrue();
+
         Matricula matricula = validarMatricula(request.getId());
 
         if (estado.equals(EstadoMatricula.Matriculado)){
@@ -175,6 +185,30 @@ public class MatriculaService {
                         .build()
                 );
             }
+
+            // si la fecha actual se encuentra dentro del rango del ciclo
+            if (fechaActual.isAfter(ciclo.getFechaInicio()) && fechaActual.isBefore(ciclo.getFechaFin())) {
+                // traer el distributivo por id del ciclo y el id del curso
+                Collection<Distributivo> distributivos = distRep.findByCicloIdAndCursoId(ciclo.getId(), curso.getId());
+                for ( Distributivo dis : distributivos) {
+                    // traer las asignaciones por id del distributivo
+                    List<Asignacion> asignaciones = asigRep.findByTema_Unidad_Distributivo_Id(dis.getId());
+
+                    // si asignaciones no esta vacio
+                    if (!asignaciones.isEmpty()) {
+                        for (Asignacion asig : asignaciones) {
+                            // crear entrega
+                            entreRep.save(Entrega.builder()
+                                    .estudiante(matricula.getEstudiante())
+                                    .activo(asig.isActivo())
+                                    .asignacion(asig)
+                                    .estado(EstadoEntrega.Pendiente)
+                                    .build());
+                        }
+                    }
+                }
+            }
+
             curso.setEstudiantesAsignados(curso.getEstudiantesAsignados() + 1);
 
             Usuario estudiante = traerEstudiante(matricula.getInscripcion().getCedula());

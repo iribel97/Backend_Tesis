@@ -7,6 +7,7 @@ import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.request.CursoRequest;
 import com.tesis.BackV2.request.HorarioRequest;
 import com.tesis.BackV2.request.MatriculacionRequest;
+import com.tesis.BackV2.request.UsuarioEditRequest;
 import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.config.HorarioConfigServ;
@@ -165,5 +166,23 @@ public class AdminOpController {
     @GetMapping("estudiantes/matriculados")
     public ResponseEntity<?> estMatriculados() throws MiExcepcion {
         return ResponseEntity.ok(usuarioServ.estMatriculadosCicloAct());
+    }
+
+    // suspender cuenta estudiante
+    @PutMapping("estudiante/suspender/{cedula}")
+    public ResponseEntity<ApiResponse<?>> suspenderCuenta(@PathVariable String cedula) {
+        return ResponseEntity.ok(usuarioServ.editarEstado(UsuarioEditRequest.builder()
+                        .cedula(cedula)
+                        .estado(String.valueOf(EstadoUsu.Suspendido))
+                .build()));
+    }
+
+    // activar cuenta estudiante
+    @PutMapping("estudiante/activar/{cedula}")
+    public ResponseEntity<ApiResponse<?>> activarCuenta(@PathVariable String cedula) {
+        return ResponseEntity.ok(usuarioServ.editarEstado(UsuarioEditRequest.builder()
+                        .cedula(cedula)
+                        .estado(String.valueOf(EstadoUsu.Inactivo))
+                .build()));
     }
 }

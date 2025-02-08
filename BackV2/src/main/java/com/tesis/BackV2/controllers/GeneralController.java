@@ -1,6 +1,7 @@
 package com.tesis.BackV2.controllers;
 
 import com.tesis.BackV2.config.ApiResponse;
+import com.tesis.BackV2.config.auth.AuthService;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.dto.UsuarioDTO;
 import com.tesis.BackV2.entities.Estudiante;
@@ -9,6 +10,7 @@ import com.tesis.BackV2.exceptions.MiExcepcion;
 import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.MatriculaRepo;
 import com.tesis.BackV2.repositories.UsuarioRepo;
+import com.tesis.BackV2.request.auth.UsuRequestPass;
 import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.cicloacademico.CalendarioAcademicoServ;
@@ -30,6 +32,13 @@ public class GeneralController {
     private final MatriculaRepo matrRepo;
     private final UsuarioServ service;
     private final UsuarioServ usuarioServ;
+    private final AuthService serviceA;
+
+    // Cambiar contraseña
+    @PutMapping("cambiar/contrasena")
+    public ResponseEntity<?> cambiarContrasena(@RequestBody UsuRequestPass request) {
+        return ResponseEntity.ok(serviceA.cambiarPassUsuario(request.getContrasena(), request.getContrasenaNueva(), request.getCedula()));
+    }
 
     // Traer todos
     @GetMapping("ciclos")

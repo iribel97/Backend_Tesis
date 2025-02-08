@@ -29,4 +29,6 @@ public interface AsignacionRepo extends JpaRepository<Asignacion, Long> {
             "AND (e.nota IS NULL OR e.nota = '' )")
     List<Asignacion> findAsignacionesPendientesPorDocente(@Param("idDocente") Long idDocente);
 
+    // traer asignaciones por id del distributivo
+    List<Asignacion> findByTema_Unidad_Distributivo_Id(Long idDistributivo);
 }

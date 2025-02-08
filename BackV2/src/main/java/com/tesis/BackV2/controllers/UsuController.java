@@ -17,22 +17,18 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {" http://10.16.141.29:4200"})
+@CrossOrigin(origins = {" http://localhost:4200"})
 public class UsuController {
     @Autowired
     private UsuarioServ usuarioService;
-    private final AuthService serviceA;
+
 
     @PutMapping()
     public ResponseEntity<ApiResponse<?>> actualizarUsuario(@RequestBody UsuarioRequest usuario) throws MiExcepcion {
         return ResponseEntity.ok(usuarioService.actualizarUser(usuario));
     }
 
-    // Cambiar contraseña
-    @PutMapping("cambiar/contrasena")
-    public ResponseEntity<?> cambiarContrasena(@RequestBody UsuRequestPass request) {
-        return ResponseEntity.ok(serviceA.cambiarPassUsuario(request.getContrasena(), request.getContrasenaNueva(), request.getCedula()));
-    }
+
 
 
 }
