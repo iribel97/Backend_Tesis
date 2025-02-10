@@ -5,9 +5,7 @@ import com.tesis.BackV2.dto.asistencia.*;
 import com.tesis.BackV2.dto.dashboard.CantAsisTutorDTO;
 import com.tesis.BackV2.dto.dashboard.CantidadesDTO;
 import com.tesis.BackV2.dto.dashboard.EstudianteFaltasDTO;
-import com.tesis.BackV2.entities.Asistencia;
-import com.tesis.BackV2.entities.Distributivo;
-import com.tesis.BackV2.entities.Matricula;
+import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.enums.EstadoAsistencia;
 import com.tesis.BackV2.exceptions.ApiException;
 import com.tesis.BackV2.repositories.*;
@@ -19,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +28,7 @@ public class AsistenciaServ {
 
     private final AsistenciaRepo repo;
     private final EstudianteRepo repoEst;
+    private final RepresentanteRepo repoRep;
     private final HorarioRepo repoHor;
     private final CicloAcademicoRepo repoCicl;
     private final MatriculaRepo repoMatr;
@@ -129,6 +129,38 @@ public class AsistenciaServ {
 
     }
 
+    // viualización de un distributivo
+    public AsistenciasEstDTO asistenciaDis (long idDis) {
+        List<Asistencia> asistencias = repo.findByDistributivo_Id(idDis);
+
+        int totalAsistencias = asistencias.size();
+        int asistio = 0, falta = 0, tardanza = 0;
+        double porcentajeAsistencias, porcentajeFaltas, porcentajeJustificadas;
+
+        for (Asistencia asistencia : asistencias) {
+            if (asistencia.getEstado().name().equals("Presente")) asistio++;
+            if (asistencia.getEstado().name().equals("Ausente")) falta++;
+            if (asistencia.getEstado().name().equals("Justificado")) tardanza++;
+        }
+
+        porcentajeAsistencias = (double) (asistio * 100) / totalAsistencias;
+        porcentajeFaltas = (double) (falta * 100) / totalAsistencias;
+        porcentajeJustificadas = (double) (tardanza * 100) / totalAsistencias;
+
+        return AsistenciasEstDTO.builder()
+                .datos(PorcentAsisEst.builder()
+                        .totalAsistencias(totalAsistencias)
+                        .totalFaltas(falta)
+                        .totalJustificadas(tardanza)
+                        .totalAsist(asistio)
+                        .porcentajeAsistencias(asistio == 0 ? 0 : porcentajeAsistencias)
+                        .porcentajeFaltas(falta == 0 ? 0 : porcentajeFaltas)
+                        .porcentajeJustificadas(tardanza == 0 ? 0 : porcentajeJustificadas)
+                        .build())
+                .build();
+
+    }
+
     // Visualización general de asistencia
     public List<AsistenciasDisEstDTO> asistenciasByDistributivo(String cedulaEst){
         Matricula x = repoMatr.findTopByEstudianteUsuarioCedulaOrderByIdDesc(cedulaEst);
@@ -140,6 +172,80 @@ public class AsistenciaServ {
                     .nombreMateria(materia.getMateria().getNombre())
                     .data(asistenciaEstudiante(x.getEstudiante().getId(), materia.getId()).getDatos())
                     .build());
+        }
+
+        return asistencias;
+    }
+
+    // Visualización general de asistencia por materias que imparte el docente
+    public  List<AsistenciasDisEstDTO> asistenciasByDistributivoDocente(String cedulaDoc){
+        Collection<Distributivo> materias = repoDist.findByCicloIdAndDocente_Usuario_Cedula(repoCicl.findByActivoTrue().getId(), cedulaDoc);
+        List<AsistenciasDisEstDTO> asistencias = new ArrayList<>();
+
+        for (Distributivo materia : materias) {
+            asistencias.add(AsistenciasDisEstDTO.builder()
+                    .nombreMateria(materia.getMateria().getNombre())
+                    .curso(materia.getCurso().getGrado().getNombre() + " " + materia.getCurso().getParalelo())
+                    .data(asistenciaDis(materia.getId()).getDatos())
+                    .build());
+        }
+
+        return asistencias;
+    }
+
+    // visualiazción de todas las asistencias de un estudiante
+    public AsistenciasEstudianteRepDTO asisGeneralEstRep(Estudiante estudiante) {
+        // Matricula del estudiante
+        Matricula matricula = repoMatr.findByEstudiante_IdAndCiclo_Activo(estudiante.getId(), true);
+        // listar asistencias por estudiante
+        List<Asistencia> asistencias = repo.findByEstudianteAndCicloActivo(estudiante.getId());
+        // Inicializar el array de retorno
+        AsistenciasEstudianteRepDTO asisEst = new AsistenciasEstudianteRepDTO();
+        // Inicializar variables
+        int totalAsistencias = asistencias.size();
+        int asistio = 0, falta = 0, tardanza = 0;
+        double porcentajeAsistencias = 0, porcentajeFaltas = 0, porcentajeJustificadas = 0;
+
+        if (totalAsistencias > 0) {
+            // Contar asistencias por estado
+            for (Asistencia asistencia : asistencias) {
+                if (asistencia.getEstado().name().equals("Presente")) asistio++;
+                if (asistencia.getEstado().name().equals("Ausente")) falta++;
+                if (asistencia.getEstado().name().equals("Justificado")) tardanza++;
+            }
+            // Calcular porcentajes
+            porcentajeAsistencias = (double) (asistio * 100) / totalAsistencias;
+            porcentajeFaltas = (double) (falta * 100) / totalAsistencias;
+            porcentajeJustificadas = (double) (tardanza * 100) / totalAsistencias;
+        }
+
+        return AsistenciasEstudianteRepDTO.builder()
+                .apellidos(estudiante.getUsuario().getApellidos())
+                .nombres(estudiante.getUsuario().getNombres())
+                .curso(matricula.getCurso().getGrado().getNombre() + " " + matricula.getCurso().getParalelo())
+                .data(PorcentAsisEst.builder()
+                        .totalAsistencias(totalAsistencias)
+                        .totalFaltas(falta)
+                        .totalJustificadas(tardanza)
+                        .totalAsist(asistio)
+                        .porcentajeAsistencias(asistio == 0 ? 0 : porcentajeAsistencias)
+                        .porcentajeFaltas(falta == 0 ? 0 : porcentajeFaltas)
+                        .porcentajeJustificadas(tardanza == 0 ? 0 : porcentajeJustificadas)
+                        .build())
+                .build();
+
+    }
+
+    // visualizar asistencias de todos los estudiantes de un representante
+    public List<AsistenciasEstudianteRepDTO> asisGeneralRep(String cedulaRep) {
+        Representante representante = repoRep.findByUsuarioCedula(cedulaRep);
+        // Traer los estudiantes del representante
+        List<Estudiante> estudiantes = repoEst.findByRepresentanteId(representante.getId());
+        // Inicializar el array de retorno
+        List<AsistenciasEstudianteRepDTO> asistencias = new ArrayList<>();
+
+        for (Estudiante estudiante : estudiantes) {
+            asistencias.add(asisGeneralEstRep(estudiante));
         }
 
         return asistencias;

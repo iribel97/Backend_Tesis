@@ -47,7 +47,7 @@ public class EstudianteController {
 
         List<Estudiante> estudiantes = repEst.findByRepresentanteId(representante.getId());
 
-        if (estudiantes.isEmpty()) return buildErrorResponse("Aún no cuenta con estudiantes", 404);
+        if (estudiantes.isEmpty()) return buildErrorResponse("Aún no cuenta con estudiantes", 202);
 
         List<ContGeneralEstDTO> general = new ArrayList<>();
 
@@ -83,6 +83,23 @@ public class EstudianteController {
         if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
 
         return ResponseEntity.ok(contServ.estregasPendientesEst(estudiante.getId()));
+    }
+
+    // visualizar entregas pendientes por cedula de estudiante para que vea el representante
+    @GetMapping("dashboard/representante/entregas/{cedula}")
+    public ResponseEntity<?> obtenerEntregasRepresentante(@PathVariable String cedula) {
+        Estudiante estudiante = repEst.findByUsuarioCedula(cedula);
+        if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
+
+        return ResponseEntity.ok(contServ.estregasPendientesEst(estudiante.getId()));
+    }
+
+    @GetMapping("dashboard/representante/notas/{cedulaEst}")
+    public ResponseEntity<?> obtenerPromediosByRepresentante(@PathVariable String cedulaEst) {
+        Estudiante estudiante = repEst.findByUsuarioCedula(cedulaEst);
+        if (estudiante == null) return buildErrorResponse("No se encontró el estudiante", 404);
+
+        return ResponseEntity.ok(contServ.notasCursoEst(estudiante.getId()));
     }
 
     @GetMapping("horario")

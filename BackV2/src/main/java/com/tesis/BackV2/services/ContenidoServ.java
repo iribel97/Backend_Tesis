@@ -44,10 +44,12 @@ public class ContenidoServ {
     private final AsignacionRepo repoAsig;
     private final CicloAcademicoRepo repoCicl;
     private final DistributivoRepo repoDis;
+    private final DocenteRepo repoDocente;
     private final DocMaterialApoyoRepo repoDoc;
     private final DocEntregaRepo repoDocEnt;
     private final EntregaRepo repoEnt;
     private final EstudianteRepo repoEst;
+    private final RepresentanteRepo repoRep;
     private final HorarioRepo repoHor;
     private final MaterialApoyoRepo repoMatAp;
     private final MatriculaRepo repoMat;
@@ -1079,6 +1081,122 @@ public class ContenidoServ {
         return nivel1.values().stream().toList();
     }
 
+    // Traer calificaciones por distributivo y estudiante
+    public List<NivelUnoEntDTO> entregasPorDisYDocente(long idDistributivo) {
+        // Validar que el id exista
+        Distributivo distributivo = repoDis.findById(idDistributivo)
+                .orElseThrow(() -> new ApiException(ApiResponse.builder()
+                        .error(true)
+                        .mensaje("Solicitud incorrecta")
+                        .codigo(400)
+                        .detalles("Distributivo no encontrado")
+                        .build()));
+
+        // Obtener sistemas de calificación asociados al distributivo
+        List<SistemaCalificacion> sistemas = repoSisCalf.findByCicloIdAndIdRegistro(distributivo.getCiclo().getId(), distributivo.getMateria().getRegistroCalificacion());
+        // Obtener entregas por distributivo
+        List<Entrega> entregas = repoEnt.findByAsignacion_Tema_Unidad_Distributivo_Id(idDistributivo);
+
+        if (entregas.isEmpty()) {
+            return new ArrayList<>();
+        }
+        // Estructuras de datos para los niveles
+        Map<Calificacion, NivelUnoEntDTO> nivel1 = new TreeMap<>(Comparator.comparing(Calificacion::getLvl1));
+        Map<Calificacion, NivelDosEntDTO> nivel2 = new HashMap<>();
+        Map<Calificacion, NivelTresEntDTO> nivel3 = new HashMap<>();
+        Map<Calificacion, NivelEntregaDTO> nivel4 = new HashMap<>();
+
+        // Construcción de niveles con sistemas de calificación
+        Calificacion niv1 = new Calificacion();
+        Calificacion niv2 = new Calificacion();
+        Calificacion niv3 = new Calificacion();
+        for (SistemaCalificacion sistema : sistemas) {
+            if(sistema.getId().getLvl2() == 0) {
+                nivel1.put(sistema.getId(), NivelUnoEntDTO.builder()
+                        .nombreNivel(sistema.getDescripcion())
+                        .sumativa(0)
+                        .peso(parseDoubleSafe(sistema.getPeso()))
+                        .niveles(new ArrayList<>())
+                        .build());
+                niv1 = sistema.getId();
+            } else if(sistema.getId().getLvl3() == 0) {
+                NivelDosEntDTO nivel2DTO = NivelDosEntDTO.builder()
+                        .nivelAnt(niv1)
+                        .nombreNivel(sistema.getDescripcion())
+                        .sumativa(0)
+                        .peso(parseDoubleSafe(sistema.getPeso()))
+                        .siguientNivel(new ArrayList<>())
+                        .build();
+                nivel2.put(sistema.getId(), nivel2DTO);
+                nivel1.get(niv1).getNiveles().add(nivel2DTO);
+                niv2 = sistema.getId();
+            } else if(sistema.getId().getLvl4() == 0) {
+                NivelTresEntDTO nivel3DTO = NivelTresEntDTO.builder()
+                        .nivelAnt(niv2)
+                        .nombreNivel(sistema.getDescripcion())
+                        .sumativa(0)
+                        .peso(parseDoubleSafe(sistema.getPeso()))
+                        .nivelEntregas(new ArrayList<>())
+                        .build();
+                nivel3.put(sistema.getId(), nivel3DTO);
+                nivel2.get(niv2).getSiguientNivel().add(nivel3DTO);
+                niv3 = sistema.getId();
+            } else {
+                NivelEntregaDTO nivel4DTO = NivelEntregaDTO.builder()
+                        .nivelAnt(niv3)
+                        .nombreNivel(sistema.getDescripcion())
+                        .sumativa(0)
+                        .peso(parseDoubleSafe(sistema.getPeso()))
+                        .asignaciones(new ArrayList<>())
+                        .build();
+                nivel4.put(sistema.getId(), nivel4DTO);
+                nivel3.get(niv3).getNivelEntregas().add(nivel4DTO);
+            }
+        }
+
+        for (Entrega x : entregas ) {
+            double nota = parseDoubleSafe(x.getNota());
+            long nivel4Id = x.getAsignacion().getCalif().getId().getLvl4();
+
+            if (nivel4Id == 0) {
+                nivel3.get(x.getAsignacion().getCalif().getId()).getNivelEntregas().add(
+                        NivelEntregaDTO.builder()
+                                .nombreNivel("")
+                                .asignaciones(List.of(createContNivelEntregaDTO(x)))
+                                .build());
+                nivel3.get(x.getAsignacion().getCalif().getId()).setSumativa(nivel3.get(x.getAsignacion().getCalif().getId()).getSumativa() + nota);
+            } else {
+                nivel4.get(x.getAsignacion().getCalif().getId()).getAsignaciones().add(createContNivelEntregaDTO(x));
+                nivel4.get(x.getAsignacion().getCalif().getId()).setSumativa(nivel4.get(x.getAsignacion().getCalif().getId()).getSumativa() + nota);
+            }
+        }
+
+        // sacar promedio de nivel 4 y lo qu salga en promedio se lo suma a nivel 3
+        for  (NivelEntregaDTO y : nivel4.values()) {
+            y.setPromedio( y.getAsignaciones().isEmpty() ? 0 : y.getSumativa() / y.getAsignaciones().size());
+            nivel3.get(y.getNivelAnt()).setSumativa(nivel3.get(y.getNivelAnt()).getSumativa() + y.getPromedio());
+        }
+
+        // sacar promedio de nivel 3 y lo qu salga en promedio se lo suma a nivel 2
+        for  (NivelTresEntDTO y : nivel3.values()) {
+            y.setPromedio( y.getNivelEntregas().isEmpty() ? 0 : y.getSumativa() / y.getNivelEntregas().size()  );
+            nivel2.get(y.getNivelAnt()).setSumativa(nivel2.get(y.getNivelAnt()).getSumativa() + (y.getPromedio() * (y.getPeso() / 100)));
+        }
+
+        // sacar promedio de nivel 2 y lo qu salga en promedio se lo suma a nivel 1
+        for  (NivelDosEntDTO y : nivel2.values()) {
+            y.setPromedio( y.getSiguientNivel().isEmpty() ? 0 : y.getSumativa() * (y.getPeso() / 100));
+            nivel1.get(y.getNivelAnt()).setSumativa(nivel1.get(y.getNivelAnt()).getSumativa() + (y.getPromedio() ));
+        }
+
+        // sacar romedio del nivel 1
+        for  (NivelUnoEntDTO y : nivel1.values()) {
+            y.setPromedio( y.getNiveles().isEmpty() ? 0 : y.getSumativa() * (y.getPeso() / 100) );
+        }
+
+        return nivel1.values().stream().toList();
+    }
+
     // Traer todas las materias del estudiante para ver sus notas
     public List<DisNotasEst> notasCursoEst(long idEst){
         Estudiante estudiante = repoEst.findById(idEst).orElseThrow(() -> new ApiException(ApiResponse.builder()
@@ -1172,13 +1290,137 @@ public class ContenidoServ {
                             .promedio(sum)
                             .nombreEstudiante(estudiante.getUsuario().getApellidos() + " " + estudiante.getUsuario().getNombres())
                             .promedios(notasDis)
+                            .curso(dis.getCurso().getGrado().getNombre() + " " + dis.getCurso().getParalelo())
                             .build()
-);
+            );
         }
 
         disNotasEst.sort(Comparator.comparing(DisNotasEst::getNombreMateria));
         return disNotasEst;
     }
+
+    // notas por representante
+    public List<DisNotasEst> getPromediosByRepresentante(String cedulaRepre){
+        // Traer representante
+        Representante representante = repoRep.findByUsuarioCedula(cedulaRepre);
+        // traer matriculas por id del representante y ciclo activo
+        List<Matricula> matriculas = repoMat.findByInscripcion_Representante_IdAndCiclo_Id(representante.getId(), repoCicl.findByActivoTrue().getId());
+        // lista que sse va  a retornar
+        List<DisNotasEst> disNotasEst = new ArrayList<>();
+
+        // foreach de matriculas
+        for ( Matricula x : matriculas) {
+            List<DisNotasEst> notas = notasCursoEst(x.getEstudiante().getId());
+
+            // ordenar desde promedio bajo al más alto y luego ordenar por materia
+            notas.sort(Comparator.comparingDouble(DisNotasEst::getPromedio).thenComparing(DisNotasEst::getNombreMateria));
+            // agregar a la lista el primer elemento de la lista de notas
+            disNotasEst.add(notas.getFirst());
+        }
+
+
+        return disNotasEst;
+    }
+
+    // notas por curso del docente
+
+    public List<DisNotasEst> notasCursoDisDocente(long idDocente){
+        Docente docente =  repoDocente.findById(idDocente).orElseThrow(() -> new ApiException(ApiResponse.builder()
+                .error(true)
+                .codigo(400)
+                .mensaje("Solicitud incorrecta")
+                .detalles("Docente no encontrado")
+                .build()));
+        CicloAcademico ciclo = repoCicl.findByActivoTrue();
+
+        // listar distributivos por docente
+        Collection<Distributivo> distributivos = repoDis.findByCicloIdAndDocente_Usuario_Cedula(ciclo.getId(), docente.getUsuario().getCedula());
+        List<DisNotasEst> disNotasEst = new ArrayList<>();
+
+        distributivos.stream()
+                .sorted(Comparator.comparing((Distributivo d) -> d.getMateria().getNombre())
+                        .thenComparing(d -> d.getMateria().getGrado().getId()))
+                .forEach(dis -> {
+                    // existing logic to process each distributivo
+                });
+
+        for (Distributivo dis : distributivos) {
+            List<NivelUnoEntDTO> notas = entregasPorDisYDocente(dis.getId());
+            List<NivelUnoEntDTO> notasD = new ArrayList<>();
+            double sum = 0;
+
+            // si notas es nulo setear todo a 0 poner datos en default
+            if (notas.isEmpty()) {
+                NivelUnoEntDTO nivel1x = NivelUnoEntDTO.builder()
+                        .nombreNivel("1er Trimestre")
+                        .sumativa(0)
+                        .peso(0)
+                        .niveles(new ArrayList<>())
+                        .build();
+                NivelUnoEntDTO nivel1y = NivelUnoEntDTO.builder()
+                        .nombreNivel("2do Trimestre")
+                        .sumativa(0)
+                        .peso(0)
+                        .niveles(new ArrayList<>())
+                        .build();
+                NivelUnoEntDTO nivel1z = NivelUnoEntDTO.builder()
+                        .nombreNivel("3er Trimestre")
+                        .sumativa(0)
+                        .peso(0)
+                        .niveles(new ArrayList<>())
+                        .build();
+                NivelDosEntDTO nivel2x = NivelDosEntDTO.builder()
+                        .nombreNivel("1er Parcial")
+                        .sumativa(0)
+                        .peso(0)
+                        .build();
+                NivelDosEntDTO nivel2y = NivelDosEntDTO.builder()
+                        .nombreNivel("2do Parcial")
+                        .sumativa(0)
+                        .peso(0)
+                        .build();
+                nivel1x.setNiveles(List.of(nivel2x, nivel2y));
+                nivel1y.setNiveles(List.of(nivel2x, nivel2y));
+                nivel1z.setNiveles(List.of(nivel2x, nivel2y));
+
+                notas.add(nivel1x);
+                notas.add(nivel1y);
+                notas.add(nivel1z);
+            }
+
+            for (NivelUnoEntDTO x : notas) {
+                // de niveles solo quiero el nombre y el promedio
+                notasD.add(NivelUnoEntDTO.builder()
+                        .nombreNivel(x.getNombreNivel())
+                        .promedio(x.getPromedio())
+                        .niveles(x.getNiveles().stream()
+                                .map(nivel2 -> NivelDosEntDTO.builder()
+                                        .nombreNivel(nivel2.getNombreNivel())
+                                        .promedio(nivel2.getPromedio())
+                                        .build())
+                                .collect(Collectors.toList())
+                        )
+                        .build()
+                );
+
+                sum += x.getPromedio() * (x.getPeso() / 100);
+            }
+
+            disNotasEst.add (
+                    DisNotasEst.builder()
+                            .nombreMateria(dis.getMateria().getNombre())
+                            .progreso(0)
+                            .nombreDocente(dis.getDocente().getUsuario().getApellidos() + " " + dis.getDocente().getUsuario().getNombres())
+                            .curso(dis.getCurso().getGrado().getNombre() + " " + dis.getCurso().getParalelo())
+                            .promedio(sum)
+                            .promedios(notasD)
+                            .build()
+            );
+        }
+
+        return disNotasEst;
+    }
+
 
     // Promedio general del estudiante
     public double promedioCursoGeneralEst(long idEst){

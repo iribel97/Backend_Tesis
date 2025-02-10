@@ -17,6 +17,7 @@ public class DisNotasEst {
     private String nombreMateria;
     private String nombreEstudiante;
     private String nombreDocente;
+    private String curso;
     private double progreso;
     private double promedio;
 

@@ -5,15 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AsistenciasDisEstDTO {
+public class AsistenciasEstudianteRepDTO {
 
-    private String nombreMateria;
+    private String apellidos;
+    private String nombres;
     private String curso;
 
     private PorcentAsisEst data;

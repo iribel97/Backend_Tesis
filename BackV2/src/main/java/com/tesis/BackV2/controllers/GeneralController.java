@@ -14,6 +14,7 @@ import com.tesis.BackV2.request.auth.UsuRequestPass;
 import com.tesis.BackV2.services.CicloAcademicoServ;
 import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.cicloacademico.CalendarioAcademicoServ;
+import com.tesis.BackV2.services.inscripcion.InscripcionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class GeneralController {
     private final CicloAcademicoServ cicloAServ;
     private final JwtService jwtService;
     private final CalendarioAcademicoServ calendarioAcademicoServ;
+    private final InscripcionService inscripServ;
     private final EstudianteRepo estudianteRepo;
     private final MatriculaRepo matrRepo;
     private final UsuarioServ service;
@@ -55,6 +57,12 @@ public class GeneralController {
     @GetMapping("cursos")
     public ResponseEntity<?> getCursos() {
         return ResponseEntity.ok(cicloAServ.obtenerAulas());
+    }
+
+    // Listar una sola inscripción
+    @GetMapping("inscripcion/{cedula}")
+    public ResponseEntity<?> obtenerInscripcion(@PathVariable String cedula) {
+        return ResponseEntity.ok(inscripServ.getInscripcion(cedula));
     }
 
     // visualizar cursos por grado

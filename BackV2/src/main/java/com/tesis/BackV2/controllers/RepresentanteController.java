@@ -3,15 +3,12 @@ package com.tesis.BackV2.controllers;
 import com.tesis.BackV2.config.ApiResponse;
 import com.tesis.BackV2.config.jwt.JwtService;
 import com.tesis.BackV2.dto.InscripcionDTO;
-import com.tesis.BackV2.entities.Estudiante;
-import com.tesis.BackV2.exceptions.ApiException;
-import com.tesis.BackV2.repositories.EstudianteRepo;
 import com.tesis.BackV2.repositories.MatriculaRepo;
-import com.tesis.BackV2.repositories.UsuarioRepo;
 import com.tesis.BackV2.request.InscripcionRequest;
 import com.tesis.BackV2.request.MatriculacionRequest;
 import com.tesis.BackV2.services.AsistenciaServ;
 import com.tesis.BackV2.services.CicloAcademicoServ;
+import com.tesis.BackV2.services.ContenidoServ;
 import com.tesis.BackV2.services.UsuarioServ;
 import com.tesis.BackV2.services.inscripcion.InscripcionService;
 import com.tesis.BackV2.services.inscripcion.MatriculaService;
@@ -19,7 +16,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,6 +34,7 @@ public class RepresentanteController {
     private final InscripcionService inscripServ;
     private final MatriculaService matricServ;
     private final AsistenciaServ asistenciaServ;
+    private final ContenidoServ contenidoServ;
     private final UsuarioServ usuarioServ;
 
     // Obtener los estudiantes edl representante
@@ -47,6 +44,24 @@ public class RepresentanteController {
         // Extraer el nombre de usuario (o cualquier dato que guardes en el token)
         String userCedula = jwtService.extractUsername(token);
         return ResponseEntity.ok(usuarioServ.getEstudiantesByRepresentante(userCedula));
+    }
+
+    // visualzación de asistencias de los estudiantes de un rerpesentante
+    @GetMapping("asistencias")
+    public ResponseEntity<?> obtenerAsistencias(HttpServletRequest request) {
+        String token = extractTokenFromRequest(request);
+        // Extraer el nombre de usuario (o cualquier dato que guardes en el token)
+        String userCedula = jwtService.extractUsername(token);
+        return ResponseEntity.ok(asistenciaServ.asisGeneralRep(userCedula));
+    }
+
+    // visualizar promdeio de estudiantes por representante
+    @GetMapping("promedio")
+    public ResponseEntity<?> obtenerPromedio(HttpServletRequest request) {
+        String token = extractTokenFromRequest(request);
+        // Extraer el nombre de usuario (o cualquier dato que guardes en el token)
+        String userCedula = jwtService.extractUsername(token);
+        return ResponseEntity.ok(contenidoServ.getPromediosByRepresentante(userCedula));
     }
 
     /*  ---------------------------- Visualización de Conducta  ---------------------------- */

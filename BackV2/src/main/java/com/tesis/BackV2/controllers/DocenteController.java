@@ -111,6 +111,14 @@ public class DocenteController {
         return ResponseEntity.ok(asistenciaServ.actualizarAsistencia(requests));
     }
 
+    //visualización general de asistencias de las materias que imparte el docente
+    @GetMapping("asistencias/generales")
+    public ResponseEntity<?> asistenciasGeneral (HttpServletRequest request) {
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(asistenciaServ.asistenciasByDistributivoDocente(docente.getUsuario().getCedula()));
+    }
+
     /*  ---------------------------- Gestión de Conducta  ---------------------------- */
 
     /*  ---------------------------- Gestión de Citaciones  ---------------------------- */
@@ -147,6 +155,13 @@ public class DocenteController {
 
 
     /*  ---------------------------- Reporte de Calificaciones  ---------------------------- */
+    // visualizar las notas de todas las materias que imparte el docente
+    @GetMapping("visualizar/notas")
+    public ResponseEntity<?> notasDocente(HttpServletRequest request){
+        Docente docente = validarDocente(request);
+        if (docente == null) return buildErrorResponse("Docente no encontrado", 400);
+        return ResponseEntity.ok(contServ.notasCursoDisDocente(docente.getId()));
+    }
 
     /*  ---------------------------- Materias  ---------------------------- */
     // Traer Materia por docente
