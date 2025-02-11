@@ -49,7 +49,7 @@ public class MatriculaService {
     @Transactional
     public ApiResponse<String> crearMatricula(MatriculacionRequest request) {
 
-        CicloAcademico ciclo = cicloRep.findTopByOrderByIdDesc();
+        CicloAcademico ciclo = cicloRep.findByActivoTrue();
 
         // Comprobar si el estudiante se encuentra inscrito
         Inscripcion inscripcion = validarInscripcion(request.getCedulaEstudiante());
@@ -121,9 +121,12 @@ public class MatriculaService {
 
         Estudiante estudiante = estRep.findByUsuarioCedula(matricula.getInscripcion().getCedula());
 
-        Curso curso = matricula.getCurso();
-        curso.setEstudiantesAsignados(curso.getEstudiantesAsignados() - 1);
-        cursoRep.save(curso);
+        if (matricula.getCurso() != null) {
+            Curso curso = matricula.getCurso();
+            curso.setEstudiantesAsignados(curso.getEstudiantesAsignados() - 1);
+            cursoRep.save(curso);
+        }
+
 
         Usuario usu = estudiante.getUsuario();
         usu.setEstado(EstadoUsu.Suspendido);

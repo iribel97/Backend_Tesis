@@ -15,6 +15,7 @@ public class EstudianteDTO {
 
     private long id;
     private LocalDate ingreso;
+    private long idMatricula;
     private String curso;
 
     private RepresentanteDTO representante;
