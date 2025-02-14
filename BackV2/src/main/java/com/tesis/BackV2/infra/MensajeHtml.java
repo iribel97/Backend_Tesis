@@ -1012,4 +1012,44 @@ public class MensajeHtml {
                 "</body>\n" +
                 "</html>\n";
     }
+
+    public String mensajeFaltaClases(String nombreEstudiante, String materia, String fecha) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <title>Notificación de Falta de Asistencia</title>\n" +
+                "    <style>\n" +
+                "        body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }\n" +
+                "        .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden; }\n" +
+                "        .header { background-color: #d9534f; color: #ffffff; text-align: center; padding: 20px; }\n" +
+                "        .header h1 { margin: 0; font-size: 24px; }\n" +
+                "        .content { padding: 20px; color: #333; line-height: 1.6; }\n" +
+                "        .highlight { background-color: #ffe6e6; border-left: 4px solid #d9534f; padding: 10px; margin: 20px 0; border-radius: 4px; }\n" +
+                "        .footer { background-color: #f1f1f1; color: #555; text-align: center; padding: 15px; font-size: 14px; }\n" +
+                "    </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "    <div class=\"email-container\">\n" +
+                "        <div class=\"header\">\n" +
+                "            <h1>Notificación de Falta de Asistencia</h1>\n" +
+                "        </div>\n" +
+                "        <div class=\"content\">\n" +
+                "            <p>Estimado/a representante,</p>\n" +
+                "            <p>Le notificamos que su representado <strong>" + nombreEstudiante + "</strong> ha registrado una falta de asistencia:</p>\n" +
+                "            <div class=\"highlight\">\n" +
+                "                <p><strong>Materia:</strong> " + materia + "</p>\n" +
+                "                <p><strong>Fecha:</strong> " + fecha + "</p>\n" +
+                "            </div>\n" +
+                "            <p>Le recomendamos tomar las medidas necesarias para evitar futuras ausencias.</p>\n" +
+                "        </div>\n" +
+                "        <div class=\"footer\">\n" +
+                "            <p>Este es un mensaje automático. No responda a este correo.</p>\n" +
+                "        </div>\n" +
+                "    </div>\n" +
+                "</body>\n" +
+                "</html>";
+    }
+
 }

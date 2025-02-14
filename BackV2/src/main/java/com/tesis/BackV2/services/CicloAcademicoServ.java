@@ -357,6 +357,15 @@ public class CicloAcademicoServ {
                         .detalles("No es posible actualizar el curso, no existe")
                         .build()
                 ));
+        if(request.getCantEstudiantes() < curso.getEstudiantesAsignados()) {
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("No es posible reducir la cantidad de estudiantes asignados")
+                    .build()
+            );
+        }
 
         validarParaleloYGradoUnico(request.getParalelo(), request.getGrado(), request.getId());
         validarTutorParaEdicion(request.getTutorId(), curso);
@@ -386,6 +395,16 @@ public class CicloAcademicoServ {
                         .detalles("El curso que intenta eliminar no existe")
                         .build()
                 ));
+
+        if (curso.getEstudiantesAsignados() > 0) {
+            throw new ApiException(ApiResponse.<String>builder()
+                    .error(true)
+                    .mensaje("Solicitud incorrecta")
+                    .codigo(400)
+                    .detalles("No es posible eliminar el curso, tiene estudiantes asignados")
+                    .build()
+            );
+        }
 
         eliminarCursoDeDistributivo(id);
 
@@ -482,6 +501,8 @@ public class CicloAcademicoServ {
     private CursoDTO convertirAulaADTO(Curso curso) {
         return CursoDTO.builder()
                 .id(curso.getId())
+                .idGrado(curso.getGrado().getId())
+                .idTutor(curso.getTutor().getId())
                 .paralelo(curso.getParalelo())
                 .maxEstudiantes(curso.getMaxEstudiantes())
                 .cant(curso.getEstudiantesAsignados())

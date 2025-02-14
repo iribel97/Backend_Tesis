@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 public class CursoDTO {
 
     private long id;
+    private long idGrado;
+    private long idTutor;
     private String paralelo;
     private int maxEstudiantes;
     private int cant;

@@ -107,7 +107,7 @@ public class InscripcionService {
                 .ocupacionMadre(request.getOcupacionMadre())
                 .estado(EstadoInscripcion.Pendiente)
                 .fechaInscripcion(java.time.LocalDate.now())
-                .cilo(repoCicloAcademico.findTopByOrderByIdDesc())
+                .cilo(repoCicloAcademico.findByActivoTrue())
                 .grado(repoGrado.findById(request.getGrado()).orElseThrow(() -> new ApiException(ApiResponse.<String>builder()
                         .error(true)
                         .codigo(404)

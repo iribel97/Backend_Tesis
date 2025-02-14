@@ -8,10 +8,12 @@ import com.tesis.BackV2.dto.dashboard.EstudianteFaltasDTO;
 import com.tesis.BackV2.entities.*;
 import com.tesis.BackV2.enums.EstadoAsistencia;
 import com.tesis.BackV2.exceptions.ApiException;
+import com.tesis.BackV2.infra.MensajeHtml;
 import com.tesis.BackV2.repositories.*;
 import com.tesis.BackV2.request.AsistenciaRequest;
 import com.tesis.BackV2.request.CicloARequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AsistenciaServ {
+    @Autowired
+    private CorreoServ emailService;
+
+    private final MensajeHtml mensaje = new MensajeHtml();
 
     private final AsistenciaRepo repo;
     private final EstudianteRepo repoEst;
@@ -40,18 +46,32 @@ public class AsistenciaServ {
 
         for (AsistenciaRequest asistenciaRequest : requests) {
             validarRequest(asistenciaRequest);
+            Estudiante est = repoEst.findByUsuarioCedula(asistenciaRequest.getCedulaEstudiante());
+            Distributivo dis = repoDist.findById(asistenciaRequest.getDistributivoID()).orElseThrow(() ->
+                    new ApiException(ApiResponse.<String> builder()
+                            .error(true)
+                            .codigo(404)
+                            .mensaje("No se encontró el distributivo")
+                            .build()));
+
+            if(asistenciaRequest.getEstado().equals(EstadoAsistencia.Ausente)){
+                String nombresEstudiante = est.getUsuario().getApellidos() + " " + est.getUsuario().getNombres();
+                String destinatario = est.getRepresentante().getUsuario().getEmail();
+                String asunto = "Falta a clases";
+                String messaje = mensaje.mensajeFaltaClases(nombresEstudiante,
+                        dis.getMateria().getNombre(),
+                        String.valueOf(asistenciaRequest.getFecha()) );
+
+                emailService.enviarCorreo(destinatario, asunto, messaje);
+
+            }
 
             repo.save(Asistencia.builder()
                     .estado(asistenciaRequest.getEstado())
                     .fecha(asistenciaRequest.getFecha())
                     .observaciones(asistenciaRequest.getObservaciones())
-                    .estudiante(repoEst.findByUsuarioCedula(asistenciaRequest.getCedulaEstudiante()))
-                    .distributivo(repoDist.findById(asistenciaRequest.getDistributivoID()).orElseThrow(() ->
-                            new ApiException(ApiResponse.<String> builder()
-                                    .error(true)
-                                    .codigo(404)
-                                    .mensaje("No se encontró el distributivo")
-                                    .build())))
+                    .estudiante(est)
+                    .distributivo(dis)
                     .cicloAcademico(repoCicl.findByActivoTrue())
                     .build());
         }
@@ -74,6 +94,18 @@ public class AsistenciaServ {
                             .codigo(404)
                             .mensaje("No se encontró la asistencia con ID: " + request.getIdAsistencia())
                             .build()));
+
+            if(request.getEstado().equals(EstadoAsistencia.Ausente)){
+                String nombresEstudiante = asistencia.getEstudiante().getUsuario().getApellidos() + " " + asistencia.getEstudiante().getUsuario().getNombres();
+                String destinatario = asistencia.getEstudiante().getRepresentante().getUsuario().getEmail();
+                String asunto = "Falta a clases";
+                String messaje = mensaje.mensajeFaltaClases(nombresEstudiante,
+                        asistencia.getDistributivo().getMateria().getNombre(),
+                        String.valueOf(asistencia.getFecha()) );
+
+                emailService.enviarCorreo(destinatario, asunto, messaje);
+
+            }
 
             asistencia.setEstado(request.getEstado());
             asistencia.setObservaciones(request.getObservaciones());
